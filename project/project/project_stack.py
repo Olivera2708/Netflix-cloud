@@ -3,7 +3,8 @@ from aws_cdk import (
     aws_lambda as _lambda,
     Stack,
     aws_iam as iam,
-    aws_dynamodb as dynamodb, BundlingOptions, Duration
+    aws_dynamodb as dynamodb, BundlingOptions, Duration,
+    aws_apigateway as apigateway
 )
 from constructs import Construct
 from aws_cdk.aws_lambda_python_alpha import PythonLayerVersion
@@ -14,8 +15,8 @@ class ProjectStack(Stack):
         super().__init__(scope, construct_id, **kwargs)
 
         movies_bucket = s3.Bucket(
-            self, 
-            id="movies-team3", 
+            self,
+            id="movies-team3",
             bucket_name="movies-team3"
             )
 
@@ -28,6 +29,12 @@ class ProjectStack(Stack):
             ),
             read_capacity=1,
             write_capacity=1
+        )
+
+        api = apigateway.RestApi(
+            self, "APIGatewayTeam3",
+            rest_api_name="API Gateway Team 3",
+            description="This is my API Gateway with Lambda integration."
         )
 
         # IAM Role for Lambda Functions
@@ -90,10 +97,14 @@ class ProjectStack(Stack):
             compatible_runtimes=[_lambda.Runtime.PYTHON_3_9]
         )
 
-        create_lambda_function(
+        upload_movie_function = create_lambda_function(
             "upload_movie",
             "upload_movie.upload_movie",
             "upload_movie",
             "POST",
             [util_layer]
         )
+
+        upload_movie_integration = apigateway.LambdaIntegration(upload_movie_function)
+        api.root.add_method("POST", upload_movie_integration)
+
