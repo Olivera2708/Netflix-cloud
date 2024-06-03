@@ -9,6 +9,7 @@ table = dynamodb.Table('movies-table-team3')
 
 def upload_movie(event, context):
     try:
+        event = json.loads(event["body"])
         file_name = event['file_name']
         file_content = event['file_content']
         metadata = event['metadata']
@@ -19,7 +20,7 @@ def upload_movie(event, context):
         file_metadata = s3.head_object(Bucket=bucket, Key=file_name)
         file_type = file_metadata['ContentType']
         file_size = file_metadata['ContentLength']
-        creation_time = file_metadata['LastModified'].isoformat()
+        creation_time = file_metadata['LastModified'].isoformat() #Potrebno promeniti!!!!!
         last_modified = file_metadata['LastModified'].isoformat()
 
         item = {

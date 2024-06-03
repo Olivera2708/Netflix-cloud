@@ -24,7 +24,7 @@ class ProjectStack(Stack):
             self, "movies-table-team3",
             table_name="movies-table-team3",
             partition_key=dynamodb.Attribute(
-                name="name",
+                name="file_name",
                 type=dynamodb.AttributeType.STRING
             ),
             read_capacity=1,
@@ -45,21 +45,31 @@ class ProjectStack(Stack):
         lambda_role.add_managed_policy(
             iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
         )
-        lambda_role.add_to_policy(
-            iam.PolicyStatement(
-                effect=iam.Effect.ALLOW,
-                actions=[
-                    "dynamodb:DescribeTable",
-                    "dynamodb:Query",
-                    "dynamodb:Scan",
-                    "dynamodb:GetItem",
-                    "dynamodb:PutItem",
-                    "dynamodb:UpdateItem",
-                    "dynamodb:DeleteItem"
-                ],
-                resources=[movies_table.table_arn]
-            )
+        lambda_role.add_managed_policy(
+            iam.ManagedPolicy.from_aws_managed_policy_name("AmazonS3FullAccess")
         )
+        lambda_role.add_managed_policy(
+            iam.ManagedPolicy.from_aws_managed_policy_name("AmazonDynamoDBFullAccess")
+        )
+        # lambda_role.add_to_policy(
+        #     iam.PolicyStatement(
+        #         effect=iam.Effect.ALLOW,
+        #         actions=[
+        #             "dynamodb:DescribeTable",
+        #             "dynamodb:Query",
+        #             "dynamodb:Scan",
+        #             "dynamodb:GetItem",
+        #             "dynamodb:PutItem",
+        #             "dynamodb:UpdateItem",
+        #             "dynamodb:DeleteItem",
+        #             "s3:PutObject",
+        #             "s3:GetObject",
+        #             "s3:ListBucket",
+        #             "s3:HeadObject"
+        #         ],
+        #         resources=[movies_table.table_arn]
+        #     )
+        # )
 
         def create_lambda_function(id, handler, include_dir, method, layers):
             function = _lambda.Function(
