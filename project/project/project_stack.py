@@ -105,6 +105,17 @@ class ProjectStack(Stack):
             [util_layer]
         )
 
-        upload_movie_integration = apigateway.LambdaIntegration(upload_movie_function)
-        api.root.add_method("POST", upload_movie_integration)
+        download_movie_function = create_lambda_function(
+            "download_movie",
+            "download_movie.download_movie",
+            "download_movie",
+            "GET",
+            [util_layer]
+        )
 
+        movies_resource = api.root.add_resource("movies")
+        upload_movie_integration = apigateway.LambdaIntegration(upload_movie_function)
+        movies_resource.add_method("POST", upload_movie_integration)
+
+        download_movie_integration = apigateway.LambdaIntegration(download_movie_function)
+        movies_resource.add_method("GET", download_movie_integration)
