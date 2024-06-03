@@ -1,5 +1,6 @@
 import json
 import boto3
+import base64
 from botocore.exceptions import NoCredentialsError
 
 s3 = boto3.client('s3')
@@ -11,8 +12,10 @@ def upload_movie(event, context):
     try:
         event = json.loads(event["body"])
         file_name = event['file_name']
-        file_content = event['file_content']
+        file_content_base64 = event['file_content']
         metadata = event['metadata']
+
+        file_content = base64.b64decode(file_content_base64)
 
         bucket = 'movies-team3'
         s3.put_object(Bucket=bucket, Key=file_name, Body=file_content)
@@ -20,14 +23,12 @@ def upload_movie(event, context):
         file_metadata = s3.head_object(Bucket=bucket, Key=file_name)
         file_type = file_metadata['ContentType']
         file_size = file_metadata['ContentLength']
-        creation_time = file_metadata['LastModified'].isoformat() #Potrebno promeniti!!!!!
         last_modified = file_metadata['LastModified'].isoformat()
 
         item = {
             'file_name': file_name,
             'file_type': file_type,
             'file_size': file_size,
-            'creation_time': creation_time,
             'last_modified': last_modified,
             'title': metadata.get('title', ''),
             'description': metadata.get('description', ''),
