@@ -1,26 +1,27 @@
 import json
 import boto3
 import base64
-import uuid
 from botocore.exceptions import NoCredentialsError
-
 s3 = boto3.client('s3')
 
 def upload_movie(event, context):
     try:
-        event = json.loads(event["body"])
-        key = event["id"]
-        file_content_base64 = event['file_content']
+        s3_key = event["key"]
+        s3_bucket = event["bucket"]
+
+        response = s3.get_object(Bucket=s3_bucket, Key=s3_key)
+        json_data = response['Body'].read().decode('utf-8')
+        data = json.loads(json_data)
+
+        key = data["id"]
+        file_content_base64 = data['file_content']
         file_content = base64.b64decode(file_content_base64)
 
         bucket = 'movies-team3'
         s3.put_object(Bucket=bucket, Key=key, Body=file_content)
 
-        return {
-            'statusCode': 200,
-            'body': json.dumps('File uploaded')
-        }
-
+        return event
+    
     except NoCredentialsError:
         return {
             'statusCode': 403,

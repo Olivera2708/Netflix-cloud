@@ -4,7 +4,9 @@ from aws_cdk import (
     Stack,
     aws_iam as iam,
     aws_dynamodb as dynamodb, BundlingOptions, Duration,
-    aws_apigateway as apigateway
+    aws_apigateway as apigateway,
+    aws_stepfunctions as _sfn,
+    aws_stepfunctions_tasks as _sfn_tasks
 )
 from constructs import Construct
 from aws_cdk.aws_lambda_python_alpha import PythonLayerVersion
@@ -83,6 +85,9 @@ class Team3Stack(Stack):
         lambda_role.add_managed_policy(
             iam.ManagedPolicy.from_aws_managed_policy_name("AmazonDynamoDBFullAccess")
         )
+        lambda_role.add_managed_policy(
+            iam.ManagedPolicy.from_aws_managed_policy_name("AWSStepFunctionsFullAccess")
+        )
 
         def create_lambda_function(id, handler, include_dir, method, layers):
             function = _lambda.Function(
@@ -120,6 +125,15 @@ class Team3Stack(Stack):
             compatible_runtimes=[_lambda.Runtime.PYTHON_3_9]
         )
 
+        #Lambda functions
+        upload_function = create_lambda_function(
+            "upload",
+            "upload.upload",
+            "upload",
+            "POST",
+            [util_layer]
+        )
+
         upload_movie_function = create_lambda_function(
             "upload_movie",
             "upload_movie.upload_movie",
@@ -144,14 +158,34 @@ class Team3Stack(Stack):
             [util_layer]
         )
 
-        movies_resource = api.root.add_resource("movies")
-        upload_movie_integration = apigateway.LambdaIntegration(upload_movie_function)
-        movies_resource.add_method("POST", upload_movie_integration)
+        resource = api.root.add_resource("upload")
+        upload_integration = apigateway.LambdaIntegration(upload_function)
+        resource.add_method("POST", upload_integration)
 
-        movies_resource = api.root.add_resource("metadata")
-        upload_metadata_integration = apigateway.LambdaIntegration(upload_metadata_function)
-        movies_resource.add_method("POST", upload_metadata_integration)
-
-        movies_resource = api.root.get_resource("movies")
+        resource = api.root.add_resource("download")
         download_movie_integration = apigateway.LambdaIntegration(download_movie_function)
-        movies_resource.add_method("GET", download_movie_integration)
+        resource.add_method("GET", download_movie_integration)
+
+        # Step Function Tasks
+        upload_movie_task = _sfn_tasks.LambdaInvoke(
+            self, "UploadMovie",
+            lambda_function=upload_movie_function,
+            output_path='$.Payload'
+        )
+
+        upload_metadata_task = _sfn_tasks.LambdaInvoke(
+            self, "UploadMetadata",
+            lambda_function=upload_metadata_function,
+            output_path='$.Payload'
+        )
+
+        # Step Function Definition -> chaining tasks
+        definition = upload_movie_task.next(upload_metadata_task)
+        
+        # Step Function
+        _sfn.StateMachine(
+            self, "TranscodingAndUploading",
+            definition_body=_sfn.DefinitionBody.from_chainable(definition),
+            comment="Transcoding and uploading new movies"
+        )
+        
