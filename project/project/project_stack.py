@@ -83,25 +83,6 @@ class Team3Stack(Stack):
         lambda_role.add_managed_policy(
             iam.ManagedPolicy.from_aws_managed_policy_name("AmazonDynamoDBFullAccess")
         )
-        # lambda_role.add_to_policy(
-        #     iam.PolicyStatement(
-        #         effect=iam.Effect.ALLOW,
-        #         actions=[
-        #             "dynamodb:DescribeTable",
-        #             "dynamodb:Query",
-        #             "dynamodb:Scan",
-        #             "dynamodb:GetItem",
-        #             "dynamodb:PutItem",
-        #             "dynamodb:UpdateItem",
-        #             "dynamodb:DeleteItem",
-        #             "s3:PutObject",
-        #             "s3:GetObject",
-        #             "s3:ListBucket",
-        #             "s3:HeadObject"
-        #         ],
-        #         resources=[movies_table.table_arn]
-        #     )
-        # )
 
         def create_lambda_function(id, handler, include_dir, method, layers):
             function = _lambda.Function(
@@ -147,6 +128,14 @@ class Team3Stack(Stack):
             [util_layer]
         )
 
+        upload_metadata_function = create_lambda_function(
+            "upload_metadata",
+            "upload_metadata.upload_metadata",
+            "upload_metadata",
+            "POST",
+            [util_layer]
+        )
+
         download_movie_function = create_lambda_function(
             "download_movie",
             "download_movie.download_movie",
@@ -159,5 +148,10 @@ class Team3Stack(Stack):
         upload_movie_integration = apigateway.LambdaIntegration(upload_movie_function)
         movies_resource.add_method("POST", upload_movie_integration)
 
+        movies_resource = api.root.add_resource("metadata")
+        upload_metadata_integration = apigateway.LambdaIntegration(upload_metadata_function)
+        movies_resource.add_method("POST", upload_metadata_integration)
+
+        movies_resource = api.root.get_resource("movies")
         download_movie_integration = apigateway.LambdaIntegration(download_movie_function)
         movies_resource.add_method("GET", download_movie_integration)
