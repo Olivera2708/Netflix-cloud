@@ -9,7 +9,7 @@ from aws_cdk import (
 from constructs import Construct
 from aws_cdk.aws_lambda_python_alpha import PythonLayerVersion
 
-class ProjectStack(Stack):
+class Team3Stack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -24,9 +24,41 @@ class ProjectStack(Stack):
             self, "movies-table-team3",
             table_name="movies-table-team3",
             partition_key=dynamodb.Attribute(
-                name="file_name",
+                name="id",
                 type=dynamodb.AttributeType.STRING
             ),
+            read_capacity=1,
+            write_capacity=1
+        )
+
+        #index by title
+        movies_table.add_global_secondary_index(
+            index_name="TitleIndex",
+            partition_key=dynamodb.Attribute(
+                name="title",
+                type=dynamodb.AttributeType.STRING
+            ),
+            sort_key=dynamodb.Attribute(
+                name="year",
+                type=dynamodb.AttributeType.STRING
+            ),
+            projection_type=dynamodb.ProjectionType.ALL,
+            read_capacity=1,
+            write_capacity=1
+        )
+
+        #index by genres
+        movies_table.add_global_secondary_index(
+            index_name="DescriptionIndex",
+            partition_key=dynamodb.Attribute(
+                name="description",
+                type=dynamodb.AttributeType.STRING
+            ),
+            sort_key=dynamodb.Attribute(
+                name="title",
+                type=dynamodb.AttributeType.STRING
+            ),
+            projection_type=dynamodb.ProjectionType.ALL,
             read_capacity=1,
             write_capacity=1
         )

@@ -3,11 +3,11 @@ import os
 
 import aws_cdk as cdk
 
-from project.project_stack import ProjectStack
+from project.project_stack import Team3Stack
 
 
 app = cdk.App()
-ProjectStack(app, "ProjectStack",
+Team3Stack(app, "Team3Stack",
     # If you don't specify 'env', this stack will be environment-agnostic.
     # Account/Region-dependent features and context lookups will not work,
     # but a single synthesized template can be deployed anywhere.
