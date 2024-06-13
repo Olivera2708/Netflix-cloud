@@ -9,7 +9,22 @@ table = dynamodb.Table('movies-table-team3')
 s3 = boto3.client('s3')
 
 def upload_metadata(event, context):
-    pass
+    sqs = boto3.client('sqs')
+    
+    for record in event['Records']:
+        message_body = record['body']
+        print(f"Received message: {message_body}")
+        process_message(message_body)
+        
+        # # Delete the message from the queue if necessary
+        # receipt_handle = record['receiptHandle']
+        # queue_url = 'https://sqs.<region>.amazonaws.com/<account-id>/<queue-name>'
+        # sqs.delete_message(
+        #     QueueUrl=queue_url,
+        #     ReceiptHandle=receipt_handle
+        # )
+
+def process_message(event):
     try:
         s3_key = event["key"]
         s3_bucket = event["bucket"]

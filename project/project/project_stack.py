@@ -6,10 +6,12 @@ from aws_cdk import (
     aws_dynamodb as dynamodb, BundlingOptions, Duration,
     aws_apigateway as apigateway,
     aws_stepfunctions as _sfn,
-    aws_stepfunctions_tasks as _sfn_tasks
+    aws_stepfunctions_tasks as _sfn_tasks,
+    aws_sqs as _sqs
 )
 from constructs import Construct
 from aws_cdk.aws_lambda_python_alpha import PythonLayerVersion
+import aws_cdk.aws_lambda_event_sources as lambda_event_sources
 
 class Team3Stack(Stack):
 
@@ -88,8 +90,11 @@ class Team3Stack(Stack):
         lambda_role.add_managed_policy(
             iam.ManagedPolicy.from_aws_managed_policy_name("AWSStepFunctionsFullAccess")
         )
+        lambda_role.add_managed_policy(
+            iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSQSFullAccess")
+        )
 
-        def create_lambda_function(id, handler, include_dir, method, layers):
+        def create_lambda_function(id, handler, include_dir, method, layers, environment=None):
             function = _lambda.Function(
                 self, id,
                 runtime=_lambda.Runtime.PYTHON_3_9,
@@ -105,9 +110,7 @@ class Team3Stack(Stack):
                                              ), ),
                 memory_size=128,
                 timeout=Duration.seconds(10),
-                environment={
-                    'TABLE_NAME': movies_table.table_name
-                },
+                environment=environment or {},
                 role=lambda_role
             )
             fn_url = function.add_function_url(
@@ -123,15 +126,6 @@ class Team3Stack(Stack):
             self, 'UtilLambdaLayer',
             entry='libs',
             compatible_runtimes=[_lambda.Runtime.PYTHON_3_9]
-        )
-
-        #Lambda functions
-        upload_function = create_lambda_function(
-            "upload",
-            "upload.upload",
-            "upload",
-            "POST",
-            [util_layer]
         )
 
         upload_movie_function = create_lambda_function(
@@ -158,13 +152,15 @@ class Team3Stack(Stack):
             [util_layer]
         )
 
-        resource = api.root.add_resource("upload")
-        upload_integration = apigateway.LambdaIntegration(upload_function)
-        resource.add_method("POST", upload_integration)
+        #sqs
+        upload_queue = _sqs.Queue(
+            self, "UploadQueueTeam3",
+            visibility_timeout=Duration.seconds(300),
+            queue_name="upload-queue-team3"
+        )
 
-        resource = api.root.add_resource("download")
-        download_movie_integration = apigateway.LambdaIntegration(download_movie_function)
-        resource.add_method("GET", download_movie_integration)
+        event_source = lambda_event_sources.SqsEventSource(upload_queue)
+        upload_metadata_function.add_event_source(event_source)
 
         # Step Function Tasks
         upload_movie_task = _sfn_tasks.LambdaInvoke(
@@ -173,19 +169,39 @@ class Team3Stack(Stack):
             output_path='$.Payload'
         )
 
-        upload_metadata_task = _sfn_tasks.LambdaInvoke(
-            self, "UploadMetadata",
-            lambda_function=upload_metadata_function,
-            output_path='$.Payload'
+        send_to_queue_task = _sfn_tasks.SqsSendMessage(
+            self, "SendToQueue",
+            queue=upload_queue,
+            message_body=_sfn.TaskInput.from_json_path_at("$")
         )
 
         # Step Function Definition -> chaining tasks
-        definition = upload_movie_task.next(upload_metadata_task)
+        definition = upload_movie_task.next(send_to_queue_task)#.next(upload_metadata_task)
         
         # Step Function
-        _sfn.StateMachine(
+        state_machine = _sfn.StateMachine(
             self, "TranscodingAndUploading",
-            definition_body=_sfn.DefinitionBody.from_chainable(definition),
-            comment="Transcoding and uploading new movies"
+            definition=definition,
+            comment="Transcoding and uploading new movies",
+            timeout=Duration.minutes(5)
+        )
+
+        upload_function = create_lambda_function(
+            "upload",
+            "upload.upload",
+            "upload",
+            "POST",
+            [util_layer],
+            environment={
+                "STATE_MACHINE_ARN": state_machine.state_machine_arn
+            }
         )
         
+        #endpoints
+        resource = api.root.add_resource("upload")
+        upload_integration = apigateway.LambdaIntegration(upload_function)
+        resource.add_method("POST", upload_integration)
+
+        resource = api.root.add_resource("download")
+        download_movie_integration = apigateway.LambdaIntegration(download_movie_function)
+        resource.add_method("GET", download_movie_integration)

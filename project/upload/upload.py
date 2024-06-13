@@ -1,12 +1,13 @@
 import json
 import boto3
 import uuid
+import os
 
 s3 = boto3.client('s3')
+state_machine_arn = os.environ['STATE_MACHINE_ARN']
 
 def upload(event, context):
     stepfunctions_client = boto3.client('stepfunctions')
-    state_machine_arn = 'arn:aws:states:eu-central-1:533267409058:stateMachine:TranscodingAndUploading75F01ED0-7s6GZ5G0m7YE'
     bucket_name = 'movies-team3'
 
     try:
