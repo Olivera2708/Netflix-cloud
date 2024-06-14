@@ -153,10 +153,13 @@ class Team3Stack(Stack):
         )
 
         #sqs
+        dead_letter_queue = _sqs.Queue(self, "Team3UploadDeadLetterQueue", queue_name="upload-dead-queue-team3")
+
         upload_queue = _sqs.Queue(
             self, "UploadQueueTeam3",
-            visibility_timeout=Duration.seconds(300),
-            queue_name="upload-queue-team3"
+            visibility_timeout=Duration.seconds(30),
+            queue_name="upload-queue-team3",
+            dead_letter_queue=_sqs.DeadLetterQueue(max_receive_count=5, queue=dead_letter_queue)
         )
 
         event_source = lambda_event_sources.SqsEventSource(upload_queue)

@@ -10,8 +10,16 @@ s3 = boto3.client('s3')
 
 def upload_metadata(event, context):
     for record in event['Records']:
-        message_body = record['body']
-        process_message(message_body)
+        try:
+            message_body = record['body']
+            data = json.loads(message_body)
+            if not data:
+                raise ValueError('Invalid input: body is required')
+
+            process_message(message_body)
+
+        except Exception as e:
+            raise e
 
 def process_message(event):
     try:
@@ -53,14 +61,5 @@ def process_message(event):
             'statusCode': 200,
             'body': json.dumps('Metadata saved successfully')
         }
-
-    except NoCredentialsError:
-        return {
-            'statusCode': 403,
-            'body': json.dumps('Credentials not available')
-        }
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'body': json.dumps(str(e))
-        }
+        raise e
