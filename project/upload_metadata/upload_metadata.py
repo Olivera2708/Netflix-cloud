@@ -1,11 +1,13 @@
 import json
 import boto3
-import base64
-import uuid
+import os
 from botocore.exceptions import NoCredentialsError
 
+bucket = os.environ['BUCKET']
+table = os.environ['TABLE']
+
 dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table('movies-table-team3')
+table = dynamodb.Table(table)
 s3 = boto3.client('s3')
 
 def upload_metadata(event, context):
@@ -31,7 +33,6 @@ def process_message(event):
         json_data = response['Body'].read().decode('utf-8')
         data = json.loads(json_data)
 
-        bucket = 'movies-team3'
         key = data["id"]
         file_metadata = s3.head_object(Bucket=bucket, Key=key)
         

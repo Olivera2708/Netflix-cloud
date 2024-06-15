@@ -3,12 +3,13 @@ import boto3
 import uuid
 import os
 
+
 s3 = boto3.client('s3')
 state_machine_arn = os.environ['STATE_MACHINE_ARN']
+bucket_name = os.environ['BUCKET']
 
 def upload(event, context):
     stepfunctions_client = boto3.client('stepfunctions')
-    bucket_name = 'movies-team3'
 
     try:
         input_data = json.loads(event["body"])
@@ -19,7 +20,7 @@ def upload(event, context):
             }
 
         unique_id = str(uuid.uuid4())
-        input_data["id"] = f"{unique_id}_{input_data['file_name']}.mp4"
+        input_data["id"] = f"{input_data['file_name']}_{unique_id}/"
 
         json_data = json.dumps(input_data)
         s3_key = f'input_data/{unique_id}.json'

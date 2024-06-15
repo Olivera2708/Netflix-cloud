@@ -133,7 +133,10 @@ class Team3Stack(Stack):
             "upload_movie.upload_movie",
             "upload_movie",
             "POST",
-            [util_layer]
+            [util_layer],
+            environment={
+                "BUCKET": movies_bucket.bucket_name
+            }
         )
 
         upload_metadata_function = create_lambda_function(
@@ -141,7 +144,11 @@ class Team3Stack(Stack):
             "upload_metadata.upload_metadata",
             "upload_metadata",
             "POST",
-            [util_layer]
+            [util_layer],
+            environment={
+                "BUCKET": movies_bucket.bucket_name,
+                "TABLE": movies_table.table_name
+            }
         )
 
         download_movie_function = create_lambda_function(
@@ -150,6 +157,30 @@ class Team3Stack(Stack):
             "download_movie",
             "GET",
             [util_layer]
+        )
+
+        transcode_360p_function = create_lambda_function(
+            "transcode_360p_function",
+            "transcoding_uploading.transcoding_uploading",
+            "transcoding_uploading",
+            "POST",
+            [util_layer],
+            environment={
+                "RESOLUTION": "640x360",
+                "BUCKET": movies_bucket.bucket_name
+            }
+        )
+
+        transcode_480p_function = create_lambda_function(
+            "transcode_480p_function",
+            "transcoding_uploading.transcoding_uploading",
+            "transcoding_uploading",
+            "POST",
+            [util_layer],
+            environment={
+                "RESOLUTION": "640x480",
+                "BUCKET": movies_bucket.bucket_name
+            }
         )
 
         #sqs
@@ -178,8 +209,29 @@ class Team3Stack(Stack):
             message_body=_sfn.TaskInput.from_json_path_at("$")
         )
 
+        transcode_360p_task = _sfn_tasks.LambdaInvoke(
+            self, "Transcode360p",
+            lambda_function=transcode_360p_function,
+            output_path='$.Payload'
+        )
+
+        transcode_480p_task = _sfn_tasks.LambdaInvoke(
+            self, "Transcode480p",
+            lambda_function=transcode_480p_function,
+            output_path='$.Payload'
+        )
+
+        #Parallel
+        parallel_state = _sfn.Parallel(
+            self, "Parallel State"
+        )
+
+        parallel_state.branch(upload_movie_task)
+        parallel_state.branch(transcode_360p_task)
+        parallel_state.branch(transcode_480p_task)
+
         # Step Function Definition -> chaining tasks
-        definition = upload_movie_task.next(send_to_queue_task)#.next(upload_metadata_task)
+        definition = parallel_state.next(send_to_queue_task)
         
         # Step Function
         state_machine = _sfn.StateMachine(
