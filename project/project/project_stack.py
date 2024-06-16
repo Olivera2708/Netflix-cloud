@@ -128,6 +128,14 @@ class Team3Stack(Stack):
             compatible_runtimes=[_lambda.Runtime.PYTHON_3_9]
         )
 
+        # Define the Lambda Layer
+        ffmpeg_layer = _lambda.LayerVersion(
+            self, 'FFmpegLayer',
+            code=_lambda.AssetCode('lambda_layers/ffmpeg_layer'),
+            compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
+            description='FFmpeg layer',
+        )
+
         upload_movie_function = create_lambda_function(
             "upload_movie",
             "upload_movie.upload_movie",
@@ -164,7 +172,7 @@ class Team3Stack(Stack):
             "transcoding_uploading.transcoding_uploading",
             "transcoding_uploading",
             "POST",
-            [util_layer],
+            [util_layer, ffmpeg_layer],
             environment={
                 "RESOLUTION": "640x360",
                 "BUCKET": movies_bucket.bucket_name
@@ -176,7 +184,7 @@ class Team3Stack(Stack):
             "transcoding_uploading.transcoding_uploading",
             "transcoding_uploading",
             "POST",
-            [util_layer],
+            [util_layer, ffmpeg_layer],
             environment={
                 "RESOLUTION": "640x480",
                 "BUCKET": movies_bucket.bucket_name
