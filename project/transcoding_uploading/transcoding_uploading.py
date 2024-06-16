@@ -1,13 +1,13 @@
 import json
 import boto3
 import os
+import tempfile
 import base64
 import subprocess
 
 s3 = boto3.client('s3')
 resolution = tuple(map(int, os.environ['RESOLUTION'].split('x')))
 bucket = os.environ['BUCKET']
-FFMPEG_CMD = '/opt/bin/ffmpeg'
 
 def transcoding_uploading(event, context):
     s3_key = event["key"]
@@ -18,30 +18,37 @@ def transcoding_uploading(event, context):
     data = json.loads(json_data)
 
     #transcode
+    temp_output_file_path = tempfile.mktemp(suffix='.mp4')
     video_content_base64 = data["file_content"]
-    new_video_content = transcoding(base64.b64decode(video_content_base64))
+    ret = transcoding(base64.b64decode(video_content_base64), temp_output_file_path)
+
+    with open(temp_output_file_path, 'rb') as video:
+        new_video = video.read()
 
     #upisati
     key = f"{data['id']}{resolution[0]}_{resolution[1]}.mp4"
+    s3.put_object(Bucket=bucket, Key=key, Body=new_video, ContentType='video/mp4')
+    os.remove(temp_output_file_path)
 
-    s3.put_object(Bucket=bucket, Key=key, Body=new_video_content)
+    return ret
 
-    return event
+def transcoding(video_content, temp_output_file_path):
+    with tempfile.NamedTemporaryFile(delete=False) as temp_input_file:
+        temp_input_file.write(video_content)
+        temp_input_file_path = temp_input_file.name
 
-def transcoding(video_content):
-    # Transcode using ffmpeg
-    cmd = [
-        FFMPEG_CMD,
-        '-i', 'pipe:0',  # Read input from stdin
+    command = [
+        'ffmpeg',
+        '-i', temp_input_file_path,
         '-vf', f'scale={resolution[0]}:{resolution[1]}',
-        '-codec:v', 'h264',
-        '-b:v', '1500k',
-        '-f', 'mp4',
-        'pipe:1'  # Output to stdout
+        '-c:a', 'copy',
+        temp_output_file_path
     ]
 
-    # Execute ffmpeg command
-    ffmpeg_process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    transcoded_video_content, _ = ffmpeg_process.communicate(input=video_content)
-
-    return transcoded_video_content
+    try:
+        subprocess.run(command, check=True)
+        return f"Video transcoded successfully to {resolution}."
+    except Exception as e:
+        raise e
+    finally:
+        os.remove(temp_input_file_path)

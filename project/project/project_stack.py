@@ -108,8 +108,8 @@ class Team3Stack(Stack):
                                                      "pip install --no-cache -r requirements.txt -t /asset-output && cp -r . /asset-output"
                                                  ],
                                              ), ),
-                memory_size=128,
-                timeout=Duration.seconds(10),
+                memory_size=2048,
+                timeout=Duration.minutes(5),
                 environment=environment or {},
                 role=lambda_role
             )
