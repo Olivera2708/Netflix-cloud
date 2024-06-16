@@ -209,24 +209,40 @@ class Team3Stack(Stack):
             self, "UploadMovie",
             lambda_function=upload_movie_function,
             output_path='$.Payload'
+        ).add_retry(
+            interval=Duration.seconds(20),
+            max_attempts=5,
+            backoff_rate=2
         )
 
         send_to_queue_task = _sfn_tasks.SqsSendMessage(
             self, "SendToQueue",
             queue=upload_queue,
             message_body=_sfn.TaskInput.from_json_path_at("$")
+        ).add_retry(
+            interval=Duration.seconds(5),
+            max_attempts=5,
+            backoff_rate=2
         )
 
         transcode_720p_task = _sfn_tasks.LambdaInvoke(
             self, "Transcode360p",
             lambda_function=transcode_720p_function,
             output_path='$.Payload'
+        ).add_retry(
+            interval=Duration.seconds(20),
+            max_attempts=5,
+            backoff_rate=2
         )
 
         transcode_480p_task = _sfn_tasks.LambdaInvoke(
             self, "Transcode480p",
             lambda_function=transcode_480p_function,
             output_path='$.Payload'
+        ).add_retry(
+            interval=Duration.seconds(20),
+            max_attempts=5,
+            backoff_rate=2
         )
 
         #Parallel
