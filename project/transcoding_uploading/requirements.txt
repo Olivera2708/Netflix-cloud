@@ -1,2 +1,2 @@
 boto3
-moviepy
+ffmpeg-python

@@ -248,7 +248,8 @@ class Team3Stack(Stack):
             "POST",
             [util_layer],
             environment={
-                "STATE_MACHINE_ARN": state_machine.state_machine_arn
+                "STATE_MACHINE_ARN": state_machine.state_machine_arn,
+                "BUCKET": movies_bucket.bucket_name
             }
         )
         

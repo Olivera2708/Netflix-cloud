@@ -1,6 +1,7 @@
 import json
 import boto3
 import base64
+import os
 from botocore.exceptions import NoCredentialsError
 
 s3 = boto3.client('s3')

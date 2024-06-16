@@ -1,8 +1,7 @@
 import json
 import boto3
 import os
-from moviepy.editor import VideoFileClip
-from io import BytesIO
+import ffmpeg
 import base64
 
 s3 = boto3.client('s3')
@@ -31,18 +30,11 @@ def transcoding_uploading(event, context):
     return event
 
 def transcoding(video):
-    clip = VideoFileClip(video)
-    resized_clip = clip.resize(newsize=resolution)
-    video_bytes = BytesIO()
-    resized_clip.write_videofile(
-        video_bytes, 
-        codec='libx264', 
-        audio_codec='aac',
-        preset='medium',
-        ffmpeg_params=['-crf', '23']
+    input_video = ffmpeg.input('pipe:0')
+    output_video = ffmpeg.output(input_video, 'pipe:1', vf=f'scale={resolution[0]}:{resolution[1]}', vcodec='libx264', acodec='aac', preset='medium', crf=23)
+    
+    out, _ = (
+        ffmpeg.run(output_video, input=video, capture_stdout=True, capture_stderr=True)
     )
-    video_bytes.seek(0)
-    clip.close()
-    resized_clip.close()
-
-    return video_bytes.getvalue()
+    
+    return base64.b64encode(out).decode('utf-8')
