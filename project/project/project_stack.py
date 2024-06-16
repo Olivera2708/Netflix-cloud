@@ -167,14 +167,14 @@ class Team3Stack(Stack):
             [util_layer]
         )
 
-        transcode_360p_function = create_lambda_function(
+        transcode_720p_function = create_lambda_function(
             "transcode_360p_function",
             "transcoding_uploading.transcoding_uploading",
             "transcoding_uploading",
             "POST",
             [util_layer, ffmpeg_layer],
             environment={
-                "RESOLUTION": "640x360",
+                "RESOLUTION": "1280x720",
                 "BUCKET": movies_bucket.bucket_name
             }
         )
@@ -186,7 +186,7 @@ class Team3Stack(Stack):
             "POST",
             [util_layer, ffmpeg_layer],
             environment={
-                "RESOLUTION": "640x480",
+                "RESOLUTION": "854x480",
                 "BUCKET": movies_bucket.bucket_name
             }
         )
@@ -217,9 +217,9 @@ class Team3Stack(Stack):
             message_body=_sfn.TaskInput.from_json_path_at("$")
         )
 
-        transcode_360p_task = _sfn_tasks.LambdaInvoke(
+        transcode_720p_task = _sfn_tasks.LambdaInvoke(
             self, "Transcode360p",
-            lambda_function=transcode_360p_function,
+            lambda_function=transcode_720p_function,
             output_path='$.Payload'
         )
 
@@ -235,7 +235,7 @@ class Team3Stack(Stack):
         )
 
         parallel_state.branch(upload_movie_task)
-        parallel_state.branch(transcode_360p_task)
+        parallel_state.branch(transcode_720p_task)
         parallel_state.branch(transcode_480p_task)
 
         # Step Function Definition -> chaining tasks

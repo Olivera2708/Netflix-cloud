@@ -15,17 +15,17 @@ def upload_metadata(event, context):
         try:
             message_body = record['body']
             data = json.loads(message_body)
+
             if not data:
                 raise ValueError('Invalid input: body is required')
 
-            process_message(message_body)
+            process_message(data[0])
 
         except Exception as e:
             raise e
 
 def process_message(event):
     try:
-        event = json.loads(event)
         s3_key = event["key"]
         s3_bucket = event["bucket"]
 
@@ -33,7 +33,8 @@ def process_message(event):
         json_data = response['Body'].read().decode('utf-8')
         data = json.loads(json_data)
 
-        key = data["id"]
+        key = f"{data['id']}original.mp4"
+        table_key = data['id'][:-1]
         file_metadata = s3.head_object(Bucket=bucket, Key=key)
         
         file_type = file_metadata['ContentType']
@@ -43,7 +44,7 @@ def process_message(event):
         data = data["metadata"]
 
         item = {
-            'id': key,
+            'id': table_key,
             'file_type': file_type,
             'file_size': file_size,
             'last_modified': last_modified,

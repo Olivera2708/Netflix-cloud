@@ -30,7 +30,7 @@ def transcoding_uploading(event, context):
     s3.put_object(Bucket=bucket, Key=key, Body=new_video, ContentType='video/mp4')
     os.remove(temp_output_file_path)
 
-    return ret
+    return event
 
 def transcoding(video_content, temp_output_file_path):
     with tempfile.NamedTemporaryFile(delete=False) as temp_input_file:
