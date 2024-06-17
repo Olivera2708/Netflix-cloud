@@ -85,6 +85,11 @@ export class AddMovieComponent {
   }
 
   async onSubmit() {
+    // this.movieService.downloadMovie('What_Happened_To_Monday_63c48b80-2a88-4009-a72d-07a1be4a298e/original.mp4').subscribe({
+    //   next: (data) => {
+    //     console.log(data)
+    //   }
+    // })
     if (!this.validateForm()) {
       return;
     }

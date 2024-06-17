@@ -70,7 +70,12 @@ class Team3Stack(Stack):
         api = apigateway.RestApi(
             self, "APIGatewayTeam3",
             rest_api_name="API Gateway Team 3",
-            description="This is my API Gateway with Lambda integration."
+            endpoint_types=[apigateway.EndpointType.REGIONAL],
+            default_cors_preflight_options=apigateway.CorsOptions(
+                allow_origins=apigateway.Cors.ALL_ORIGINS,
+                allow_methods=apigateway.Cors.ALL_METHODS,
+                allow_headers=apigateway.Cors.DEFAULT_HEADERS
+            )
         )
 
         # IAM Role for Lambda Functions
