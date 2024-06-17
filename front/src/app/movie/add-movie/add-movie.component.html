@@ -2,23 +2,26 @@
   <div id="left"></div>
   <div id="right">
     <h3>New movie</h3>
-    <form class="new-movie-form">
+    <form class="new-movie-form" (ngSubmit)="onSubmit()">
       <div>
         <mat-form-field appearance="outline">
           <mat-label>Title</mat-label>
           <input matInput [(ngModel)]="title" name="title">
+          <mat-error *ngIf="errors.title">{{ errors.title }}</mat-error>
         </mat-form-field>
       </div>
       <div>
         <mat-form-field appearance="outline">
           <mat-label>Description</mat-label>
           <textarea matInput [(ngModel)]="description" name="description"></textarea>
+<!--          <mat-error *ngIf="errors.description">{{ errors.description }}</mat-error>-->
         </mat-form-field>
       </div>
       <div>
         <mat-form-field appearance="outline">
           <mat-label>Year</mat-label>
           <input matInput [(ngModel)]="year" name="year" type="text" pattern="[0-9]*" maxlength="4" minlength="4">
+<!--          <mat-error *ngIf="errors.year">{{ errors.year }}</mat-error>-->
         </mat-form-field>
       </div>
       <div>
@@ -31,6 +34,7 @@
             <mat-icon>add</mat-icon>
           </button>
         </div>
+<!--        <mat-error *ngIf="errors.genres">{{ errors.genres }}</mat-error>-->
         <mat-list>
           <mat-list-item *ngFor="let genre of genres; let i = index">
             <div class="list-element">
@@ -62,6 +66,7 @@
             </div>
           </mat-list-item>
         </mat-list>
+<!--        <mat-error *ngIf="errors.actors">{{ errors.actors }}</mat-error>-->
       </div>
       <div>
         <div class="add-list">
@@ -83,18 +88,19 @@
             </div>
           </mat-list-item>
         </mat-list>
+<!--        <mat-error *ngIf="errors.directors">{{ errors.directors }}</mat-error>-->
       </div>
       <div class="buttons">
         <div class="inline">
           <div>
-          <label for="fileInput" class="custom-file-label">
-            <span>Upload movie</span>
-          </label>
-          <input type="file" name="movie" id="fileInput" (change)="onMovieSelected($event)" class="custom-file-input"/>
+            <label for="fileInput" class="custom-file-label">
+              <span>Upload movie</span>
+            </label>
+            <input type="file" name="movie" id="fileInput" (change)="onMovieSelected($event)" class="custom-file-input" accept="video/mp4"/>
           </div>
           <p>{{ movieText }}</p>
         </div>
-        <button type="submit" id="button-submit" (click)="onSubmit()">Submit</button>
+        <button type="submit" id="button-submit">Submit</button>
       </div>
     </form>
   </div>

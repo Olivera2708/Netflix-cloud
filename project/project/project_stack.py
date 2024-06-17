@@ -113,6 +113,7 @@ class Team3Stack(Stack):
                 environment=environment or {},
                 role=lambda_role
             )
+
             fn_url = function.add_function_url(
                 auth_type=_lambda.FunctionUrlAuthType.NONE,
                 cors=_lambda.FunctionUrlCorsOptions(
@@ -196,7 +197,7 @@ class Team3Stack(Stack):
 
         upload_queue = _sqs.Queue(
             self, "UploadQueueTeam3",
-            visibility_timeout=Duration.seconds(30),
+            visibility_timeout=Duration.minutes(5),
             queue_name="upload-queue-team3",
             dead_letter_queue=_sqs.DeadLetterQueue(max_receive_count=5, queue=dead_letter_queue)
         )
@@ -278,10 +279,10 @@ class Team3Stack(Stack):
         )
         
         #endpoints
-        resource = api.root.add_resource("upload")
+        upload_resource = api.root.add_resource("upload")
         upload_integration = apigateway.LambdaIntegration(upload_function)
-        resource.add_method("POST", upload_integration)
+        upload_resource.add_method("POST", upload_integration)
 
-        resource = api.root.add_resource("download")
+        download_resource = api.root.add_resource("download")
         download_movie_integration = apigateway.LambdaIntegration(download_movie_function)
-        resource.add_method("GET", download_movie_integration)
+        download_resource.add_method("GET", download_movie_integration)
