@@ -48,7 +48,7 @@ def upload(event, context):
                 'Access-Control-Allow-Headers': 'Content-Type',
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             },
-            'body': json.dumps(s3_reference)
+            'body': json.dumps({'message': 'Success'})
         }
 
     except Exception as e:

@@ -9,6 +9,7 @@ import {MatLine} from "@angular/material/core";
 import {MatIconButton} from "@angular/material/button";
 import {MatFileUploadModule} from "mat-file-upload";
 import {MovieService} from "../movie.service";
+import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Component({
   selector: 'app-add-movie',
@@ -43,7 +44,7 @@ export class AddMovieComponent {
   year: string = '';
   errors: string = '';
 
-  constructor(private movieService: MovieService) { }
+  constructor(private movieService: MovieService, private _snackBar: MatSnackBar) { }
 
   addActor() {
     if (this.newActor.trim()) {
@@ -105,14 +106,31 @@ export class AddMovieComponent {
           }
         }
 
+        this.actors = [];
+        this.newActor = '';
+        this.genres = [];
+        this.newGenre = '';
+        this.directors = [];
+        this.newDirector = '';
+        this.file = null;
+        this.title = '';
+        this.movieText= '';
+        this.description = '';
+        this.year = '';
+        this.errors = '';
+
         this.movieService.addNewMovie(payload).subscribe({
           next: (data) => {
-            console.log(data)
+            if (data['message'] == "Success")
+              this._snackBar.open('Movie is uploading...', 'Close');
           }
         })
       } catch (error) {
         console.error('Error converting file to base64:', error);
       }
+    }
+    else {
+      this.movieText = 'Select movie';
     }
   }
 
@@ -155,10 +173,6 @@ export class AddMovieComponent {
     }
     if (this.directors.length === 0) {
       this.errors = 'At least one director is required';
-      return false;
-    }
-    if (this.file == null){
-      this.errors = 'No file selected'
       return false;
     }
 
