@@ -41,7 +41,7 @@ export class AddMovieComponent {
   movieText: string = '';
   description: string = '';
   year: string = '';
-  errors: any = {};
+  errors: string = '';
 
   constructor(private movieService: MovieService) { }
 
@@ -85,11 +85,6 @@ export class AddMovieComponent {
   }
 
   async onSubmit() {
-    // this.movieService.downloadMovie('What_Happened_To_Monday_63c48b80-2a88-4009-a72d-07a1be4a298e/original.mp4').subscribe({
-    //   next: (data) => {
-    //     console.log(data)
-    //   }
-    // })
     if (!this.validateForm()) {
       return;
     }
@@ -123,39 +118,51 @@ export class AddMovieComponent {
 
   validateForm(): boolean {
     const currentYear = new Date().getFullYear();
-    this.errors = {};
+    this.errors = '';
 
     if (!this.title.trim()) {
-      this.errors.title = 'Title is required';
+      this.errors = 'Title is required';
+      return false;
     }
     if (!this.description.trim()) {
-      this.errors.description = 'Description is required';
+      this.errors = 'Description is required';
+      return false;
     }
     if (!this.year.trim()) {
-      this.errors.year = 'Year is required';
+      this.errors = 'Year is required';
+      return false;
     } else if (!/^\d{4}$/.test(this.year.trim())) {
-      this.errors.year = 'Year must be a valid 4-digit number';
+      this.errors = 'Year must be a valid 4-digit number';
+      return false;
     } else {
       const yearNumber = parseInt(this.year, 10);
-      if (yearNumber > currentYear || yearNumber < 1900) {
-        this.errors.year = 'Year must be in the past';
+      if (yearNumber > currentYear) {
+        this.errors = 'Year must be in the past';
+        return false;
+      }
+      if (yearNumber < 1900){
+        this.errors = 'Year must be greater than 1900';
+        return false;
       }
     }
     if (this.genres.length === 0) {
-      this.errors.genres = 'At least one genre is required';
+      this.errors = 'At least one genre is required';
+      return false;
     }
     if (this.actors.length === 0) {
-      this.errors.actors = 'At least one actor is required';
+      this.errors = 'At least one actor is required';
+      return false;
     }
     if (this.directors.length === 0) {
-      this.errors.directors = 'At least one director is required';
+      this.errors = 'At least one director is required';
+      return false;
     }
     if (this.file == null){
-      this.errors.file = 'No file selected'
+      this.errors = 'No file selected'
+      return false;
     }
 
-    console.log(this.errors)
-    return Object.keys(this.errors).length === 0;
+    return true;
   }
 
   convertFileToBase64(file: File): Promise<string> {

@@ -7,21 +7,18 @@
         <mat-form-field appearance="outline">
           <mat-label>Title</mat-label>
           <input matInput [(ngModel)]="title" name="title">
-          <mat-error *ngIf="errors.title">{{ errors.title }}</mat-error>
         </mat-form-field>
       </div>
       <div>
         <mat-form-field appearance="outline">
           <mat-label>Description</mat-label>
           <textarea matInput [(ngModel)]="description" name="description"></textarea>
-<!--          <mat-error *ngIf="errors.description">{{ errors.description }}</mat-error>-->
         </mat-form-field>
       </div>
       <div>
         <mat-form-field appearance="outline">
           <mat-label>Year</mat-label>
           <input matInput [(ngModel)]="year" name="year" type="text" pattern="[0-9]*" maxlength="4" minlength="4">
-<!--          <mat-error *ngIf="errors.year">{{ errors.year }}</mat-error>-->
         </mat-form-field>
       </div>
       <div>
@@ -34,7 +31,6 @@
             <mat-icon>add</mat-icon>
           </button>
         </div>
-<!--        <mat-error *ngIf="errors.genres">{{ errors.genres }}</mat-error>-->
         <mat-list>
           <mat-list-item *ngFor="let genre of genres; let i = index">
             <div class="list-element">
@@ -66,7 +62,6 @@
             </div>
           </mat-list-item>
         </mat-list>
-<!--        <mat-error *ngIf="errors.actors">{{ errors.actors }}</mat-error>-->
       </div>
       <div>
         <div class="add-list">
@@ -88,8 +83,9 @@
             </div>
           </mat-list-item>
         </mat-list>
-<!--        <mat-error *ngIf="errors.directors">{{ errors.directors }}</mat-error>-->
       </div>
+      <br>
+      <mat-error *ngIf="errors">{{ errors }}</mat-error>
       <div class="buttons">
         <div class="inline">
           <div>
