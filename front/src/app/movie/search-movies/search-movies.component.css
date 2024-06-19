@@ -1,0 +1,125 @@
+
+form {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0em;
+  unicode-bidi: isolate;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.textarea-description{
+  width: 30rem;
+  height: -webkit-fill-available;
+}
+
+#main {
+  display: flex;
+  background-image: linear-gradient(to top, rgba(255,255,255,0), rgb(25, 28, 28)), url('../../../assets/images/background.jpg');
+  background-size: cover;
+  flex-direction: column;
+  width: 100%;
+}
+
+#left {
+  width: 50%;
+  height: 100vh;
+
+}
+
+h3 {
+  color: #1a9094;
+  margin-bottom: 3rem;
+}
+
+#search-bar {
+  padding: 2rem 8rem 2rem 8rem;
+  width: 90%;
+}
+
+.list-element {
+  display: flex;
+  align-items: center;
+}
+
+.list-add {
+  margin-left: 1rem;
+  margin-right: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.add-list {
+  display: flex;
+  align-items: center;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+mat-list-item {
+  display: flex;
+  align-items: center;
+  padding-right: 1rem;
+  width: auto;
+}
+
+mat-list {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: -1rem;
+}
+
+.custom-file-input {
+  display: none;
+}
+
+.custom-file-label {
+  width: 8rem;
+  text-align: center;
+  background-color: #42b1b6;
+  color: #ffffff;
+  font-size: 1rem;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 2rem;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.custom-file-label:hover {
+  background-color: #2f7f83;
+}
+
+#button-submit {
+  width: 8rem;
+  height: 3rem;
+  font-size: 1rem;
+  background-color: #42b1b6;
+  color: #ffffff;
+  border: none;
+  border-radius: 2rem;
+  cursor: pointer;
+}
+
+#button-submit:hover {
+  background-color: #2f7f83;
+}
+
+.buttons {
+  margin-left: 2rem;
+  margin-right: 2rem;
+  margin-top: 2rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.inline {
+  display: flex;
+  align-items: center;
+}
+
+p {
+  margin: 0 0 0 1rem;
+  color: whitesmoke;
+}
