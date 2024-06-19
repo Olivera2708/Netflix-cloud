@@ -18,7 +18,9 @@ def download_movie(event, context):
             'statusCode': 200,
             'body': json.dumps({'url': response}),
             'headers': {
-                'Content-Type': 'application/json'
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             }
         }
     except ClientError as e:
@@ -26,6 +28,8 @@ def download_movie(event, context):
             'statusCode': 500,
             'body': json.dumps({'error': str(e)}),
             'headers': {
-                'Content-Type': 'application/json'
-            }
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
         }
