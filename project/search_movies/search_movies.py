@@ -11,12 +11,12 @@ table = dynamodb.Table(table_name)
 
 def search_movies(event, context):
     try:
-        query_params = event.get('queryStringParameters', {})
-        title = query_params.get('title', '')
-        description = query_params.get('description', '')
-        actors = query_params.get('actors', [])
-        directors = query_params.get('directors', [])
-        genres = query_params.get('genres', [])
+
+        title = event['queryStringParameters']['title']
+        description = event['queryStringParameters']['description']
+        actors = event['queryStringParameters']['actors']
+        directors = event['queryStringParameters']['directors']
+        genres = event['queryStringParameters']['genres']
 
         filter_expression = Attr('title').contains(title)
 
