@@ -5,6 +5,7 @@ form {
   unicode-bidi: isolate;
   flex-wrap: wrap;
   width: 100%;
+  justify-content: center;
 }
 
 .textarea-description{

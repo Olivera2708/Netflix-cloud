@@ -79,32 +79,34 @@ export class SearchMoviesComponent {
 
 
   async onSubmit() {
-    if (!this.validateForm()) {
-      return;
-    }
-      try {
 
-        const payload = {
-          metadata: {
-            title: this.title,
-            description: this.description,
-            actors: this.actors,
-            directors: this.directors,
-            genres: this.genres,
-          }
+    try {
+
+      const payload = {
+        metadata: {
+          title: this.title,
+          description: this.description,
+          actors: this.actors,
+          directors: this.directors,
+          genres: this.genres,
         }
-
-        this.resetFields();
-
-        this.movieService.addNewMovie(payload).subscribe({
-          next: (data) => {
-            if (data['message'] == "Success")
-              this._snackBar.open('Movie is uploading...', 'Close');
-          }
-        })
-      } catch (error) {
-        console.error('Error converting file to base64:', error);
       }
+
+      this.resetFields();
+
+      this.movieService.searchMovie(payload.metadata.actors,
+      payload.metadata.directors,
+      payload.metadata.genres,
+      payload.metadata.title,
+      payload.metadata.description)
+      .subscribe({
+        next: (data) => {
+          console.log(data);
+        }
+      })
+    } catch (error) {
+      console.error('Error converting file to base64:', error);
+    }
 
 
   }
@@ -121,40 +123,7 @@ export class SearchMoviesComponent {
     this.errors = '';
   }
 
-  validateForm(): boolean {
-    const currentYear = new Date().getFullYear();
-    this.errors = '';
 
-    if (!this.title.trim()) {
-      this.errors = 'Title is required';
-      return false;
-    }
-    if (!this.description.trim()) {
-      this.errors = 'Description is required';
-      return false;
-    }
-    if (this.genres.length === 0) {
-      this.errors = 'At least one genre is required';
-      return false;
-    }
-    if (this.actors.length === 0) {
-      this.errors = 'At least one actor is required';
-      return false;
-    }
-    if (this.directors.length === 0) {
-      this.errors = 'At least one director is required';
-      return false;
-    }
 
-    return true;
-  }
 
-  convertFileToBase64(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result?.toString().split(',')[1] || '');
-      reader.onerror = error => reject(error);
-    });
-  }
 }
