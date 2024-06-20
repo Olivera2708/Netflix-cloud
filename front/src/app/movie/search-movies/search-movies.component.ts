@@ -39,7 +39,6 @@ export class SearchMoviesComponent {
   newDirector: string = '';
   title: string = '';
   description: string = '';
-  year: string = '';
   errors: string = '';
 
   constructor(private movieService: MovieService, private _snackBar: MatSnackBar) { }
@@ -92,7 +91,6 @@ export class SearchMoviesComponent {
             actors: this.actors,
             directors: this.directors,
             genres: this.genres,
-            year: this.year
           }
         }
 
@@ -120,7 +118,6 @@ export class SearchMoviesComponent {
     this.newDirector = '';
     this.title = '';
     this.description = '';
-    this.year = '';
     this.errors = '';
   }
 
@@ -135,23 +132,6 @@ export class SearchMoviesComponent {
     if (!this.description.trim()) {
       this.errors = 'Description is required';
       return false;
-    }
-    if (!this.year.trim()) {
-      this.errors = 'Year is required';
-      return false;
-    } else if (!/^\d{4}$/.test(this.year.trim())) {
-      this.errors = 'Year must be a valid 4-digit number';
-      return false;
-    } else {
-      const yearNumber = parseInt(this.year, 10);
-      if (yearNumber > currentYear) {
-        this.errors = 'Year must be in the past';
-        return false;
-      }
-      if (yearNumber < 1900){
-        this.errors = 'Year must be greater than 1900';
-        return false;
-      }
     }
     if (this.genres.length === 0) {
       this.errors = 'At least one genre is required';
