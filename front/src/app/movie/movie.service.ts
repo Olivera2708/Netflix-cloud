@@ -2,6 +2,7 @@ import {Injectable} from "@angular/core";
 import {HttpClient, HttpParams} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {environment} from "../../env";
+import {Metadata} from "./model/metadata.model";
 
 
 @Injectable({
@@ -30,5 +31,9 @@ export class MovieService {
             directors: directors},
       {'headers' : { 'Content-Type': 'application/json' },}
     );
+  }
+  getMetadata(id: string): Observable<Metadata> {
+    return this.httpClient.get<Metadata>(environment.apiGateway + "metadata?id=" + id,
+      {'headers': {'Content-Type': 'application/json'}})
   }
 }
