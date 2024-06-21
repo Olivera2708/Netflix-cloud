@@ -173,6 +173,17 @@ class Team3Stack(Stack):
             [util_layer]
         )
 
+        get_metadata_function = create_lambda_function(
+            "get_metadata",
+            "get_metadata.get_metadata",
+            "get_metadata",
+            "GET",
+            [util_layer],
+            environment={
+                "TABLE": movies_table.table_name
+            }
+        )
+
         transcode_720p_function = create_lambda_function(
             "transcode_360p_function",
             "transcoding_uploading.transcoding_uploading",
@@ -291,3 +302,7 @@ class Team3Stack(Stack):
         download_resource = api.root.add_resource("download")
         download_movie_integration = apigateway.LambdaIntegration(download_movie_function)
         download_resource.add_method("GET", download_movie_integration)
+
+        movie_metadata_resource = api.root.add_resource("metadata")
+        movie_metadata_integration = apigateway.LambdaIntegration(get_metadata_function)
+        movie_metadata_resource.add_method("GET", movie_metadata_integration)
