@@ -1,19 +1,18 @@
 import json
 import boto3
-import uuid
 import os
+from boto3.dynamodb.conditions import Attr
+
+# Initialize DynamoDB resource
+dynamodb = boto3.resource('dynamodb')
+table_name = os.environ['TABLE']
+table = dynamodb.Table(table_name)
 
 
-s3 = boto3.client('s3')
-state_machine_arn = os.environ['STATE_MACHINE_ARN']
-bucket_name = os.environ['BUCKET']
-
-def upload(event, context):
-    stepfunctions_client = boto3.client('stepfunctions')
-
+def search_movies(event, context):
     try:
-        input_data = json.loads(event["body"])
-        if not input_data:
+        input_data = event['body']
+        if True:
             return {
                 'statusCode': 400,
                 'headers': {
@@ -21,24 +20,48 @@ def upload(event, context):
                     'Access-Control-Allow-Headers': 'Content-Type',
                     'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                 },
-                'body': json.dumps({'error': 'Invalid input: body is required'})
+                'body': json.dumps(event)
             }
+            
+        input_data = json.loads(input_data)
 
-        unique_id = str(uuid.uuid4())
-        input_data["id"] = f"{input_data['file_name']}_{unique_id}/"
+            # Extract query parameters from event
+        title = input_data['title']
+        description = input_data['description']
+        actors = input_data['actors']
+        directors = input_data['directors']
+        genres = input_data['genres']
 
-        json_data = json.dumps(input_data)
-        s3_key = f'input_data/{unique_id}.json'
-        s3.put_object(Bucket=bucket_name, Key=s3_key, Body=json_data)
-
-        s3_reference = {
-            "bucket": bucket_name,
-            "key": s3_key
+        return {
+            'statusCode': 400,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'GET,POST,OPTIONS'
+            },
+            'genres': genres,
+            'directors': directors
         }
 
-        stepfunctions_client.start_execution(
-            stateMachineArn=state_machine_arn,
-            input=json.dumps(s3_reference)
+        filter_expression = Attr('title').contains(title)
+
+        filter_expression = filter_expression & Attr('description').contains(
+            description) if filter_expression else Attr('description').contains(description)
+
+        for actor in actors:
+            filter_expression = filter_expression & Attr('actors').contains(actor) if filter_expression else Attr(
+                'actors').contains(actor)
+
+        for director in directors:
+            filter_expression = filter_expression & Attr('directors').contains(
+                director) if filter_expression else Attr('directors').contains(director)
+
+        for genre in genres:
+            filter_expression = filter_expression & Attr('genres').contains(genre) if filter_expression else Attr(
+                'genres').contains(genre)
+
+        response = table.scan(
+            FilterExpression=filter_expression
         )
 
         return {
@@ -46,9 +69,9 @@ def upload(event, context):
             'headers': {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                'Access-Control-Allow-Methods': 'GET,POST,OPTIONS'
             },
-            'body': json.dumps({'message': 'Success'})
+            'body': response["Items"]
         }
 
     except Exception as e:
@@ -57,7 +80,7 @@ def upload(event, context):
             'headers': {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                'Access-Control-Allow-Methods': 'GET,POST,OPTIONS'
             },
-            'body': json.dumps({'error': str(e)})
+            'body': json.dumps(f"An error occurred: {str(e)}")
         }

@@ -23,7 +23,8 @@ def search_movies(event, context):
                 'body': json.dumps({'error': 'Invalid input: body is required'})
             }
 
-            # Extract query parameters from event
+        input_data = json.loads(input_data)
+        # Extract query parameters from event
         title = input_data['title']
         description = input_data['description']
         actors = input_data['actors']
