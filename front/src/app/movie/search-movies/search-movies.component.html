@@ -1,7 +1,7 @@
 <div id="main">
   <div id="search-bar">
     <h3>Search movies</h3>
-    <form class="new-movie-form" (ngSubmit)="onSubmit()">
+    <form class="new-movie-form">
       <div>
         <mat-form-field appearance="outline">
           <mat-label>Title</mat-label>
@@ -83,7 +83,7 @@
       </div>
       <br>
       <div>
-        <button type="submit" id="button-submit">Search</button>
+        <button  id="button-submit" (click)="search()">Search</button>
         <mat-error *ngIf="errors">{{ errors }}</mat-error>
       </div>
     </form>

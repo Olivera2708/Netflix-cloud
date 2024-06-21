@@ -78,7 +78,7 @@ export class SearchMoviesComponent {
 
 
 
-  async onSubmit() {
+  search() {
 
     try {
 

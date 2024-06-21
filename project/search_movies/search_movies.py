@@ -11,12 +11,24 @@ table = dynamodb.Table(table_name)
 
 def search_movies(event, context):
     try:
+        if event.get('queryStringParameters') is None:
+            return {
+                'statusCode': 400,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS'
+                },
+                'body': json.dumps("No query parameters provided")
+            }
 
-        title = event['queryStringParameters']['title']
-        description = event['queryStringParameters']['description']
-        actors = event['queryStringParameters']['actors']
-        directors = event['queryStringParameters']['directors']
-        genres = event['queryStringParameters']['genres']
+            # Extract query parameters from event
+        title = event['queryStringParameters'].get('title')
+        description = event['queryStringParameters'].get('description')
+        actors = event['queryStringParameters'].get('actors')
+        directors = event['queryStringParameters'].get('directors')
+        genres = event['queryStringParameters'].get('genres')
+
 
         filter_expression = Attr('title').contains(title)
 
@@ -43,7 +55,7 @@ def search_movies(event, context):
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Methods': 'GET,POST,OPTIONS'
             },
             'body': response["Items"]
@@ -54,7 +66,7 @@ def search_movies(event, context):
             'statusCode': 500,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Methods': 'GET,POST,OPTIONS'
             },
             'body': json.dumps(f"An error occurred: {str(e)}")

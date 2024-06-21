@@ -20,14 +20,14 @@ export class MovieService {
       {'headers': {'Content-Type': 'application/json'}})
   }
 
-  searchMovie( actors: string[], directors: string[], genres: string[],title?: string, description?: string): Observable<any> {
+  searchMovie( actors: string[], directors: string[], genres: string[],title: string, description: string): Observable<any> {
     let params = new HttpParams();
-    if (title) {
+
       params = params.append('title', title);
-    }
-    if (description) {
+
+
       params = params.append('description', description);
-    }
+
     actors.forEach(actor => {
       params = params.append('actors', actor);
     });
