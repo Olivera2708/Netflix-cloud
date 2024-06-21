@@ -177,7 +177,7 @@ class Team3Stack(Stack):
             "search_movies",
             "search_movies.search_movies",
             "search_movies",
-            "GET",
+            "POST",
             [util_layer],
             environment={
                 "TABLE": movies_table.table_name
@@ -305,4 +305,4 @@ class Team3Stack(Stack):
 
         search_resource = api.root.add_resource("search")
         search_movies_integration = apigateway.LambdaIntegration(search_movies_function)
-        search_resource.add_method("GET", search_movies_integration)
+        search_resource.add_method("POST", search_movies_integration)

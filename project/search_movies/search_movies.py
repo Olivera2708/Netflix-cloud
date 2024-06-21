@@ -11,24 +11,35 @@ table = dynamodb.Table(table_name)
 
 def search_movies(event, context):
     try:
-        if event.get('queryStringParameters') is None:
+        input_data = event["body"]
+        if not input_data:
             return {
                 'statusCode': 400,
                 'headers': {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS'
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                 },
-                'body': json.dumps("No query parameters provided")
+                'body': json.dumps({'error': 'Invalid input: body is required'})
             }
 
             # Extract query parameters from event
-        title = event['queryStringParameters'].get('title')
-        description = event['queryStringParameters'].get('description')
-        actors = event['queryStringParameters'].get('actors')
-        directors = event['queryStringParameters'].get('directors')
-        genres = event['queryStringParameters'].get('genres')
+        title = input_data['title']
+        description = input_data['description']
+        actors = input_data['actors']
+        directors = input_data['directors']
+        genres = input_data['genres']
 
+        return {
+            'statusCode': 400,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'GET,POST,OPTIONS'
+            },
+            'genres': genres,
+            'directors': directors
+        }
 
         filter_expression = Attr('title').contains(title)
 
@@ -55,7 +66,7 @@ def search_movies(event, context):
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Headers': 'Content-Type',
                 'Access-Control-Allow-Methods': 'GET,POST,OPTIONS'
             },
             'body': response["Items"]
@@ -66,7 +77,7 @@ def search_movies(event, context):
             'statusCode': 500,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Headers': 'Content-Type',
                 'Access-Control-Allow-Methods': 'GET,POST,OPTIONS'
             },
             'body': json.dumps(f"An error occurred: {str(e)}")

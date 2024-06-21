@@ -21,28 +21,14 @@ export class MovieService {
   }
 
   searchMovie( actors: string[], directors: string[], genres: string[],title: string, description: string): Observable<any> {
-    let params = new HttpParams();
 
-      params = params.append('title', title);
-
-
-      params = params.append('description', description);
-
-    actors.forEach(actor => {
-      params = params.append('actors', actor);
-    });
-
-    directors.forEach(director => {
-      params = params.append('directors', director);
-    });
-
-    genres.forEach(genre => {
-      params = params.append('genres', genre);
-    });
-
-    return this.httpClient.get<any>(`${environment.apiGateway}search`, {
-      headers: { 'Content-Type': 'application/json' },
-      params: params
-    });
+    return this.httpClient.post<any>(`${environment.apiGateway}search`,
+      {title: title,
+            description: description,
+            genres: genres,
+            actors: actors,
+            directors: directors},
+      {headers : { 'Content-Type': 'application/json' },}
+    );
   }
 }
