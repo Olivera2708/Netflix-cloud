@@ -1,0 +1,42 @@
+.main {
+  padding-top: 2rem;
+}
+
+.container {
+  padding: 0 2rem 0 2rem;
+  display: flex;
+  width: 95%;
+  height: 100vh;
+}
+
+.left {
+  width: 70%;
+}
+
+.right {
+  margin-left: 1.5rem;
+  width: 30%;
+}
+
+.video-container {
+  border: solid 0.2rem #343434;
+}
+
+video {
+  width: 100%;
+}
+
+h2 {
+  margin-left: 3rem;
+  color: darkgrey;
+}
+
+.subtitle {
+  font-size: 1.4rem;
+  color: #1a9094;
+}
+
+.value {
+  font-size: 1rem;
+  color: darkgrey;
+}
