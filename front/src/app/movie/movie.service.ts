@@ -28,7 +28,7 @@ export class MovieService {
             genres: genres,
             actors: actors,
             directors: directors},
-      {headers : { 'Content-Type': 'application/json' },}
+      {'headers' : { 'Content-Type': 'application/json' },}
     );
   }
 }
