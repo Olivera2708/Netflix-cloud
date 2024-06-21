@@ -185,7 +185,7 @@ class Team3Stack(Stack):
         )
 
         transcode_720p_function = create_lambda_function(
-            "transcode_360p_function",
+            "transcode_720p_function",
             "transcoding_uploading.transcoding_uploading",
             "transcoding_uploading",
             "POST",
@@ -204,6 +204,18 @@ class Team3Stack(Stack):
             [util_layer, ffmpeg_layer],
             environment={
                 "RESOLUTION": "854x480",
+                "BUCKET": movies_bucket.bucket_name
+            }
+        )
+
+        transcode_320p_function = create_lambda_function(
+            "transcode_320p_function",
+            "transcoding_uploading.transcoding_uploading",
+            "transcoding_uploading",
+            "POST",
+            [util_layer, ffmpeg_layer],
+            environment={
+                "RESOLUTION": "640x360",
                 "BUCKET": movies_bucket.bucket_name
             }
         )
@@ -243,7 +255,7 @@ class Team3Stack(Stack):
         )
 
         transcode_720p_task = _sfn_tasks.LambdaInvoke(
-            self, "Transcode360p",
+            self, "Transcode720p",
             lambda_function=transcode_720p_function,
             output_path='$.Payload'
         ).add_retry(
@@ -262,6 +274,16 @@ class Team3Stack(Stack):
             backoff_rate=2
         )
 
+        transcode_320p_task = _sfn_tasks.LambdaInvoke(
+            self, "Transcode320p",
+            lambda_function=transcode_320p_function,
+            output_path='$.Payload'
+        ).add_retry(
+            interval=Duration.seconds(20),
+            max_attempts=5,
+            backoff_rate=2
+        )
+
         #Parallel
         parallel_state = _sfn.Parallel(
             self, "Parallel State"
@@ -270,6 +292,7 @@ class Team3Stack(Stack):
         parallel_state.branch(upload_movie_task)
         parallel_state.branch(transcode_720p_task)
         parallel_state.branch(transcode_480p_task)
+        parallel_state.branch(transcode_320p_task)
 
         # Step Function Definition -> chaining tasks
         definition = parallel_state.next(send_to_queue_task)
