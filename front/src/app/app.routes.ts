@@ -6,5 +6,5 @@ import {SearchMoviesComponent} from "./movie/search-movies/search-movies.compone
 export const routes: Routes = [
   { path: "movie", component: ViewMovieComponent},
   { path: "add", component: AddMovieComponent},
-  { path: "search-movies", component: SearchMoviesComponent}
+  { path: "", component: SearchMoviesComponent}
 ];

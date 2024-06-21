@@ -9,7 +9,7 @@ import {MovieService} from "../movie.service";
   styleUrl: './view-movie.component.css'
 })
 export class ViewMovieComponent implements OnInit {
-  id: string = "The_Matrix.mp4_29647c78-8c49-4712-bf6e-003a24282a7c"
+  id: string = "What_Happened_To_Monday_565d6724-6493-4d9d-a4ab-6a065b2dc59e"
   title: string = ""
   description: string = ""
   actors: string = ""

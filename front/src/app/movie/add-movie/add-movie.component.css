@@ -1,6 +1,9 @@
 #main {
+  height: calc(100vh - 4rem);
+  padding-top: 4rem;
   display: flex;
   justify-content: center;
+  overflow: hidden;
 }
 
 #left {
