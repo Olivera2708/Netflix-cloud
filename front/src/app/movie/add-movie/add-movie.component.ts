@@ -124,10 +124,12 @@ export class AddMovieComponent {
           next: (data) => {
             if (data['message'] == "Success")
               this._snackBar.open('Movie is uploading...', 'Close');
+            else
+              this._snackBar.open('There was an error while adding movie', 'Close');
           }
         })
       } catch (error) {
-        console.error('Error converting file to base64:', error);
+        this._snackBar.open('There is an error while converting file', 'Close');
       }
     }
     else {
