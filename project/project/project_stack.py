@@ -22,18 +22,35 @@ class Team3Stack(Stack):
         user_pool = cognito.UserPool(
             self,
             id = "UserPoolTeam3",
+            user_pool_name="UserPoolTeam3",
             self_sign_up_enabled=True,
             sign_in_aliases=cognito.SignInAliases(
                 username=True,
                 email=True
             ),
             auto_verify=cognito.AutoVerifiedAttrs(email=True),
+            user_verification=cognito.UserVerificationConfig(
+                email_subject="Confirm your email address to access our application",
+                email_body="""
+                Dear User,\n
+                Please confirm your email address to gain access to our application. Click {##link##} to verify your account.\n
+                Thank you.
+                """,
+                email_style=cognito.VerificationEmailStyle.LINK
+            ),
             password_policy=cognito.PasswordPolicy(
                 min_length=8,
                 require_digits=True,
                 require_lowercase=True,
                 require_uppercase=True,
                 require_symbols=True
+            )
+        )
+
+        user_pool.add_domain(
+            "CognitoDomain",
+            cognito_domain=cognito.CognitoDomainOptions(
+                domain_prefix="moviefy"
             )
         )
 
@@ -142,9 +159,9 @@ class Team3Stack(Stack):
         )
 
         lambda_role.add_to_policy(
-            statement=iam.PolicyStatement(
+            iam.PolicyStatement(
                 actions=["cognito-idp:AdminAddUserToGroup"],
-                resources=["arn:aws:cognito-idp:eu-central-1:533267409058:userpool/eu-central-1_IkEeNyHn6"]
+                resources=[f"arn:aws:cognito-idp:{self.region}:{self.account}:userpool/{user_pool.user_pool_id}"]
             )
         )
 
@@ -291,17 +308,7 @@ class Team3Stack(Stack):
             }
         )
 
-        verify_user_function = create_lambda_function(
-            "verify_user",
-            "verify_user.verify_user",
-            "verify_user",
-            "POST",
-            [util_layer],
-            environment={
-                "CLIENT_ID": user_pool_client.user_pool_client_id
-            }
-        )
-
+     
         transcode_320p_function = create_lambda_function(
             "transcode_320p_function",
             "transcoding_uploading.transcoding_uploading",
@@ -419,10 +426,6 @@ class Team3Stack(Stack):
         login_resource = api.root.add_resource("login")
         login_integration = apigateway.LambdaIntegration(login_function)
         login_resource.add_method("POST", login_integration)
-
-        verify_user_resource = api.root.add_resource("verify")
-        verify_user_integration = apigateway.LambdaIntegration(verify_user_function)
-        verify_user_resource.add_method("POST", verify_user_integration)
 
         upload_resource = api.root.add_resource("upload")
         upload_integration = apigateway.LambdaIntegration(upload_function)
