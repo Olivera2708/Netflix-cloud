@@ -85,7 +85,8 @@ export class AddMovieComponent {
         this.movieText = this.file.name;
   }
 
-  async onSubmit() {
+  async onSubmit(event: Event) {
+    event.preventDefault();
     if (!this.validateForm()) {
       return;
     }

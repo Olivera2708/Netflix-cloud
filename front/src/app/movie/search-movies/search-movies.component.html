@@ -1,0 +1,93 @@
+<div id="main">
+  <div id="search-bar">
+    <h3>Search movies</h3>
+    <form class="new-movie-form">
+      <div>
+        <mat-form-field appearance="outline">
+          <mat-label>Title</mat-label>
+          <input matInput [(ngModel)]="title" name="title">
+        </mat-form-field>
+      </div>
+
+      <div>
+        <div>
+          <div class="add-list">
+            <mat-form-field appearance="outline">
+              <mat-label>Genre</mat-label>
+              <input matInput [(ngModel)]="newGenre" name="genre">
+            </mat-form-field>
+            <button class="list-add" mat-icon-button (click)="addGenre()">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+          <mat-list>
+            <mat-list-item *ngFor="let genre of genres; let i = index">
+              <div class="list-element">
+                <div mat-line>{{ genre }}</div>
+                <button mat-icon-button (click)="removeGenre(i)">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            </mat-list-item>
+          </mat-list>
+        </div>
+        <div>
+          <div class="add-list">
+            <mat-form-field appearance="outline">
+              <mat-label>Actors</mat-label>
+              <input matInput [(ngModel)]="newActor" name="actor">
+            </mat-form-field>
+            <button class="list-add" mat-icon-button (click)="addActor()">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+          <mat-list>
+            <mat-list-item *ngFor="let actor of actors; let i = index">
+              <div class="list-element">
+                <div mat-line>{{ actor }}</div>
+                <button mat-icon-button (click)="removeActor(i)">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            </mat-list-item>
+          </mat-list>
+        </div>
+        <div>
+          <div class="add-list">
+            <mat-form-field appearance="outline">
+              <mat-label>Director</mat-label>
+              <input matInput [(ngModel)]="newDirector" name="director">
+            </mat-form-field>
+            <button class="list-add" mat-icon-button (click)="addDirector()">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+          <mat-list>
+            <mat-list-item *ngFor="let director of directors; let i = index">
+              <div class="list-element">
+                <div mat-line>{{ director }}</div>
+                <button mat-icon-button (click)="removeDirector(i)">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            </mat-list-item>
+          </mat-list>
+        </div>
+      </div>
+
+      <div>
+        <mat-form-field class="textarea-description" appearance="outline">
+          <mat-label>Description</mat-label>
+          <textarea matInput [(ngModel)]="description" name="description"></textarea>
+        </mat-form-field>
+      </div>
+      <br>
+      <div>
+        <button  id="button-submit" (click)="search()">Search</button>
+        <mat-error *ngIf="errors">{{ errors }}</mat-error>
+      </div>
+    </form>
+  </div>
+  <div id="down"></div>
+
+</div>
