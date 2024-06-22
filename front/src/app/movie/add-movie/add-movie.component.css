@@ -108,3 +108,17 @@ p {
   margin: 0 0 0 1rem;
   color: whitesmoke;
 }
+
+.inline {
+  display: flex;
+  justify-content: center;
+}
+
+#series {
+  margin-top: 1rem;
+  margin-left: 2rem;
+}
+
+.plus-icon {
+  color: #ffb787;
+}
