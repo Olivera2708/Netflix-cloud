@@ -3,7 +3,6 @@
   padding-top: 4rem;
   display: flex;
   justify-content: center;
-  overflow: hidden;
 }
 
 #left {
@@ -119,6 +118,10 @@ p {
   margin-left: 2rem;
 }
 
-.plus-icon {
+.icon {
   color: #ffb787;
+}
+
+span {
+  font-size: 1.1rem;
 }

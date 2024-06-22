@@ -97,12 +97,17 @@ export class AddMovieComponent {
     if (this.file != null) {
       try {
         const base64 = await this.convertFileToBase64(this.file);
-
+        let title_name: string;
+        if (this.checkbox)
+          title_name = this.seriesName + "/" + this.title;
+        else
+          title_name = this.title;
+        title_name = title_name.replace("/", "_")
         const payload = {
           file_name: this.file?.name,
           file_content: base64,
           metadata: {
-            title: this.title,
+            title: title_name,
             description: this.description,
             actors: this.actors,
             directors: this.directors,
@@ -123,6 +128,7 @@ export class AddMovieComponent {
         this.description = '';
         this.year = '';
         this.errors = '';
+        this.seriesName = '';
 
         this.movieService.addNewMovie(payload).subscribe({
           next: (data) => {
@@ -151,6 +157,10 @@ export class AddMovieComponent {
     }
     if (!this.description.trim()) {
       this.errors = 'Description is required';
+      return false;
+    }
+    if (this.checkbox && !this.seriesName.trim()) {
+      this.errors = 'Series name is required';
       return false;
     }
     if (!this.year.trim()) {
@@ -197,5 +207,7 @@ export class AddMovieComponent {
 
   checkboxChanged(event: boolean){
     this.checkbox = event
+    if (!this.checkbox)
+      this.seriesName = ''
   }
 }
