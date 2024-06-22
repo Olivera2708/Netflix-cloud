@@ -40,3 +40,43 @@ h3 {
   font-size: 1rem;
   color: darkgrey;
 }
+
+.inline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#button-download {
+  margin-left: 3rem;
+  padding: 0.6rem 1rem 0.6rem 1rem;
+  font-size: 1rem;
+  background-color: #42b1b6;
+  color: #ffffff;
+  border: none;
+  border-radius: 2rem;
+  cursor: pointer;
+}
+
+.res {
+  color: darkgrey;
+  padding: 0;
+  margin: 0 1rem 0 0;
+  font-size: 1.2rem;
+}
+
+.resolution {
+  display: flex;
+  align-items: center;
+}
+
+#button-download:hover {
+  background-color: #2f7f83;
+}
+
+.menu {
+  width: 5rem;
+  border: solid 2px #2f7f83;
+  color: darkgrey;
+  padding: 0.5rem 1rem 0.5rem 1rem;
+}

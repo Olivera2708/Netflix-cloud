@@ -1,10 +1,17 @@
 import {Component, OnInit} from '@angular/core';
 import {MovieService} from "../movie.service";
+import {MatMenu, MatMenuItem, MatMenuTrigger} from "@angular/material/menu";
+import {MatButton} from "@angular/material/button";
 
 @Component({
   selector: 'app-view-movie',
   standalone: true,
-  imports: [],
+  imports: [
+    MatMenu,
+    MatButton,
+    MatMenuItem,
+    MatMenuTrigger
+  ],
   templateUrl: './view-movie.component.html',
   styleUrl: './view-movie.component.css'
 })
@@ -16,7 +23,7 @@ export class ViewMovieComponent implements OnInit {
   directors: string = ""
   genres: string = ""
   year: string = ""
-
+  selectedResolution = 'original';
 
   constructor(private movieService: MovieService) { }
 
@@ -24,6 +31,9 @@ export class ViewMovieComponent implements OnInit {
     this.setInformation();
   }
 
+  changeResolution(resolution: string) {
+    this.selectedResolution = resolution;
+  }
   setInformation(){
     this.movieService.getMetadata(this.id).subscribe({
       next: (data) => {
@@ -35,5 +45,9 @@ export class ViewMovieComponent implements OnInit {
         this.directors = data.directors.join(", ")
       }
     })
+  }
+
+  menuItemClicked(item: string) {
+    console.log(`${item} clicked`);
   }
 }
