@@ -2,23 +2,36 @@
   <div class="container">
     <div class="left">
       <div class="video-container">
-        <video controls>
-<!--          <source src="assets/videos/sample.mp4" type="video/mp4">-->
+        <video #videoPlayer controls>
+          <source [src]="videoURL" type="video/mp4">
+          Your browser does not support the video tag.
         </video>
       </div>
-      <h3>{{title}}</h3>
+      <div class="inline">
+        <h3>{{ title }}</h3>
+        <div class="resolution">
+          <p class="res">Resolution: </p>
+          <button class="menu" mat-button [matMenuTriggerFor]="menu">{{ selectedResolution }}</button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="changeResolution('original')">original</button>
+            <button mat-menu-item (click)="changeResolution('360p')">360p</button>
+            <button mat-menu-item (click)="changeResolution('480p')">480p</button>
+            <button mat-menu-item (click)="changeResolution('720p')">720p</button>
+          </mat-menu>
+        </div>
+      </div>
     </div>
     <div class="right">
       <p class="subtitle">Description</p>
-      <p class="value">{{description}}</p>
+      <p class="value">{{ description }}</p>
       <p class="subtitle">Genres</p>
-      <p class="value">{{genres}}</p>
+      <p class="value">{{ genres }}</p>
       <p class="subtitle">Year</p>
-      <p class="value">{{year}}</p>
+      <p class="value">{{ year }}</p>
       <p class="subtitle">Actors</p>
-      <p class="value">{{actors}}</p>
+      <p class="value">{{ actors }}</p>
       <p class="subtitle">Director</p>
-      <p class="value">{{directors}}</p>
+      <p class="value">{{ directors }}</p>
     </div>
   </div>
 </div>

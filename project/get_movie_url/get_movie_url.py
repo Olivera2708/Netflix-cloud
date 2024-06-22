@@ -5,7 +5,7 @@ from botocore.exceptions import ClientError
 s3_client = boto3.client('s3')
 
 
-def download_movie(event, context):
+def get_movie_url(event, context):
     bucket_name = event['queryStringParameters']['bucket']
     object_key = event['queryStringParameters']['key']
     
