@@ -2,8 +2,9 @@
   <div class="container">
     <div class="left">
       <div class="video-container">
-        <video controls>
-          <!--          <source src="assets/videos/sample.mp4" type="video/mp4">-->
+        <video #videoPlayer controls>
+          <source [src]="videoURL" type="video/mp4">
+          Your browser does not support the video tag.
         </video>
       </div>
       <div class="inline">
@@ -17,7 +18,6 @@
             <button mat-menu-item (click)="changeResolution('480p')">480p</button>
             <button mat-menu-item (click)="changeResolution('720p')">720p</button>
           </mat-menu>
-          <button id="button-download">Download</button>
         </div>
       </div>
     </div>

@@ -165,10 +165,10 @@ class Team3Stack(Stack):
             }
         )
 
-        download_movie_function = create_lambda_function(
-            "download_movie",
-            "download_movie.download_movie",
-            "download_movie",
+        get_movie_url_function = create_lambda_function(
+            "get_movie_url",
+            "get_movie_url.get_movie_url",
+            "get_movie_url",
             "GET",
             [util_layer]
         )
@@ -333,9 +333,9 @@ class Team3Stack(Stack):
         upload_integration = apigateway.LambdaIntegration(upload_function)
         upload_resource.add_method("POST", upload_integration)
 
-        download_resource = api.root.add_resource("download")
-        download_movie_integration = apigateway.LambdaIntegration(download_movie_function)
-        download_resource.add_method("GET", download_movie_integration)
+        get_movie_url_resource = api.root.add_resource("movie")
+        get_movie_url_integration = apigateway.LambdaIntegration(get_movie_url_function)
+        get_movie_url_resource.add_method("GET", get_movie_url_integration)
 
         search_resource = api.root.add_resource("search")
         search_movies_integration = apigateway.LambdaIntegration(search_movies_function)

@@ -14,16 +14,12 @@
 }
 
 .left {
-  width: 70%;
+  width: 75%;
 }
 
 .right {
   margin-left: 1.5rem;
-  width: 30%;
-}
-
-video {
-  width: 100%;
+  width: 25%;
 }
 
 h3 {
@@ -42,6 +38,7 @@ h3 {
 }
 
 .inline {
+  margin: 1.5rem 1rem 0 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -79,4 +76,19 @@ h3 {
   border: solid 2px #2f7f83;
   color: darkgrey;
   padding: 0.5rem 1rem 0.5rem 1rem;
+}
+
+.video-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.video-container video {
+  width: auto;
+  max-width: 100%;
+  height: auto;
 }

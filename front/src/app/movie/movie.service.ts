@@ -16,8 +16,8 @@ export class MovieService {
       {'headers': {'Content-Type': 'application/json'}})
   }
 
-  downloadMovie(key: string): Observable<any> {
-    return this.httpClient.get<any>(environment.apiGateway + "download" + "?bucket=movie-team3&key=" + key,
+  getMovieURL(key: string): Observable<any> {
+    return this.httpClient.get<any>(environment.apiGateway + "movie" + "?bucket=movies-team3&key=" + key,
       {'headers': {'Content-Type': 'application/json'}})
   }
 
