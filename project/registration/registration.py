@@ -6,7 +6,7 @@ from botocore.exceptions import ClientError
 user_pool_id = os.environ['USER_POOL_ID']
 client_id = os.environ['CLIENT_ID']
 
-client = boto3.client('cognitp-idp')
+client = boto3.client('cognito-idp')
 
 def registration(event, context):
     body = json.loads(event['body'])

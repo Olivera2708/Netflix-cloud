@@ -5,7 +5,7 @@ from botocore.exceptions import ClientError
 
 client_id = os.environ['CLIENT_ID']
 
-client = boto3.client('cognitp-idp')
+client = boto3.client('cognito-idp')
 
 def login(event, context):
     body = json.loads(event['body'])
