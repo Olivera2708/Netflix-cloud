@@ -7,7 +7,8 @@ from aws_cdk import (
     aws_apigateway as apigateway,
     aws_stepfunctions as _sfn,
     aws_stepfunctions_tasks as _sfn_tasks,
-    aws_sqs as _sqs
+    aws_sqs as _sqs,
+    aws_cognito as cognito
 )
 from constructs import Construct
 from aws_cdk.aws_lambda_python_alpha import PythonLayerVersion
@@ -17,6 +18,47 @@ class Team3Stack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
+
+        user_pool = cognito.UserPool(
+            self,
+            id = "UserPoolTeam3",
+            self_sign_up_enabled=True,
+            sign_in_aliases=cognito.SignInAliases(
+                username=True,
+                email=True
+            ),
+            auto_verify=cognito.AutoVerifiedAttrs(email=True),
+            password_policy=cognito.PasswordPolicy(
+                min_length=8,
+                require_digits=True,
+                require_lowercase=True,
+                require_uppercase=True,
+                require_symbols=True
+            )
+        )
+
+        user_pool_client = user_pool.add_client(
+            id="UserPoolClient",
+            auth_flows=cognito.AuthFlow(
+                user_password=True
+            )
+        )
+
+        admin_group = cognito.CfnUserPoolGroup(
+            self,
+            id="AdminGroup",
+            user_pool_id=user_pool.user_pool_id,
+            group_name="Admin",
+            description="Administrators group"
+        )
+
+        regular_user_group = cognito.CfnUserPoolGroup(
+            self,
+            id="RegularUserGroup",
+            user_pool_id=user_pool.user_pool_id,
+            group_name="RegularUser",
+            description="Regular user group"
+        )
 
         movies_bucket = s3.Bucket(
             self,
@@ -197,6 +239,29 @@ class Team3Stack(Stack):
             }
         )
 
+        registration_function = create_lambda_function(
+            "registration",
+            "registration.registration",
+            "registration",
+            "POST",
+            [util_layer],
+            environment={
+                "USER_POOL_ID": user_pool.user_pool_id,
+                "CLIENT_ID": user_pool_client.user_pool_client_id
+            }
+        )
+
+        login_function = create_lambda_function(
+            "login",
+            "login.login",
+            "login",
+            "POST",
+            [util_layer],
+            environment={
+                "CLIENT_ID": user_pool_client.user_pool_client_id
+            }
+        )
+
         #sqs
         dead_letter_queue = _sqs.Queue(self, "Team3UploadDeadLetterQueue", queue_name="upload-dead-queue-team3")
 
@@ -284,6 +349,14 @@ class Team3Stack(Stack):
         )
         
         #endpoints
+        registration_resource = api.root.add_resource("register")
+        registration_integration = apigateway.LambdaIntegration(registration_function)
+        registration_resource.add_method("POST", registration_integration)
+
+        login_resource = api.root.add_resource("login")
+        login_integration = apigateway.LambdaIntegration(login_function)
+        login_resource.add_method("POST", login_integration)
+
         upload_resource = api.root.add_resource("upload")
         upload_integration = apigateway.LambdaIntegration(upload_function)
         upload_resource.add_method("POST", upload_integration)
