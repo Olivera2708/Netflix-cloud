@@ -141,6 +141,13 @@ class Team3Stack(Stack):
             iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSQSFullAccess")
         )
 
+        lambda_role.add_to_policy(
+            statement=iam.PolicyStatement(
+                actions=["cognito-idp:AdminAddUserToGroup"],
+                resources=["arn:aws:cognito-idp:eu-central-1:533267409058:userpool/eu-central-1_IkEeNyHn6"]
+            )
+        )
+
         def create_lambda_function(id, handler, include_dir, method, layers, environment=None):
             function = _lambda.Function(
                 self, id,
@@ -284,6 +291,17 @@ class Team3Stack(Stack):
             }
         )
 
+        verify_user_function = create_lambda_function(
+            "verify_user",
+            "verify_user.verify_user",
+            "verify_user",
+            "POST",
+            [util_layer],
+            environment={
+                "CLIENT_ID": user_pool_client.user_pool_client_id
+            }
+        )
+
         transcode_320p_function = create_lambda_function(
             "transcode_320p_function",
             "transcoding_uploading.transcoding_uploading",
@@ -401,6 +419,10 @@ class Team3Stack(Stack):
         login_resource = api.root.add_resource("login")
         login_integration = apigateway.LambdaIntegration(login_function)
         login_resource.add_method("POST", login_integration)
+
+        verify_user_resource = api.root.add_resource("verify")
+        verify_user_integration = apigateway.LambdaIntegration(verify_user_function)
+        verify_user_resource.add_method("POST", verify_user_integration)
 
         upload_resource = api.root.add_resource("upload")
         upload_integration = apigateway.LambdaIntegration(upload_function)
