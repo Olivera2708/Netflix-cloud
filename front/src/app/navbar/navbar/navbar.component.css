@@ -1,0 +1,22 @@
+.logo {
+  cursor: pointer;
+  margin-left: 2rem;
+  font-size: 1.8rem;
+  color: #262626;
+}
+
+mat-toolbar {
+  color: #2c2c2c;
+  background-color: #2f7f83;
+  position: fixed;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+a[mat-button] {
+  height: auto;
+  color: #2c2c2c;
+  font-size: 1.4rem;
+}

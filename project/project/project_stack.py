@@ -215,8 +215,30 @@ class Team3Stack(Stack):
             [util_layer]
         )
 
+        search_movies_function = create_lambda_function(
+            "search_movies",
+            "search_movies.search_movies",
+            "search_movies",
+            "POST",
+            [util_layer],
+            environment={
+                "TABLE": movies_table.table_name
+            }
+        )
+        
+        get_metadata_function = create_lambda_function(
+            "get_metadata",
+            "get_metadata.get_metadata",
+            "get_metadata",
+            "GET",
+            [util_layer],
+            environment={
+                "TABLE": movies_table.table_name
+            }
+        )
+
         transcode_720p_function = create_lambda_function(
-            "transcode_360p_function",
+            "transcode_720p_function",
             "transcoding_uploading.transcoding_uploading",
             "transcoding_uploading",
             "POST",
@@ -262,6 +284,18 @@ class Team3Stack(Stack):
             }
         )
 
+        transcode_320p_function = create_lambda_function(
+            "transcode_320p_function",
+            "transcoding_uploading.transcoding_uploading",
+            "transcoding_uploading",
+            "POST",
+            [util_layer, ffmpeg_layer],
+            environment={
+                "RESOLUTION": "640x360",
+                "BUCKET": movies_bucket.bucket_name
+            }
+        )
+
         #sqs
         dead_letter_queue = _sqs.Queue(self, "Team3UploadDeadLetterQueue", queue_name="upload-dead-queue-team3")
 
@@ -297,7 +331,7 @@ class Team3Stack(Stack):
         )
 
         transcode_720p_task = _sfn_tasks.LambdaInvoke(
-            self, "Transcode360p",
+            self, "Transcode720p",
             lambda_function=transcode_720p_function,
             output_path='$.Payload'
         ).add_retry(
@@ -316,6 +350,16 @@ class Team3Stack(Stack):
             backoff_rate=2
         )
 
+        transcode_320p_task = _sfn_tasks.LambdaInvoke(
+            self, "Transcode320p",
+            lambda_function=transcode_320p_function,
+            output_path='$.Payload'
+        ).add_retry(
+            interval=Duration.seconds(20),
+            max_attempts=5,
+            backoff_rate=2
+        )
+
         #Parallel
         parallel_state = _sfn.Parallel(
             self, "Parallel State"
@@ -324,6 +368,7 @@ class Team3Stack(Stack):
         parallel_state.branch(upload_movie_task)
         parallel_state.branch(transcode_720p_task)
         parallel_state.branch(transcode_480p_task)
+        parallel_state.branch(transcode_320p_task)
 
         # Step Function Definition -> chaining tasks
         definition = parallel_state.next(send_to_queue_task)
@@ -364,3 +409,11 @@ class Team3Stack(Stack):
         download_resource = api.root.add_resource("download")
         download_movie_integration = apigateway.LambdaIntegration(download_movie_function)
         download_resource.add_method("GET", download_movie_integration)
+
+        search_resource = api.root.add_resource("search")
+        search_movies_integration = apigateway.LambdaIntegration(search_movies_function)
+        search_resource.add_method("POST", search_movies_integration)
+        
+        movie_metadata_resource = api.root.add_resource("metadata")
+        movie_metadata_integration = apigateway.LambdaIntegration(get_metadata_function)
+        movie_metadata_resource.add_method("GET", movie_metadata_integration)

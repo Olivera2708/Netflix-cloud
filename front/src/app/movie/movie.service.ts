@@ -1,7 +1,8 @@
 import {Injectable} from "@angular/core";
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpParams} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {environment} from "../../env";
+import {Metadata} from "./model/metadata.model";
 
 
 @Injectable({
@@ -17,6 +18,22 @@ export class MovieService {
 
   downloadMovie(key: string): Observable<any> {
     return this.httpClient.get<any>(environment.apiGateway + "download" + "?bucket=movie-team3&key=" + key,
+      {'headers': {'Content-Type': 'application/json'}})
+  }
+
+  searchMovie( actors: string[], directors: string[], genres: string[],title: string, description: string): Observable<any> {
+
+    return this.httpClient.post<any>(`${environment.apiGateway}search`,
+      {title: title,
+            description: description,
+            genres: genres,
+            actors: actors,
+            directors: directors},
+      {'headers' : { 'Content-Type': 'application/json' },}
+    );
+  }
+  getMetadata(id: string): Observable<Metadata> {
+    return this.httpClient.get<Metadata>(environment.apiGateway + "metadata?id=" + id,
       {'headers': {'Content-Type': 'application/json'}})
   }
 }

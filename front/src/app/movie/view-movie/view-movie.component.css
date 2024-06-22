@@ -1,0 +1,42 @@
+.main {
+  height: calc(100vh - 7rem);
+  padding-top: 7rem;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.container {
+  padding: 0 2rem 0 2rem;
+  display: flex;
+  width: 95%;
+  height: 100vh;
+}
+
+.left {
+  width: 70%;
+}
+
+.right {
+  margin-left: 1.5rem;
+  width: 30%;
+}
+
+video {
+  width: 100%;
+}
+
+h3 {
+  margin-left: 1rem;
+  color: darkgrey;
+}
+
+.subtitle {
+  font-size: 1.4rem;
+  color: #1a9094;
+}
+
+.value {
+  font-size: 1rem;
+  color: darkgrey;
+}

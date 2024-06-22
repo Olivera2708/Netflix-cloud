@@ -1,16 +1,32 @@
-#main {
-  height: calc(100vh - 4rem);
-  padding-top: 4rem;
+form {
   display: flex;
+  gap: 1rem;
+  margin-top: 0em;
+  unicode-bidi: isolate;
+  flex-wrap: wrap;
+  width: 100%;
   justify-content: center;
-  overflow: hidden;
 }
 
-#left {
-  width: 50%;
-  height: 100vh;
-  background-image: linear-gradient(to right, rgba(255,255,255,0), rgb(25, 28, 28)), url('../../../assets/images/background.jpg');
+.textarea-description{
+  width: 30rem;
+  height: -webkit-fill-available;
+}
+
+#main {
+  overflow-x: hidden;
+  display: flex;
+
+  background-image: linear-gradient(to top, rgba(255,255,255,0), rgb(0, 0, 0)), url('../../../assets/images/background.jpg');
   background-size: cover;
+  flex-direction: column;
+  width: 100%;
+}
+
+#down {
+  width: 100%;
+  height: 100vh;
+
 }
 
 h3 {
@@ -18,9 +34,9 @@ h3 {
   margin-bottom: 3rem;
 }
 
-#right {
+#search-bar {
   padding: 2rem 8rem 2rem 8rem;
-  width: 50%;
+  width: 90%;
 }
 
 .list-element {
@@ -79,6 +95,7 @@ mat-list {
 
 #button-submit {
   width: 8rem;
+  height: 3rem;
   font-size: 1rem;
   background-color: #42b1b6;
   color: #ffffff;

@@ -11,8 +11,8 @@ table = dynamodb.Table(table_name)
 
 def search_movies(event, context):
     try:
-        input_data = event['body']
-        if True:
+        input_data = event["body"]
+        if not input_data:
             return {
                 'statusCode': 400,
                 'headers': {
@@ -20,12 +20,11 @@ def search_movies(event, context):
                     'Access-Control-Allow-Headers': 'Content-Type',
                     'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                 },
-                'body': json.dumps(event)
+                'body': json.dumps({'error': 'Invalid input: body is required'})
             }
-            
-        input_data = json.loads(input_data)
 
-            # Extract query parameters from event
+        input_data = json.loads(input_data)
+        # Extract query parameters from event
         title = input_data['title']
         description = input_data['description']
         actors = input_data['actors']
