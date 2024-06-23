@@ -90,26 +90,11 @@
   </div>
   <div id="down">
     <div class="container">
-      <div class="card">
-        <h2>Card Title 1</h2>
-        <p>This is some text inside the first card. Lorem ipsum dolor sit amet.</p>
+      <div class="card" *ngFor="let movie of movies">
+        <h2>{{ movie.title }}</h2>
+        <p>{{ movie.description }}</p>
       </div>
-      <div class="card">
-        <h2>Card Title 2</h2>
-        <p>This is some text inside the second card. Lorem ipsum dolor sit amet.</p>
-      </div>
-      <div class="card">
-        <h2>Card Title 3</h2>
-        <p>This is some text inside the third card. Lorem ipsum dolor sit amet.</p>
-      </div>
-      <div class="card">
-        <h2>Card Title 3</h2>
-        <p>This is some text inside the third card. Lorem ipsum dolor sit amet.</p>
-      </div>
-      <div class="card">
-        <h2>Card Title 3</h2>
-        <p>This is some text inside the third card. Lorem ipsum dolor sit amet.</p>
-      </div>
+
     </div>
   </div>
 

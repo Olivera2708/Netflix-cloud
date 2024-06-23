@@ -103,6 +103,7 @@ export class SearchMoviesComponent {
       payload.metadata.description)
       .subscribe({
         next: (data) => {
+          
           console.log(data);
         }
       })

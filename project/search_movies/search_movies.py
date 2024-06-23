@@ -70,6 +70,11 @@ def search_movies(event, context):
             FilterExpression=filter_expression
         )
 
+        items = response['Items']
+        for item in items:
+            if 'file_size' in item:
+                del item['file_size']
+
         return {
             'statusCode': 200,
             'headers': {
@@ -77,7 +82,7 @@ def search_movies(event, context):
                 'Access-Control-Allow-Headers': 'Content-Type',
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             },
-            'body': json.dumps(str(response['Items']))
+            'body': json.dumps(items)
         }
 
     except Exception as e:
