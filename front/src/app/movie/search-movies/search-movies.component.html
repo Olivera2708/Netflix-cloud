@@ -92,7 +92,20 @@
     <div class="container">
       <div class="card" *ngFor="let movie of movies">
         <h2>{{ movie.title }}</h2>
-        <p>{{ movie.description }}</p>
+        <div class="genres-container">
+          <div style="margin-right: 0.5rem">
+            <p>Description: </p>
+          </div>
+          <p>{{ movie.description }}</p>
+        </div>
+        <div class="genres-container">
+          <div style="margin-right: 0.5rem">
+            <p>Genres: </p>
+          </div>
+          <div class="genre" *ngFor="let genre of movie.genres">
+            <span>{{genre}}</span>
+          </div>
+        </div>
       </div>
 
     </div>

@@ -156,8 +156,12 @@ p {
 
 .card p {
   color: #41b0b5;
-
 }
+
+.card span {
+  color: #41b0b5;
+}
+
 .card:hover {
 
   cursor: pointer;
@@ -169,4 +173,21 @@ p {
   .container {
     flex-direction: column;
   }
+}
+
+.genres-container{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+.genre{
+  height: min-content;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  background-color: #000000;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-right: 0.5rem;
 }

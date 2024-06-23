@@ -103,8 +103,8 @@ export class SearchMoviesComponent {
       payload.metadata.description)
       .subscribe({
         next: (data) => {
-          
-          console.log(data);
+
+          this.movies = data
         }
       })
     } catch (error) {
