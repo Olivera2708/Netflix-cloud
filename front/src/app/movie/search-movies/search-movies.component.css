@@ -176,6 +176,7 @@ p {
 }
 
 .genres-container{
+  margin-top: 0.3rem;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -186,7 +187,7 @@ p {
   height: min-content;
   padding-left: 1rem;
   padding-right: 1rem;
-  background-color: #000000;
+  background-color: #333333;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-right: 0.5rem;

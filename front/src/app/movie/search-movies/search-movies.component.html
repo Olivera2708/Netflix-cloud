@@ -106,6 +106,22 @@
             <span>{{genre}}</span>
           </div>
         </div>
+        <div class="genres-container">
+          <div style="margin-right: 0.5rem">
+            <p>Actors: </p>
+          </div>
+          <div class="genre" *ngFor="let actor of movie.actors">
+            <span>{{actor}}</span>
+          </div>
+        </div>
+        <div class="genres-container">
+          <div style="margin-right: 0.5rem">
+            <p>Directors: </p>
+          </div>
+          <div class="genre" *ngFor="let director of movie.directors">
+            <span>{{director}}</span>
+          </div>
+        </div>
       </div>
 
     </div>
