@@ -28,7 +28,7 @@
             <input matInput [(ngModel)]="newGenre" name="genre">
           </mat-form-field>
           <button class="list-add" mat-icon-button (click)="addGenre()" type="button">
-            <mat-icon>add</mat-icon>
+            <mat-icon class="icon">add</mat-icon>
           </button>
         </div>
         <mat-list>
@@ -36,7 +36,7 @@
             <div class="list-element">
               <div mat-line>{{ genre }}</div>
               <button mat-icon-button (click)="removeGenre(i)" type="button">
-                <mat-icon>close</mat-icon>
+                <mat-icon class="icon">close</mat-icon>
               </button>
             </div>
           </mat-list-item>
@@ -49,7 +49,7 @@
             <input matInput [(ngModel)]="newActor" name="actor">
           </mat-form-field>
           <button class="list-add" mat-icon-button (click)="addActor()" type="button">
-            <mat-icon>add</mat-icon>
+            <mat-icon class="icon">add</mat-icon>
           </button>
         </div>
         <mat-list>
@@ -57,7 +57,7 @@
             <div class="list-element">
               <div mat-line>{{ actor }}</div>
               <button mat-icon-button (click)="removeActor(i)" type="button">
-                <mat-icon>close</mat-icon>
+                <mat-icon class="icon">close</mat-icon>
               </button>
             </div>
           </mat-list-item>
@@ -70,7 +70,7 @@
             <input matInput [(ngModel)]="newDirector" name="director">
           </mat-form-field>
           <button class="list-add" mat-icon-button (click)="addDirector()" type="button">
-            <mat-icon>add</mat-icon>
+            <mat-icon class="icon">add</mat-icon>
           </button>
         </div>
         <mat-list>
@@ -78,11 +78,18 @@
             <div class="list-element">
               <div mat-line>{{ director }}</div>
               <button mat-icon-button (click)="removeDirector(i)" type="button">
-                <mat-icon>close</mat-icon>
+                <mat-icon class="icon">close</mat-icon>
               </button>
             </div>
           </mat-list-item>
         </mat-list>
+      </div>
+      <div class="inline">
+        <mat-checkbox (change)="checkboxChanged($event.checked)"><span>Series</span></mat-checkbox>
+        <mat-form-field id="series" appearance="outline">
+          <mat-label>Series name</mat-label>
+          <input matInput [(ngModel)]="seriesName" name="series" [disabled]="!checkbox">
+        </mat-form-field>
       </div>
       <br>
       <mat-error *ngIf="errors">{{ errors }}</mat-error>
@@ -92,7 +99,8 @@
             <label for="fileInput" class="custom-file-label">
               <span>Upload movie</span>
             </label>
-            <input type="file" name="movie" id="fileInput" (change)="onMovieSelected($event)" class="custom-file-input" accept="video/mp4"/>
+            <input type="file" name="movie" id="fileInput" (change)="onMovieSelected($event)" class="custom-file-input"
+                   accept="video/mp4"/>
           </div>
           <p>{{ movieText }}</p>
         </div>

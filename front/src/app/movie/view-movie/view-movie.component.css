@@ -92,3 +92,9 @@ h3 {
   max-width: 100%;
   height: auto;
 }
+
+.series {
+  font-size: 1.5rem;
+  margin-left: 2rem;
+  color: #2f7f83;
+}
