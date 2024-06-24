@@ -24,7 +24,7 @@ def upload(event, context):
             }
 
         unique_id = str(uuid.uuid4())
-        input_data["id"] = f"{input_data['file_name']}_{unique_id}/"
+        input_data["id"] = f"{input_data['metadata']['title']}_{unique_id}/".replace(" ", "_")
 
         json_data = json.dumps(input_data)
         s3_key = f'input_data/{unique_id}.json'
