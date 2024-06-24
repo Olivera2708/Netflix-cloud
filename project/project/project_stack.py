@@ -53,27 +53,10 @@ class Team3Stack(Stack):
             }
         )
 
-        # user_pool = cognito.UserPool(self, "MyUserPool",
-        #     user_pool_name="my-user-pool",
-        #     self_sign_up_enabled=True,
-        #     auto_verify=cognito.AutoVerifiedAttrs(email=True),  # Automatska verifikacija e-mail adrese
-        #     sign_in_aliases=cognito.SignInAliases(username=True),  # Samo korisničko ime za prijavu
-        #     password_policy=cognito.PasswordPolicy(min_length=8, require_symbols=True),
-        # )
-        # user_pool_client = user_pool.add_client(
-        #     id="UserPoolClient",
-        #     auth_flows={
-        #         "userSrp": True
-        #     },
-        #     o_auth={
-        #         "flows": {
-        #             "authorizationCodeGrant": True,
-        #             "implicitCodeGrant": True
-        #         },
-        #         "callback_urls": ["http://localhost:4200"],
-        #         "logout_urls": ["http://localhost:4200"] 
-        #     }
-        # )
+        authorizer = apigateway.CognitoUserPoolsAuthorizer(self, "Authorizer",
+            cognito_user_pools=[user_pool]
+        )
+
 
         user_pool_client = user_pool.add_client(
             "UserPoolClient",
@@ -323,30 +306,6 @@ class Team3Stack(Stack):
                 "BUCKET": movies_bucket.bucket_name
             }
         )
-
-        registration_function = create_lambda_function(
-            "registration",
-            "registration.registration",
-            "registration",
-            "POST",
-            [util_layer],
-            environment={
-                "USER_POOL_ID": user_pool.user_pool_id,
-                "CLIENT_ID": user_pool_client.user_pool_client_id
-            }
-        )
-
-        login_function = create_lambda_function(
-            "login",
-            "login.login",
-            "login",
-            "POST",
-            [util_layer],
-            environment={
-                "CLIENT_ID": user_pool_client.user_pool_client_id
-            }
-        )
-
      
         transcode_320p_function = create_lambda_function(
             "transcode_320p_function",
@@ -458,26 +417,19 @@ class Team3Stack(Stack):
         )
         
         #endpoints
-        registration_resource = api.root.add_resource("register")
-        registration_integration = apigateway.LambdaIntegration(registration_function)
-        registration_resource.add_method("POST", registration_integration)
-
-        login_resource = api.root.add_resource("login")
-        login_integration = apigateway.LambdaIntegration(login_function)
-        login_resource.add_method("POST", login_integration)
-
         upload_resource = api.root.add_resource("upload")
         upload_integration = apigateway.LambdaIntegration(upload_function)
-        upload_resource.add_method("POST", upload_integration)
+        upload_resource.add_method("POST", upload_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
 
         get_movie_url_resource = api.root.add_resource("movie")
         get_movie_url_integration = apigateway.LambdaIntegration(get_movie_url_function)
-        get_movie_url_resource.add_method("GET", get_movie_url_integration)
+        get_movie_url_resource.add_method("GET", get_movie_url_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
 
         search_resource = api.root.add_resource("search")
         search_movies_integration = apigateway.LambdaIntegration(search_movies_function)
-        search_resource.add_method("POST", search_movies_integration)
+        search_resource.add_method("POST", search_movies_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
         
         movie_metadata_resource = api.root.add_resource("metadata")
         movie_metadata_integration = apigateway.LambdaIntegration(get_metadata_function)
-        movie_metadata_resource.add_method("GET", movie_metadata_integration)
+        movie_metadata_resource.add_method("GET", movie_metadata_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
+
