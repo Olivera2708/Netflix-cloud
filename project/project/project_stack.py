@@ -7,7 +7,8 @@ from aws_cdk import (
     aws_apigateway as apigateway,
     aws_stepfunctions as _sfn,
     aws_stepfunctions_tasks as _sfn_tasks,
-    aws_sqs as _sqs
+    aws_sqs as _sqs,
+    aws_cognito as cognito
 )
 from constructs import Construct
 from aws_cdk.aws_lambda_python_alpha import PythonLayerVersion
@@ -17,6 +18,86 @@ class Team3Stack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
+
+        user_pool = cognito.UserPool(
+            self,
+            id = "UserPoolTeam3",
+            user_pool_name="UserPoolTeam3",
+            self_sign_up_enabled=True,
+            sign_in_aliases=cognito.SignInAliases(
+                username=True,
+                email=True
+            ),
+            auto_verify=cognito.AutoVerifiedAttrs(email=True),
+            user_verification=cognito.UserVerificationConfig(
+                email_subject="Confirm your email address to access our application",
+                email_body="""
+                Dear User,\n
+                Please confirm your email address to gain access to our application. Click {##link##} to verify your account.\n
+                Thank you.
+                """,
+                email_style=cognito.VerificationEmailStyle.LINK
+            ),
+            password_policy=cognito.PasswordPolicy(
+                min_length=8,
+                require_digits=True,
+                require_lowercase=True,
+                require_uppercase=True,
+                require_symbols=True
+            ),
+            custom_attributes={
+                "first_name": cognito.StringAttribute(mutable=True),
+                "last_name": cognito.StringAttribute(mutable=True),
+                "birthdate": cognito.StringAttribute(mutable=True),
+                "role": cognito.StringAttribute(mutable=True)
+            }
+        )
+
+        authorizer = apigateway.CognitoUserPoolsAuthorizer(self, "Authorizer",
+            cognito_user_pools=[user_pool]
+        )
+
+
+        user_pool_client = user_pool.add_client(
+            "UserPoolClient",
+            generate_secret=False,
+            auth_flows=cognito.AuthFlow(
+                admin_user_password=True,
+                custom=True,
+                user_password=True,
+                user_srp=True
+            ),
+            o_auth=cognito.OAuthSettings(
+                flows=cognito.OAuthFlows(
+                    authorization_code_grant=True
+                ),
+                scopes=[cognito.OAuthScope.OPENID],
+                callback_urls=["http://localhost:4200/search"]
+            )
+        )
+
+        user_pool.add_domain(
+            "CognitoDomain",
+            cognito_domain=cognito.CognitoDomainOptions(
+                domain_prefix="moviefy"
+            )
+        )
+
+        admin_group = cognito.CfnUserPoolGroup(
+            self,
+            id="AdminGroup",
+            user_pool_id=user_pool.user_pool_id,
+            group_name="Admin",
+            description="Administrators group"
+        )
+
+        regular_user_group = cognito.CfnUserPoolGroup(
+            self,
+            id="RegularUserGroup",
+            user_pool_id=user_pool.user_pool_id,
+            group_name="RegularUser",
+            description="Regular user group"
+        )
 
         movies_bucket = s3.Bucket(
             self,
@@ -97,6 +178,13 @@ class Team3Stack(Stack):
         )
         lambda_role.add_managed_policy(
             iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSQSFullAccess")
+        )
+
+        lambda_role.add_to_policy(
+            iam.PolicyStatement(
+                actions=["cognito-idp:AdminAddUserToGroup"],
+                resources=[f"arn:aws:cognito-idp:{self.region}:{self.account}:userpool/{user_pool.user_pool_id}"]
+            )
         )
 
         def create_lambda_function(id, handler, include_dir, method, layers, environment=None):
@@ -218,7 +306,7 @@ class Team3Stack(Stack):
                 "BUCKET": movies_bucket.bucket_name
             }
         )
-
+     
         transcode_320p_function = create_lambda_function(
             "transcode_320p_function",
             "transcoding_uploading.transcoding_uploading",
@@ -331,16 +419,17 @@ class Team3Stack(Stack):
         #endpoints
         upload_resource = api.root.add_resource("upload")
         upload_integration = apigateway.LambdaIntegration(upload_function)
-        upload_resource.add_method("POST", upload_integration)
+        upload_resource.add_method("POST", upload_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
 
         get_movie_url_resource = api.root.add_resource("movie")
         get_movie_url_integration = apigateway.LambdaIntegration(get_movie_url_function)
-        get_movie_url_resource.add_method("GET", get_movie_url_integration)
+        get_movie_url_resource.add_method("GET", get_movie_url_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
 
         search_resource = api.root.add_resource("search")
         search_movies_integration = apigateway.LambdaIntegration(search_movies_function)
-        search_resource.add_method("POST", search_movies_integration)
+        search_resource.add_method("POST", search_movies_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
         
         movie_metadata_resource = api.root.add_resource("metadata")
         movie_metadata_integration = apigateway.LambdaIntegration(get_metadata_function)
-        movie_metadata_resource.add_method("GET", movie_metadata_integration)
+        movie_metadata_resource.add_method("GET", movie_metadata_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
+
