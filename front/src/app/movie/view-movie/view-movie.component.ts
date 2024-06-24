@@ -1,9 +1,12 @@
-import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import {MovieService} from "../movie.service";
 import {MatMenu, MatMenuItem, MatMenuTrigger} from "@angular/material/menu";
 import {MatButton} from "@angular/material/button";
 import {NgIf} from "@angular/common";
 import {MatSnackBar} from "@angular/material/snack-bar";
+import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
+import {ActivatedRoute} from "@angular/router";
+
 
 @Component({
   selector: 'app-view-movie',
@@ -31,9 +34,13 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
   selectedResolution = 'original';
   videoURL = "";
 
-  constructor(private movieService: MovieService, private _snackBar: MatSnackBar){}
+  constructor(private route: ActivatedRoute, private movieService: MovieService, private _snackBar: MatSnackBar){}
   ngOnInit(): void {
-    this.setInformation();
+    this.route.paramMap.subscribe(params => {
+      this.id = params.get('id') || '';
+      this.setInformation();
+    });
+
   }
 
   ngAfterViewInit(): void {

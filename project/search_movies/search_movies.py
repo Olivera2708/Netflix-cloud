@@ -11,7 +11,7 @@ table = dynamodb.Table(table_name)
 
 def search_movies(event, context):
     try:
-        input_data = event["body"]
+        input_data = json.loads(event["body"])
         if not input_data:
             return {
                 'statusCode': 400,
@@ -23,24 +23,31 @@ def search_movies(event, context):
                 'body': json.dumps({'error': 'Invalid input: body is required'})
             }
 
-        input_data = json.loads(input_data)
-        # Extract query parameters from event
+        # # Extract query parameters from event
         title = input_data['title']
         description = input_data['description']
         actors = input_data['actors']
         directors = input_data['directors']
         genres = input_data['genres']
-
-        return {
-            'statusCode': 400,
-            'headers': {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Methods': 'GET,POST,OPTIONS'
-            },
-            'genres': genres,
-            'directors': directors
-        }
+        # return {
+        #     'statusCode': 200,
+        #     'headers': {
+        #         'Access-Control-Allow-Origin': '*',
+        #         'Access-Control-Allow-Headers': 'Content-Type',
+        #         'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+        #     },
+        #     'body': json.dumps(actors)
+        # }
+        # return {
+        #     'statusCode': 400,
+        #     'headers': {
+        #         'Access-Control-Allow-Origin': '*',
+        #         'Access-Control-Allow-Headers': 'Content-Type',
+        #         'Access-Control-Allow-Methods': 'GET,POST,OPTIONS'
+        #     },
+        #     'genres': genres,
+        #     'directors': directors
+        # }
 
         filter_expression = Attr('title').contains(title)
 
@@ -63,14 +70,19 @@ def search_movies(event, context):
             FilterExpression=filter_expression
         )
 
+        items = response['Items']
+        for item in items:
+            if 'file_size' in item:
+                del item['file_size']
+
         return {
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Methods': 'GET,POST,OPTIONS'
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             },
-            'body': response["Items"]
+            'body': json.dumps(items)
         }
 
     except Exception as e:
@@ -79,7 +91,7 @@ def search_movies(event, context):
             'headers': {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Methods': 'GET,POST,OPTIONS'
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             },
             'body': json.dumps(f"An error occurred: {str(e)}")
         }
