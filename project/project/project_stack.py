@@ -307,6 +307,7 @@ class Team3Stack(Stack):
 
         # Step Function Definition -> chaining tasks
         definition = parallel_state.next(send_to_queue_task)
+        # definition_edit = parallel_state.next(send_to_queue_task)
         
         # Step Function
         state_machine = _sfn.StateMachine(
@@ -315,6 +316,13 @@ class Team3Stack(Stack):
             comment="Transcoding and uploading new movies",
             timeout=Duration.minutes(5)
         )
+
+        # state_machine_edit = _sfn.StateMachine(
+        #     self, "Edit",
+        #     definition=definition_edit,
+        #     comment="Edit video and video data",
+        #     timeout=Duration.minutes(5)
+        # )
 
         upload_function = create_lambda_function(
             "upload",
