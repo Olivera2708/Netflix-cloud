@@ -88,6 +88,43 @@
       </div>
     </form>
   </div>
-  <div id="down"></div>
+  <div id="down">
+    <div class="container">
+      <div class="card" *ngFor="let movie of movies" (click)="onCardClick(movie.id)">
+        <h2>{{ movie.title }}</h2>
+        <div class="genres-container">
+          <div style="margin-right: 0.5rem">
+            <p>Description: </p>
+          </div>
+          <p>{{ movie.description }}</p>
+        </div>
+        <div class="genres-container">
+          <div style="margin-right: 0.5rem">
+            <p>Genres: </p>
+          </div>
+          <div class="genre" *ngFor="let genre of movie.genres">
+            <span>{{genre}}</span>
+          </div>
+        </div>
+        <div class="genres-container">
+          <div style="margin-right: 0.5rem">
+            <p>Actors: </p>
+          </div>
+          <div class="genre" *ngFor="let actor of movie.actors">
+            <span>{{actor}}</span>
+          </div>
+        </div>
+        <div class="genres-container">
+          <div style="margin-right: 0.5rem">
+            <p>Directors: </p>
+          </div>
+          <div class="genre" *ngFor="let director of movie.directors">
+            <span>{{director}}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
 
 </div>

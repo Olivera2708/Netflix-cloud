@@ -9,7 +9,8 @@ import {MatList, MatListItem} from "@angular/material/list";
 import {NgForOf, NgIf} from "@angular/common";
 import {MovieService} from "../movie.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
-
+import { CardModule } from 'primeng/card';
+import {Router} from "@angular/router";
 @Component({
   selector: 'app-search-movies',
   standalone: true,
@@ -25,7 +26,8 @@ import {MatSnackBar} from "@angular/material/snack-bar";
     MatList,
     MatListItem,
     NgForOf,
-    NgIf
+    NgIf,
+    CardModule
   ],
   templateUrl: './search-movies.component.html',
   styleUrl: './search-movies.component.css'
@@ -40,9 +42,13 @@ export class SearchMoviesComponent {
   title: string = '';
   description: string = '';
   errors: string = '';
+  movies: any;
 
-  constructor(private movieService: MovieService, private _snackBar: MatSnackBar) { }
+  constructor(private router: Router, private movieService: MovieService, private _snackBar: MatSnackBar) { }
 
+  ngOnInit(): void {
+    this.search();
+  }
   addActor() {
     if (this.newActor.trim()) {
       this.actors.push(this.newActor.trim());
@@ -101,7 +107,8 @@ export class SearchMoviesComponent {
       payload.metadata.description)
       .subscribe({
         next: (data) => {
-          console.log(data);
+
+          this.movies = data
         }
       })
     } catch (error) {
@@ -124,6 +131,7 @@ export class SearchMoviesComponent {
   }
 
 
-
-
+  onCardClick(id: string) {
+    this.router.navigate(['/movie', id]);
+  }
 }

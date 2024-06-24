@@ -6,7 +6,7 @@ import { LoginComponent } from './authentication/login/login.component';
 import { RegistrationComponent } from './authentication/registration/registration.component';
 
 export const routes: Routes = [
-  { path: "movie", component: ViewMovieComponent},
+  { path: "movie/:id", component: ViewMovieComponent},
   { path: "add", component: AddMovieComponent},
   { path: "search", component: SearchMoviesComponent},
   { path: "", component: LoginComponent},

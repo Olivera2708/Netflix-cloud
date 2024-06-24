@@ -1,10 +1,12 @@
-import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import {MovieService} from "../movie.service";
 import {MatMenu, MatMenuItem, MatMenuTrigger} from "@angular/material/menu";
 import {MatButton} from "@angular/material/button";
 import {NgIf} from "@angular/common";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
+import {ActivatedRoute} from "@angular/router";
+
 
 @Component({
   selector: 'app-view-movie',
@@ -21,8 +23,9 @@ import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
 })
 export class ViewMovieComponent implements OnInit, AfterViewInit {
   @ViewChild('videoPlayer') videoPlayer!: ElementRef<HTMLVideoElement>;
-  id: string = "What_Happened_To_Monday_565d6724-6493-4d9d-a4ab-6a065b2dc59e"
+  id: string = "Avenger_Endgame_d64aff03-b1d6-4b95-aa3f-99e019ddc9e3"
   title: string = ""
+  subtitle: string = ""
   description: string = ""
   actors: string = ""
   directors: string = ""
@@ -31,9 +34,13 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
   selectedResolution = 'original';
   videoURL = "";
 
-  constructor(private movieService: MovieService, private _snackBar: MatSnackBar){}
+  constructor(private route: ActivatedRoute, private movieService: MovieService, private _snackBar: MatSnackBar){}
   ngOnInit(): void {
-    this.setInformation();
+    this.route.paramMap.subscribe(params => {
+      this.id = params.get('id') || '';
+      this.setInformation();
+    });
+
   }
 
   ngAfterViewInit(): void {
@@ -58,7 +65,13 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
   setInformation(){
     this.movieService.getMetadata(this.id).subscribe({
       next: (data) => {
-        this.title = data.title
+        if (data.title.includes("/")){
+          this.title = data.title.split("/")[1]
+          this.subtitle = data.title.split("/")[0]
+        }
+        else{
+          this.title = data.title
+        }
         this.description = data.description
         this.year = data.year
         this.genres = data.genres.join(", ")

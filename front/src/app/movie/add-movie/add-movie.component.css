@@ -3,7 +3,6 @@
   padding-top: 4rem;
   display: flex;
   justify-content: center;
-  overflow: hidden;
 }
 
 #left {
@@ -107,4 +106,22 @@ mat-list {
 p {
   margin: 0 0 0 1rem;
   color: whitesmoke;
+}
+
+.inline {
+  display: flex;
+  justify-content: center;
+}
+
+#series {
+  margin-top: 1rem;
+  margin-left: 2rem;
+}
+
+.icon {
+  color: #ffb787;
+}
+
+span {
+  font-size: 1.1rem;
 }
