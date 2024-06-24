@@ -1,9 +1,10 @@
 <mat-toolbar>
   <span routerLink="/" class="logo">Moviefy</span>
   <span class="spacer"></span>
-  <a routerLink="/" mat-button>Home</a>
-  <a routerLink="/add" mat-button>Upload movie</a>
-  <a routerLink="/movie" mat-button>View movie</a>
+  <a routerLink="/search" mat-button>Home</a>
+  <app-navbar-admin *ngIf="role==='Admin'"></app-navbar-admin>
+  <app-navbar-user *ngIf="role==='RegularUser'"></app-navbar-user>
+  <a mat-button (click)="logout()">Logout</a>
 <!--  <app-navigation-admin *ngIf="role==='ADMIN'"></app-navigation-admin>-->
 <!--  <app-navigation-guest *ngIf="role==='GUEST'"></app-navigation-guest>-->
 <!--  <app-navigation-owner *ngIf="role==='OWNER'"></app-navigation-owner>-->
