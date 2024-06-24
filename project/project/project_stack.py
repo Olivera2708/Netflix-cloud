@@ -170,7 +170,22 @@ class Team3Stack(Stack):
             "get_movie_url.get_movie_url",
             "get_movie_url",
             "GET",
-            [util_layer]
+            [util_layer],
+            environment={
+                "BUCKET": movies_bucket.bucket_name
+            }
+        )
+
+        delete_data_function = create_lambda_function(
+            "delete_data",
+            "delete_data.delete_data",
+            "delete_data",
+            "DELETE",
+            [util_layer],
+            environment={
+                "BUCKET": movies_bucket.bucket_name,
+                "TABLE": movies_table.table_name
+            }
         )
 
         search_movies_function = create_lambda_function(
@@ -341,9 +356,11 @@ class Team3Stack(Stack):
         upload_integration = apigateway.LambdaIntegration(upload_function)
         upload_resource.add_method("POST", upload_integration)
 
-        get_movie_url_resource = api.root.add_resource("movie")
+        movie_resource = api.root.add_resource("movie")
         get_movie_url_integration = apigateway.LambdaIntegration(get_movie_url_function)
-        get_movie_url_resource.add_method("GET", get_movie_url_integration)
+        movie_resource.add_method("GET", get_movie_url_integration)
+        delete_data_integration = apigateway.LambdaIntegration(delete_data_function)
+        movie_resource.add_method("DELETE", delete_data_integration)
 
         search_resource = api.root.add_resource("search")
         search_movies_integration = apigateway.LambdaIntegration(search_movies_function)

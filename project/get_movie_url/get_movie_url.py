@@ -1,17 +1,17 @@
 import json
+import os
 import boto3
 from botocore.exceptions import ClientError
 
 s3_client = boto3.client('s3')
-
+bucket = os.environ['BUCKET']
 
 def get_movie_url(event, context):
-    bucket_name = event['queryStringParameters']['bucket']
     object_key = event['queryStringParameters']['key']
     
     try:
         response = s3_client.generate_presigned_url('get_object',
-                                                    Params={'Bucket': bucket_name, 'Key': object_key},
+                                                    Params={'Bucket': bucket, 'Key': object_key},
                                                     ExpiresIn=3600)
         
         return {
