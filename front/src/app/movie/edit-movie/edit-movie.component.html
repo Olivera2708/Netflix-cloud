@@ -1,8 +1,10 @@
 <div id="main">
   <div id="left"></div>
   <div id="right">
-    <h3>New movie</h3>
-    <button type="button" (click)="deleteMovie()">Delete</button>
+    <div class="buttons">
+      <h3>Edit movie</h3>
+      <button class="button-regular" id="delete" type="button" (click)="deleteMovie()">Delete</button>
+    </div>
     <form class="new-movie-form" (ngSubmit)="onSubmit($event)">
       <div>
         <mat-form-field appearance="outline">
@@ -86,7 +88,8 @@
         </mat-list>
       </div>
       <div class="inline">
-        <mat-checkbox [(ngModel)]="checkbox" (change)="checkboxChanged($event.checked)" name="checkbox"><span>Series</span></mat-checkbox>
+        <mat-checkbox [(ngModel)]="checkbox" (change)="checkboxChanged($event.checked)" name="checkbox">
+          <span>Series</span></mat-checkbox>
         <mat-form-field id="series" appearance="outline">
           <mat-label>Series name</mat-label>
           <input matInput [(ngModel)]="seriesName" name="series" [disabled]="!checkbox">
@@ -105,7 +108,7 @@
           </div>
           <p>{{ movieText }}</p>
         </div>
-        <button type="submit" id="button-submit">Submit</button>
+        <button type="submit" class="button-regular">Submit</button>
       </div>
     </form>
   </div>

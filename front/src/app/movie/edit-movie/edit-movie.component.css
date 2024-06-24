@@ -76,7 +76,7 @@ mat-list {
   background-color: #2f7f83;
 }
 
-#button-submit {
+.button-regular {
   width: 8rem;
   font-size: 1rem;
   background-color: #42b1b6;
@@ -86,7 +86,7 @@ mat-list {
   cursor: pointer;
 }
 
-#button-submit:hover {
+.button-regular:hover {
   background-color: #2f7f83;
 }
 
@@ -124,4 +124,13 @@ p {
 
 span {
   font-size: 1.1rem;
+}
+
+#delete{
+  background: darkred;
+  max-height: 3rem;
+}
+
+#delete:hover{
+  background: #600000;
 }

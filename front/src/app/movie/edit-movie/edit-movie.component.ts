@@ -11,7 +11,7 @@ import {MatFileUploadModule} from "mat-file-upload";
 import {MovieService} from "../movie.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {MatCheckbox} from "@angular/material/checkbox";
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
   selector: 'app-add-movie',
@@ -50,7 +50,7 @@ export class EditMovieComponent implements OnInit {
   checkbox: boolean = false;
   seriesName: string = "";
 
-  constructor(private route: ActivatedRoute, private movieService: MovieService, private _snackBar: MatSnackBar) { }
+  constructor(private route: ActivatedRoute, private movieService: MovieService, private _snackBar: MatSnackBar, private router: Router) { }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
@@ -250,7 +250,7 @@ export class EditMovieComponent implements OnInit {
   deleteMovie(){
     this.movieService.deleteMovie(this.id).subscribe({
       next: (data) => {
-        console.log(data)
+        this.router.navigate(['/search']);
       }
     })
   }
