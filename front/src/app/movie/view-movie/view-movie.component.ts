@@ -23,7 +23,7 @@ import {ActivatedRoute} from "@angular/router";
 })
 export class ViewMovieComponent implements OnInit, AfterViewInit {
   @ViewChild('videoPlayer') videoPlayer!: ElementRef<HTMLVideoElement>;
-  id: string = "Avenger_Endgame_d64aff03-b1d6-4b95-aa3f-99e019ddc9e3"
+  id: string = ""
   title: string = ""
   subtitle: string = ""
   description: string = ""
@@ -40,7 +40,6 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
       this.id = params.get('id') || '';
       this.setInformation();
     });
-
   }
 
   ngAfterViewInit(): void {

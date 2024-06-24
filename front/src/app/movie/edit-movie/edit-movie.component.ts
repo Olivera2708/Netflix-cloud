@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component} from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import {MatList, MatListItem} from "@angular/material/list";
@@ -11,6 +11,7 @@ import {MatFileUploadModule} from "mat-file-upload";
 import {MovieService} from "../movie.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {MatCheckbox} from "@angular/material/checkbox";
+import {ActivatedRoute} from "@angular/router";
 
 @Component({
   selector: 'app-add-movie',
@@ -32,7 +33,8 @@ import {MatCheckbox} from "@angular/material/checkbox";
   templateUrl: './edit-movie.component.html',
   styleUrls: ['./edit-movie.component.css']
 })
-export class EditMovieComponent {
+export class EditMovieComponent implements OnInit {
+  id: string = "";
   actors: string[] = [];
   newActor: string = '';
   genres: string[] = [];
@@ -48,7 +50,40 @@ export class EditMovieComponent {
   checkbox: boolean = false;
   seriesName: string = "";
 
-  constructor(private movieService: MovieService, private _snackBar: MatSnackBar) { }
+  constructor(private route: ActivatedRoute, private movieService: MovieService, private _snackBar: MatSnackBar) { }
+
+  ngOnInit(): void {
+    this.route.paramMap.subscribe(params => {
+      this.id = params.get('id') || '';
+      this.getInitialData();
+    });
+  }
+
+  getInitialData(){
+    this.movieService.getMetadata(this.id).subscribe({
+      next: (data) => {
+        this.setTitle(data["title"])
+        this.description = data["description"]
+        this.year = data["year"]
+        this.actors = data["actors"]
+        this.directors = data["directors"]
+        this.genres = data["genres"]
+      }
+    })
+  }
+
+  setTitle(data: string){
+    if (data.includes("/")){
+      const split_data = data.split("/")
+      this.seriesName = split_data[0]
+      this.title = split_data[1]
+      this.checkbox = true;
+    }
+    else{
+      this.title = data;
+      this.checkbox = false;
+    }
+  }
 
   addActor() {
     if (this.newActor.trim()) {
@@ -206,7 +241,7 @@ export class EditMovieComponent {
   }
 
   checkboxChanged(event: boolean){
-    this.checkbox = event
+    // this.checkbox = event
     if (!this.checkbox)
       this.seriesName = ''
   }

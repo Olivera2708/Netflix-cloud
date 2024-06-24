@@ -85,7 +85,7 @@
         </mat-list>
       </div>
       <div class="inline">
-        <mat-checkbox (change)="checkboxChanged($event.checked)"><span>Series</span></mat-checkbox>
+        <mat-checkbox [(ngModel)]="checkbox" (change)="checkboxChanged($event.checked)" name="checkbox"><span>Series</span></mat-checkbox>
         <mat-form-field id="series" appearance="outline">
           <mat-label>Series name</mat-label>
           <input matInput [(ngModel)]="seriesName" name="series" [disabled]="!checkbox">
