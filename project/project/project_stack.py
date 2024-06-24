@@ -44,6 +44,52 @@ class Team3Stack(Stack):
                 require_lowercase=True,
                 require_uppercase=True,
                 require_symbols=True
+            ),
+            custom_attributes={
+                "first_name": cognito.StringAttribute(mutable=True),
+                "last_name": cognito.StringAttribute(mutable=True),
+                "birthdate": cognito.StringAttribute(mutable=True),
+                "role": cognito.StringAttribute(mutable=True)
+            }
+        )
+
+        # user_pool = cognito.UserPool(self, "MyUserPool",
+        #     user_pool_name="my-user-pool",
+        #     self_sign_up_enabled=True,
+        #     auto_verify=cognito.AutoVerifiedAttrs(email=True),  # Automatska verifikacija e-mail adrese
+        #     sign_in_aliases=cognito.SignInAliases(username=True),  # Samo korisničko ime za prijavu
+        #     password_policy=cognito.PasswordPolicy(min_length=8, require_symbols=True),
+        # )
+        # user_pool_client = user_pool.add_client(
+        #     id="UserPoolClient",
+        #     auth_flows={
+        #         "userSrp": True
+        #     },
+        #     o_auth={
+        #         "flows": {
+        #             "authorizationCodeGrant": True,
+        #             "implicitCodeGrant": True
+        #         },
+        #         "callback_urls": ["http://localhost:4200"],
+        #         "logout_urls": ["http://localhost:4200"] 
+        #     }
+        # )
+
+        user_pool_client = user_pool.add_client(
+            "UserPoolClient",
+            generate_secret=False,
+            auth_flows=cognito.AuthFlow(
+                admin_user_password=True,
+                custom=True,
+                user_password=True,
+                user_srp=True
+            ),
+            o_auth=cognito.OAuthSettings(
+                flows=cognito.OAuthFlows(
+                    authorization_code_grant=True
+                ),
+                scopes=[cognito.OAuthScope.OPENID],
+                callback_urls=["http://localhost:4200/search"]
             )
         )
 
@@ -51,13 +97,6 @@ class Team3Stack(Stack):
             "CognitoDomain",
             cognito_domain=cognito.CognitoDomainOptions(
                 domain_prefix="moviefy"
-            )
-        )
-
-        user_pool_client = user_pool.add_client(
-            id="UserPoolClient",
-            auth_flows=cognito.AuthFlow(
-                user_password=True
             )
         )
 
