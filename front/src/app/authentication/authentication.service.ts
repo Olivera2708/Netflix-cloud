@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AuthenticationDetails, CognitoUser, CognitoUserAttribute, CognitoUserPool, CognitoUserSession } from 'amazon-cognito-identity-js';
+import { AuthenticationDetails, CognitoRefreshToken, CognitoUser, CognitoUserAttribute, CognitoUserPool, CognitoUserSession } from 'amazon-cognito-identity-js';
 import { JwtHelperService } from "@auth0/angular-jwt";
 import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
@@ -66,6 +66,51 @@ export class AuthenticationService {
       cognitoUser.signOut();
       this.logout();
     }
+  }
+
+  refreshAuthToken() {
+    const refreshToken = localStorage.getItem('refreshToken');
+    const cognitoUser = this.userPool.getCurrentUser();
+    if(cognitoUser && refreshToken){
+      const refreshToken2 = new CognitoRefreshToken({RefreshToken: refreshToken})
+      cognitoUser.refreshSession(refreshToken2, (err, session) => {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        const newAccessToken = session.getAccessToken().getJwtToken();
+        localStorage.setItem('accessToken', newAccessToken);
+      });
+    }
+  }
+  
+  isTokenValid() {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      return false;
+    }
+    const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+    const expiry = tokenPayload.exp * 1000;
+    return expiry > Date.now();
+  }
+  
+  makeAuthenticatedRequest2(): any {
+    if (!this.isTokenValid()) {
+      this.refreshAuthToken();
+    }
+    return localStorage.getItem('idToken');
+  }  
+
+  async makeAuthenticatedRequest(apiUrl: string) {
+    if (!this.isTokenValid()) {
+      await this.refreshAuthToken();
+    }
+    const token = localStorage.getItem('accessToken');
+    fetch(apiUrl, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
   }
 
   user$: BehaviorSubject<string> = new BehaviorSubject("");

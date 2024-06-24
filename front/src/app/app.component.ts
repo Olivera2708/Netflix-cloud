@@ -24,7 +24,6 @@ export class AppComponent {
 
   updateNavbarVisibility(url: string) {
     const noNavbarRoutes = ['/registration', '/'];
-    console.log(url)
     this.showNavbar = !noNavbarRoutes.includes(url);
   }
 }

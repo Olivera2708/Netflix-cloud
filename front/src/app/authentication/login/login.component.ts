@@ -42,7 +42,6 @@ export class LoginComponent {
     
     cognitoUser.authenticateUser(authenticationDetails, {
       onSuccess: (result) => {
-        console.log('Access token: ' + result.getAccessToken().getJwtToken());
         this.authenticationService.login(result);
 
         this.router.navigate(['/search'])

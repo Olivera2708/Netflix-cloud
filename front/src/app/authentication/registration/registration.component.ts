@@ -63,7 +63,6 @@ export class RegistrationComponent {
       }
       if(result){
         const cognitoUser = result.user;
-        console.log('user name is ' + cognitoUser.getUsername());
 
         this.addUserToGroup(cognitoUser.getUsername(), this.role, cognitoUser);
 
