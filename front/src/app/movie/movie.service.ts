@@ -16,6 +16,11 @@ export class MovieService {
       {'headers': {'Content-Type': 'application/json'}})
   }
 
+  editMovie(data: any): Observable<any> {
+    return this.httpClient.post<any>(environment.apiGateway + "edit", data,
+      {'headers': {'Content-Type': 'application/json'}})
+  }
+
   getMovieURL(key: string): Observable<any> {
     return this.httpClient.get<any>(environment.apiGateway + "movie" + "?bucket=movies-team3&key=" + key,
       {'headers': {'Content-Type': 'application/json'}})

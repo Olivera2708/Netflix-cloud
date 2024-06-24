@@ -129,57 +129,59 @@ export class EditMovieComponent implements OnInit {
     if (!this.validateForm()) {
       return;
     }
+
+    let title_name: string;
+    if (this.checkbox)
+      title_name = this.seriesName + "/" + this.title;
+    else
+      title_name = this.title;
+    title_name = title_name.replace("/", "_")
+
+    const payload : Payload = {
+      id: this.id,
+      metadata: {
+        title: title_name,
+        description: this.description,
+        actors: this.actors,
+        directors: this.directors,
+        genres: this.genres,
+        year: this.year
+      }
+    }
+
     if (this.file != null) {
       try {
         const base64 = await this.convertFileToBase64(this.file);
-        let title_name: string;
-        if (this.checkbox)
-          title_name = this.seriesName + "/" + this.title;
-        else
-          title_name = this.title;
-        title_name = title_name.replace("/", "_")
-        const payload = {
-          file_name: this.file?.name,
-          file_content: base64,
-          metadata: {
-            title: title_name,
-            description: this.description,
-            actors: this.actors,
-            directors: this.directors,
-            genres: this.genres,
-            year: this.year
-          }
-        }
-
-        this.actors = [];
-        this.newActor = '';
-        this.genres = [];
-        this.newGenre = '';
-        this.directors = [];
-        this.newDirector = '';
-        this.file = null;
-        this.title = '';
-        this.movieText= '';
-        this.description = '';
-        this.year = '';
-        this.errors = '';
-        this.seriesName = '';
-
-        this.movieService.addNewMovie(payload).subscribe({
-          next: (data) => {
-            if (data['message'] == "Success")
-              this._snackBar.open('Movie is uploading...', 'Close');
-            else
-              this._snackBar.open('There was an error while adding movie', 'Close');
-          }
-        })
-      } catch (error) {
+        payload.file_name = this.file?.name ?? '';
+        payload.file_content = base64;
+      }
+      catch (error) {
         this._snackBar.open('There is an error while converting file', 'Close');
       }
     }
-    else {
-      this.movieText = 'Select movie';
-    }
+
+    this.actors = [];
+    this.newActor = '';
+    this.genres = [];
+    this.newGenre = '';
+    this.directors = [];
+    this.newDirector = '';
+    this.file = null;
+    this.title = '';
+    this.movieText= '';
+    this.description = '';
+    this.year = '';
+    this.errors = '';
+    this.seriesName = '';
+
+    this.movieService.editMovie(payload).subscribe({
+      next: (data) => {
+        if (data['message'] == "Success")
+          this._snackBar.open('Change is being made...', 'Close');
+        else
+          this._snackBar.open('There was an error while adding movie', 'Close');
+      }
+    })
   }
 
   validateForm(): boolean {
@@ -241,8 +243,21 @@ export class EditMovieComponent implements OnInit {
   }
 
   checkboxChanged(event: boolean){
-    // this.checkbox = event
     if (!this.checkbox)
       this.seriesName = ''
   }
+}
+
+interface Payload {
+  id: string;
+  metadata: {
+    title: string;
+    description: string;
+    actors: string[];
+    directors: string[];
+    genres: string[];
+    year: string;
+  };
+  file_name?: string;
+  file_content?: string;
 }
