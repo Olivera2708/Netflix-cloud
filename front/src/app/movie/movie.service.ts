@@ -42,8 +42,8 @@ export class MovieService {
       {'headers': {'Content-Type': 'application/json'}})
   }
 
-  deleteMovie(id: string): Observable<string> {
-    return this.httpClient.delete<string>(environment.apiGateway + "movie/" + id,
+  deleteMovie(id: string): Observable<any> {
+    return this.httpClient.delete<any>(environment.apiGateway + "movie/" + id,
       {'headers': {'Content-Type': 'application/json'}})
   }
 }
