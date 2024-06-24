@@ -246,6 +246,14 @@ export class EditMovieComponent implements OnInit {
     if (!this.checkbox)
       this.seriesName = ''
   }
+
+  deleteMovie(){
+    this.movieService.deleteMovie(this.id).subscribe({
+      next: (data) => {
+        console.log(data)
+      }
+    })
+  }
 }
 
 interface Payload {

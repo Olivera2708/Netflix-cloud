@@ -445,10 +445,10 @@ class Team3Stack(Stack):
         upload_resource.add_method("POST", upload_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
 
         movie_resource = api.root.add_resource("movie")
-        get_movie_url_integration = apigateway.LambdaIntegration(get_movie_url_function, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
-        movie_resource.add_method("GET", get_movie_url_integration)
-        delete_data_integration = apigateway.LambdaIntegration(delete_data_function, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
-        movie_resource.add_method("DELETE", delete_data_integration)
+        get_movie_url_integration = apigateway.LambdaIntegration(get_movie_url_function)
+        movie_resource.add_method("GET", get_movie_url_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
+        delete_data_integration = apigateway.LambdaIntegration(delete_data_function)
+        movie_resource.add_method("DELETE", delete_data_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
 
         search_resource = api.root.add_resource("search")
         search_movies_integration = apigateway.LambdaIntegration(search_movies_function)
@@ -457,4 +457,3 @@ class Team3Stack(Stack):
         movie_metadata_resource = api.root.add_resource("metadata")
         movie_metadata_integration = apigateway.LambdaIntegration(get_metadata_function)
         movie_metadata_resource.add_method("GET", movie_metadata_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
-

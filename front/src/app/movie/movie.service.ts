@@ -41,4 +41,9 @@ export class MovieService {
     return this.httpClient.get<Metadata>(environment.apiGateway + "metadata?id=" + id,
       {'headers': {'Content-Type': 'application/json'}})
   }
+
+  deleteMovie(id: string): Observable<string> {
+    return this.httpClient.delete<string>(environment.apiGateway + "movie/" + id,
+      {'headers': {'Content-Type': 'application/json'}})
+  }
 }
