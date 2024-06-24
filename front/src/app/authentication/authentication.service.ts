@@ -3,13 +3,14 @@ import { AuthenticationDetails, CognitoUser, CognitoUserAttribute, CognitoUserPo
 import { JwtHelperService } from "@auth0/angular-jwt";
 import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { environment } from "../../env";
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthenticationService {
-  private userPoolId = 'eu-central-1_cZJlFs8hO';
-  private clientId = '2gm305pi2b2ch59dnkme2oogrf';
+  private userPoolId = environment.UserPoolId;
+  private clientId = environment.ClientId;
   private userPool = new CognitoUserPool({
     UserPoolId: this.userPoolId,
     ClientId: this.clientId
@@ -63,6 +64,7 @@ export class AuthenticationService {
     const cognitoUser = this.userPool.getCurrentUser();
     if (cognitoUser) {
       cognitoUser.signOut();
+      this.logout();
     }
   }
 
@@ -85,7 +87,10 @@ export class AuthenticationService {
     if (this.isLoggedIn()) {
       const accessToken: any = localStorage.getItem('accessToken');
       const helper: JwtHelperService = new JwtHelperService();
-      return helper.decodeToken(accessToken).role;
+      const decodedToken = helper.decodeToken(accessToken);
+      if (decodedToken && decodedToken['cognito:groups']) {
+        return decodedToken['cognito:groups'][0];
+      }
     }
     return '';
   }
@@ -106,6 +111,8 @@ export class AuthenticationService {
   logout(): void {
     this.user$.next('');
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('idToken');
+    localStorage.removeItem('refreshToken');
     // this.httpClient.get(environment.apiHost + "users/logout");
   }
 }

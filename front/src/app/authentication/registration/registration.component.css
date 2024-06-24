@@ -1,4 +1,12 @@
-/* styles.css */
+.register-container {
+  width: fit-content;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
 body {
     background-image: url('../../../assets/images/background.jpg');
     background-size: cover;
@@ -11,12 +19,9 @@ body {
   }
   
   form {
-    background-color: #ffffff;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     max-width: 400px;
-    width: 100%;
   }
   
   h2 {
@@ -82,3 +87,7 @@ body {
     color: #0056b3;
   }
   
+  span {
+    color:#007bff;
+    cursor: pointer
+  }

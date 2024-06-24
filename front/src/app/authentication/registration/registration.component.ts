@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { CognitoUserPool, CognitoUserAttribute, CognitoUserSession, CognitoUser } from 'amazon-cognito-identity-js';
 import { FormsModule } from '@angular/forms';
 import * as AWS from 'aws-sdk';
-
+import {environment} from "../../../env";
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-registration',
@@ -20,9 +21,11 @@ export class RegistrationComponent {
   email: string = "";
   role: string = "RegularUser";
 
+  constructor(private router: Router) {}
+
   userPoolData = {
-    UserPoolId: 'eu-central-1_bbiT6tV5j',
-    ClientId: '2tvrm3ovd9vvchpcj5k5tq88eu'
+    UserPoolId: environment.UserPoolId,
+    ClientId: environment.ClientId
   };
 
   userPool = new CognitoUserPool(this.userPoolData);
@@ -43,7 +46,7 @@ export class RegistrationComponent {
       Value: this.lastName
     };
     const dataBirthdate = {
-      Name: 'custom:birthdate',
+      Name: 'birthdate',
       Value: this.birthdate
     };
  
@@ -63,6 +66,8 @@ export class RegistrationComponent {
         console.log('user name is ' + cognitoUser.getUsername());
 
         this.addUserToGroup(cognitoUser.getUsername(), this.role, cognitoUser);
+
+        this.router.navigate([''])
       }
     });
   }
@@ -71,7 +76,7 @@ export class RegistrationComponent {
   addUserToGroup(username: string, groupName: string, cognitoUser: CognitoUser) {
     if (cognitoUser != null) {
       const params = {
-        UserPoolId: 'eu-central-1_bbiT6tV5j',
+        UserPoolId: environment.UserPoolId,
         Username: username,
         GroupName: groupName
       };
@@ -89,5 +94,9 @@ export class RegistrationComponent {
         }
       });
     }
+  }
+
+  redirectToLogin() {
+    this.router.navigate([''])
   }
 }

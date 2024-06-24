@@ -5,22 +5,27 @@ import { AppComponent } from './app.component';
 import { provideHttpClient } from "@angular/common/http";
 import { MatMenuModule } from "@angular/material/menu";
 import { MatButtonModule } from "@angular/material/button";
-import { NgModel } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { Interceptor } from './authentication/interceptor/interceptro';
 
 @NgModule({
   declarations: [
   ],
   imports: [
-    BrowserModule,
     AppComponent,
+    BrowserModule,
     MatMenuModule,
     MatButtonModule,
-    NgModule,
-    NgModel,
-    CommonModule
+    CommonModule,
+    FormsModule,
+    HttpClientModule
   ],
-  providers: [provideHttpClient()],
+  providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: Interceptor, multi: true },
+    provideHttpClient()
+  ],
   bootstrap: []
 })
 export class AppModule { }

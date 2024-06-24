@@ -1,28 +1,32 @@
-<form (ngSubmit)="onSubmit()">
+<div class="register-container">
+  <form (ngSubmit)="onSubmit()">
     <div>
       <label for="username">Username</label>
       <input type="text" id="username" required [(ngModel)]="username" name="username">
     </div>
-    <div>
-        <label for="email">Email</label>
-        <input type="email" id="email" required [(ngModel)]="email" name="email">
-      </div>
-    <div>
-      <label for="password">Password</label>
+  <div>
+    <label for="email">Email</label>
+  <input type="email" id="email" required [(ngModel)]="email" name="email">
+  </div>
+  <div>
+    <label for="password">Password</label>
       <input type="password" id="password" required [(ngModel)]="password" name="password">
     </div>
-    <div>
+  <div>
       <label for="firstName">First Name</label>
-      <input type="text" id="firstName" required [(ngModel)]="firstName" name="firstName">
-    </div>
-    <div>
-      <label for="lastName">Last Name</label>
-      <input type="text" id="lastName" required [(ngModel)]="lastName" name="lastName">
-    </div>
-    <div>
-      <label for="birthdate">Birthdate</label>
-      <input type="date" id="birthdate" required [(ngModel)]="birthdate" name="birthdate">
-    </div>
-    <button type="submit">Sign Up</button>
+    <input type="text" id="firstName" required [(ngModel)]="firstName" name="firstName">
+  </div>
+  <div>
+    <label for="lastName">Last Name</label>
+  <input type="text" id="lastName" required [(ngModel)]="lastName" name="lastName">
+  </div>
+  <div>
+    <label for="birthdate">Birthdate</label>
+  <input type="date" id="birthdate" required [(ngModel)]="birthdate" name="birthdate">
+  </div>
+  <button type="submit">Sign Up</button>
+  <div>
+    <label>Already have an account? <span (click)="redirectToLogin()">Login here</span></label>
+  </div>
   </form>
-  
+</div>
