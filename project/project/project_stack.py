@@ -116,6 +116,17 @@ class Team3Stack(Stack):
             write_capacity=1
         )
 
+        feed_table = dynamodb.Table(
+            self, "feed-table-team3",
+            table_name="feed-table-team3",
+            partition_key=dynamodb.Attribute(
+                name="id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            read_capacity=1,
+            write_capacity=1
+        )
+
         #index by title
         movies_table.add_global_secondary_index(
             index_name="TitleIndex",
@@ -250,6 +261,18 @@ class Team3Stack(Stack):
             environment={
                 "BUCKET": movies_bucket.bucket_name,
                 "TABLE": movies_table.table_name
+            }
+        )
+
+        upload_user_function = create_lambda_function(
+            "upload_user",
+            "upload_user.upload_user",
+            "upload_user",
+            "POST",
+            [util_layer],
+            environment={
+                "TABLE_MOVIES": movies_table.table_name,
+                "TABLE_FEED": feed_table.table_name
             }
         )
 
@@ -446,6 +469,10 @@ class Team3Stack(Stack):
         upload_resource = api.root.add_resource("upload")
         upload_integration = apigateway.LambdaIntegration(upload_function)
         upload_resource.add_method("POST", upload_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
+
+        feed_resource = api.root.add_resource("feed")
+        upload_user_integration = apigateway.LambdaIntegration(upload_user_function)
+        feed_resource.add_method("POST", upload_user_integration)
 
         movie_resource = api.root.add_resource("movie")
         get_movie_url_integration = apigateway.LambdaIntegration(get_movie_url_function)
