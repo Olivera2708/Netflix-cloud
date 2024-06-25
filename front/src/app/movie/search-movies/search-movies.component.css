@@ -8,26 +8,22 @@ form {
   justify-content: center;
 }
 
-.textarea-description{
+.textarea-description {
   width: 30rem;
   height: -webkit-fill-available;
 }
 
 #main {
-  overflow-x: hidden;
-  display: flex;
+  background-color: #252525;
+  background-image: linear-gradient(to top, rgba(255, 255, 255, 0), rgb(16, 16, 16)),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0), rgb(3, 3, 3)),
+    url('../../../assets/images/background_main.jpg');
+  background-size: auto;
+  background-position: center top;
+  background-repeat: no-repeat;
   padding-top: 4rem;
-  background-image: linear-gradient(to top, rgba(255,255,255,0), rgb(0, 0, 0)), url('../../../assets/images/background.jpg');
-  background-size: cover;
-  flex-direction: column;
   width: 100%;
-}
-
-#down {
-  width: 100%;
-  height: 100vh;
-  padding-left: 10%;
-
+  overflow-x: hidden;
 }
 
 h3 {
@@ -127,18 +123,8 @@ p {
   color: #41b0b5;
 }
 
-.container {
-  display: flex;
-  flex-wrap: wrap;
-  width: 80%;
-  gap: 20px;
-  max-height: 80vh; /* Adjust as needed */
-  overflow-y: auto;
-  padding-right: 10px; /* For scrollbar space */
-}
-
 .card {
-  width:100%;
+  width: 100%;
   background-color: #1c1c1c;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -150,12 +136,11 @@ p {
 
 .card h2 {
   margin-bottom: 10px;
-  color: #41b0b5;
-
+  color: darkgrey;
 }
 
 .card p {
-  color: #41b0b5;
+  color: darkgrey;
 }
 
 .card span {
@@ -175,15 +160,14 @@ p {
   }
 }
 
-.genres-container{
-  margin-top: 0.3rem;
+.genres-container {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   max-width: 100%;
 }
 
-.genre{
+.genre {
   height: min-content;
   padding-left: 1rem;
   padding-right: 1rem;
@@ -191,4 +175,38 @@ p {
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-right: 0.5rem;
+  margin-bottom: 0.7rem;
+}
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin: 10rem;
+}
+
+.container > * {
+  flex: 0 0 calc(33.33% - 20px);
+  margin: 0 1rem 2rem 0;
+  box-sizing: border-box;
+}
+
+.container::after {
+  content: "";
+  flex: auto;
+}
+
+@media (max-width: 768px) {
+  .container > * {
+    flex-basis: calc(50% - 20px);
+  }
+}
+
+.inline {
+  display: flex;
+  justify-content: space-between;
+}
+
+mat-icon {
+  color: #ffb787;
 }

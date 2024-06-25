@@ -134,4 +134,8 @@ export class SearchMoviesComponent {
   onCardClick(id: string) {
     this.router.navigate(['/movie', id]);
   }
+
+  editMovie(id: string) {
+    this.router.navigate(['/edit', id]);
+  }
 }
