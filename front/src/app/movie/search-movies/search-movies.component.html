@@ -89,45 +89,54 @@
 
   <div class="tabs">
     <button class="tab" [ngClass]="{'active': activeTab === 'movies'}" (click)="setActiveTab('movies')">Movies</button>
-    <button class="tab" [ngClass]="{'active': activeTab === 'series'}" style="margin-left: 4rem" (click)="setActiveTab('series')">Series</button>
+    <button class="tab" [ngClass]="{'active': activeTab === 'series'}" style="margin-left: 4rem"
+            (click)="setActiveTab('series')">Series
+    </button>
   </div>
 
-  <div class="container">
-    <div class="card" *ngFor="let movie of shownMovies" (click)="onCardClick(movie.id)">
-      <div class="inline">
-        <h2>{{ movie.title }}</h2>
-        <button mat-icon-button aria-label="Edit" (click)="editMovie(movie.id)">
-          <mat-icon>edit</mat-icon>
-        </button>
-      </div>
-      <div class="genres-container">
-        <div style="margin-right: 0.5rem">
-          <p>Description: </p>
+  <div class="container-new">
+    <div class="container">
+      <div class="card" (click)="onCardClick(movie.id)" *ngFor="let movie of shownMovies">
+        <div *ngIf="movie.displaySeries">
+          <h2 class="series-name">{{ movie.series }}</h2>
         </div>
-        <p>{{ movie.description }}</p>
-      </div>
-      <div style="margin-top: 1rem" class="genres-container">
-        <div style="margin-right: 0.5rem">
-          <p>Genres: </p>
-        </div>
-        <div class="genre" *ngFor="let genre of movie.genres">
-          <span>{{ genre }}</span>
-        </div>
-      </div>
-      <div class="genres-container">
-        <div style="margin-right: 0.5rem;">
-          <p>Actors: </p>
-        </div>
-        <div class="genre" *ngFor="let actor of movie.actors">
-          <span>{{ actor }}</span>
-        </div>
-      </div>
-      <div class="genres-container">
-        <div style="margin-right: 0.5rem">
-          <p>Directors: </p>
-        </div>
-        <div class="genre" *ngFor="let director of movie.directors">
-          <span>{{ director }}</span>
+        <div *ngIf="!movie.displaySeries">
+          <div class="inline">
+            <h2>{{ movie.title }}</h2>
+            <button mat-icon-button aria-label="Edit" (click)="editMovie(movie.id)">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </div>
+          <div class="genres-container">
+            <div style="margin-right: 0.5rem">
+              <p>Description: </p>
+            </div>
+            <p>{{ movie.description }}</p>
+          </div>
+          <div style="margin-top: 1rem" class="genres-container">
+            <div style="margin-right: 0.5rem">
+              <p>Genres: </p>
+            </div>
+            <div class="genre" *ngFor="let genre of movie.genres">
+              <span>{{ genre }}</span>
+            </div>
+          </div>
+          <div class="genres-container">
+            <div style="margin-right: 0.5rem;">
+              <p>Actors: </p>
+            </div>
+            <div class="genre" *ngFor="let actor of movie.actors">
+              <span>{{ actor }}</span>
+            </div>
+          </div>
+          <div class="genres-container">
+            <div style="margin-right: 0.5rem">
+              <p>Directors: </p>
+            </div>
+            <div class="genre" *ngFor="let director of movie.directors">
+              <span>{{ director }}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

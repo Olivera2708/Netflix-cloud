@@ -148,10 +148,42 @@ export class SearchMoviesComponent {
       });
     }
     else{
-      this.movies.forEach((movie: {title: string}) => {
-        if (movie.title.includes("/"))
-          this.shownMovies.push(movie)
+      this.movies.forEach((movie: {series: string, title: string}) => {
+        if (movie.title.includes("/")) {
+          let newMovie = JSON.parse(JSON.stringify(movie));
+          newMovie.series = movie.title.split("/")[0]
+          newMovie.title = movie.title.split("/")[1]
+          this.shownMovies.push(newMovie)
+        }
       });
+      this.shownMovies.sort((a, b) => {
+        if (a.series < b.series) {
+          return -1;
+        }
+        if (a.series > b.series) {
+          return 1;
+        }
+        if (a.title < b.title) {
+          return -1;
+        }
+        if (a.title > b.title) {
+          return 1;
+        }
+        return 0;
+      });
+      for (let index = 0; index < this.shownMovies.length; index++) {
+        const movie = this.shownMovies[index];
+        if (index === 0 || this.shownMovies[index - 1].series !== movie.series) {
+            const newMovie = {
+              series: movie.series,
+              displaySeries: true
+            };
+            this.shownMovies.splice(index, 0, newMovie);
+            index++;
+        } else {
+          movie.displaySeries = false;
+        }
+      }
     }
   }
 }
