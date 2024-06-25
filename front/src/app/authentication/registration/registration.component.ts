@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import * as AWS from 'aws-sdk';
 import {environment} from "../../../env";
 import { Router } from '@angular/router';
+import {AuthenticationService} from "../authentication.service";
 
 @Component({
   selector: 'app-registration',
@@ -21,7 +22,7 @@ export class RegistrationComponent {
   email: string = "";
   role: string = "RegularUser";
 
-  constructor(private router: Router) {}
+  constructor(private authenticationService : AuthenticationService, private router: Router) {}
 
   userPoolData = {
     UserPoolId: environment.UserPoolId,
@@ -49,7 +50,7 @@ export class RegistrationComponent {
       Name: 'birthdate',
       Value: this.birthdate
     };
- 
+
 
     attributeList.push(new CognitoUserAttribute(dataFirstName));
     attributeList.push(new CognitoUserAttribute(dataLastName));
@@ -65,7 +66,11 @@ export class RegistrationComponent {
         const cognitoUser = result.user;
 
         this.addUserToGroup(cognitoUser.getUsername(), this.role, cognitoUser);
-
+        this.authenticationService.uploadUser(dataEmail.Value).subscribe({
+          next:(data)=>{
+            
+          }
+        });
         this.router.navigate([''])
       }
     });

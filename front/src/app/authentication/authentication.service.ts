@@ -4,6 +4,7 @@ import { JwtHelperService } from "@auth0/angular-jwt";
 import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from "../../env";
+import {Metadata} from "../movie/model/metadata.model";
 
 @Injectable({
   providedIn: 'root'
@@ -80,7 +81,7 @@ export class AuthenticationService {
             reject(err);
             return;
           }
-  
+
           const newAccessToken = session.getAccessToken().getJwtToken();
           const newIdToken = session.getIdToken().getJwtToken();
           localStorage.setItem('accessToken', newAccessToken);
@@ -92,7 +93,7 @@ export class AuthenticationService {
       return Promise.reject(new Error("No valid user or refresh token found"));
     }
   }
-  
+
   isTokenValid() {
     const token = localStorage.getItem('idToken');
     if (!token) {
@@ -102,7 +103,7 @@ export class AuthenticationService {
     const expiry = tokenPayload.exp * 1000;
     return expiry > Date.now();
   }
-  
+
   async makeAuthenticatedRequest2(){
     if (!this.isTokenValid()) {
       try {
@@ -110,11 +111,11 @@ export class AuthenticationService {
       } catch (error) {
         console.log('Failed to refresh tokens', error);
         this.logout()
-        return null; 
+        return null;
       }
     }
     return localStorage.getItem('idToken');
-  }  
+  }
 
   async makeAuthenticatedRequest(apiUrl: string) {
     if (!this.isTokenValid()) {
@@ -174,5 +175,11 @@ export class AuthenticationService {
     localStorage.removeItem('idToken');
     localStorage.removeItem('refreshToken');
     // this.httpClient.get(environment.apiHost + "users/logout");
+  }
+
+  uploadUser(id: string): Observable<any> {
+    return this.httpClient.post<any>(environment.apiGateway + "feed",
+      {"id":id },
+      {'headers': {'Content-Type': 'application/json'}})
   }
 }
