@@ -33,7 +33,7 @@ h3 {
 }
 
 #search-bar {
-  padding: 2rem 8rem 2rem 8rem;
+  padding: 2rem 8rem 0rem 8rem;
   width: 90%;
 }
 
@@ -212,6 +212,7 @@ p {
 .tabs {
   display: flex;
   justify-content: center;
+  margin-top: 2rem;
 }
 
 .tab {

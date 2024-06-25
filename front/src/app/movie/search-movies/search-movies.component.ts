@@ -11,6 +11,8 @@ import {MovieService} from "../movie.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import { CardModule } from 'primeng/card';
 import {Router} from "@angular/router";
+import {NavbarAdminComponent} from "../../navbar/navbar-admin/navbar-admin.component";
+import {AuthenticationService} from "../../authentication/authentication.service";
 @Component({
   selector: 'app-search-movies',
   standalone: true,
@@ -28,7 +30,8 @@ import {Router} from "@angular/router";
     NgForOf,
     NgIf,
     CardModule,
-    NgClass
+    NgClass,
+    NavbarAdminComponent
   ],
   templateUrl: './search-movies.component.html',
   styleUrl: './search-movies.component.css'
@@ -46,8 +49,11 @@ export class SearchMoviesComponent {
   movies: any;
   shownMovies: any[] = [];
   activeTab: string = 'movies';
+  role: string = '';
 
-  constructor(private router: Router, private movieService: MovieService, private _snackBar: MatSnackBar) { }
+  constructor(private router: Router, private movieService: MovieService, private _snackBar: MatSnackBar, private authenticationService: AuthenticationService) {
+    this.role = authenticationService.getRole()
+  }
 
   ngOnInit(): void {
     this.search();

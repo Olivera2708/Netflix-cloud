@@ -1,5 +1,5 @@
 <div id="main">
-  <div id="search-bar">
+  <div id="search-bar" *ngIf="role!=='Admin'">
     <form class="new-movie-form">
       <div>
         <mat-form-field appearance="outline">
@@ -103,7 +103,7 @@
         <div *ngIf="!movie.displaySeries">
           <div class="inline">
             <h2>{{ movie.title }}</h2>
-            <button mat-icon-button aria-label="Edit" (click)="editMovie(movie.id)">
+            <button *ngIf="role==='Admin'" mat-icon-button aria-label="Edit" (click)="editMovie(movie.id)">
               <mat-icon>edit</mat-icon>
             </button>
           </div>
