@@ -40,7 +40,11 @@ def upload_user(event, context):
             }
         item = {
             'id': user_id,
-            'subscriptions': [],
+            'subscriptions': {
+                'genres': [],
+                'actors': [],
+                'directors': []
+            },
             'feed': feed,
             'ratings': []
         }

@@ -68,7 +68,7 @@ export class RegistrationComponent {
         this.addUserToGroup(cognitoUser.getUsername(), this.role, cognitoUser);
         this.authenticationService.uploadUser(dataEmail.Value).subscribe({
           next:(data)=>{
-            
+
           }
         });
         this.router.navigate([''])
