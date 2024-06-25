@@ -28,6 +28,7 @@ h3 {
 }
 
 .subtitle {
+  margin-top:0.5rem;
   font-size: 1.4rem;
   color: #1a9094;
 }
@@ -35,6 +36,7 @@ h3 {
 .value {
   font-size: 1rem;
   color: darkgrey;
+
 }
 
 .inline {
@@ -97,4 +99,36 @@ h3 {
   font-size: 1.5rem;
   margin-left: 2rem;
   color: #2f7f83;
+}
+
+.subscribe{
+  color: darkgrey;
+
+}
+
+.subscribe:hover {
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+
+.genres-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+.genre {
+  color: #41b0b5;
+  display: flex;
+  align-items: center;
+  height: min-content;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  background-color: #333333;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-right: 0.5rem;
+  margin-bottom: 0.7rem;
 }

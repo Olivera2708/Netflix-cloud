@@ -24,15 +24,32 @@
     </div>
     <div class="right">
       <p class="subtitle">Description</p>
+
       <p class="value">{{ description }}</p>
       <p class="subtitle">Genres</p>
-      <p class="value" >{{ genres }}</p>
+      <div class="genres-container">
+        <div class="genre" *ngFor="let genre of genreList" >
+          {{genre}} <mat-icon class="subscribe" (click)="subscribeTo('genres', genre)" >add_alert</mat-icon>
+        </div>
+      </div>
+
+<!--      <p class="value" >{{ genres }}</p>-->
       <p class="subtitle">Year</p>
       <p class="value">{{ year }}</p>
       <p class="subtitle">Actors</p>
-      <p class="value">{{ actors }}</p>
+      <div class="genres-container">
+        <div class="genre" *ngFor="let actor of actorList" >
+          {{actor}} <mat-icon class="subscribe" (click)="subscribeTo('actors', actor)" >add_alert</mat-icon>
+        </div>
+      </div>
+<!--      <p class="value">{{ actors }}</p>-->
       <p class="subtitle">Director</p>
-      <p class="value">{{ directors }}</p>
+      <div class="genres-container">
+        <div class="genre" *ngFor="let director of directorList" >
+          {{director}} <mat-icon class="subscribe" (click)="subscribeTo('directors', director)" >add_alert</mat-icon>
+        </div>
+      </div>
+<!--      <p class="value">{{ directors }}</p>-->
     </div>
   </div>
 </div>
