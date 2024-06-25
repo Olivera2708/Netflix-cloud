@@ -73,19 +73,28 @@ export class AuthenticationService {
     const cognitoUser = this.userPool.getCurrentUser();
     if(cognitoUser && refreshToken){
       const refreshToken2 = new CognitoRefreshToken({RefreshToken: refreshToken})
-      cognitoUser.refreshSession(refreshToken2, (err, session) => {
-        if (err) {
-          console.log(err);
-          return;
-        }
-        const newAccessToken = session.getAccessToken().getJwtToken();
-        localStorage.setItem('accessToken', newAccessToken);
+      return new Promise<void>((resolve, reject) => {
+        cognitoUser.refreshSession(refreshToken2, (err, session) => {
+          if (err) {
+            console.log(err);
+            reject(err);
+            return;
+          }
+  
+          const newAccessToken = session.getAccessToken().getJwtToken();
+          const newIdToken = session.getIdToken().getJwtToken();
+          localStorage.setItem('accessToken', newAccessToken);
+          localStorage.setItem('idToken', newIdToken);
+          resolve();
+        });
       });
+    } else {
+      return Promise.reject(new Error("No valid user or refresh token found"));
     }
   }
   
   isTokenValid() {
-    const token = localStorage.getItem('accessToken');
+    const token = localStorage.getItem('idToken');
     if (!token) {
       return false;
     }
@@ -94,9 +103,15 @@ export class AuthenticationService {
     return expiry > Date.now();
   }
   
-  makeAuthenticatedRequest2(): any {
+  async makeAuthenticatedRequest2(){
     if (!this.isTokenValid()) {
-      this.refreshAuthToken();
+      try {
+        await this.refreshAuthToken();
+      } catch (error) {
+        console.log('Failed to refresh tokens', error);
+        this.logout()
+        return null; 
+      }
     }
     return localStorage.getItem('idToken');
   }  
