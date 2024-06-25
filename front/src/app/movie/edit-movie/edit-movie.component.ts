@@ -154,6 +154,24 @@ export class EditMovieComponent implements OnInit {
         const base64 = await this.convertFileToBase64(this.file);
         payload.file_name = this.file?.name ?? '';
         payload.file_content = base64;
+
+        this.movieService.deleteMovie(this.id).subscribe({
+          next: (data) => {
+            if ("Movie deleted successfully" == data["message"]){
+              this.movieService.addNewMovie(payload).subscribe({
+                next: (data) => {
+                  if (data['message'] == "Success")
+                    this._snackBar.open('Movie is uploading...', 'Close');
+                  else
+                    this._snackBar.open('There was an error while uploading movie', 'Close');
+                }
+              })
+            }
+            else {
+              this._snackBar.open('There was an error while uploading movie', 'Close');
+            }
+          }
+        })
       }
       catch (error) {
         this._snackBar.open('There is an error while converting file', 'Close');
@@ -174,7 +192,7 @@ export class EditMovieComponent implements OnInit {
     this.errors = '';
     this.seriesName = '';
 
-    this.movieService.editMovie(payload).subscribe({
+    this.movieService.editMetadata(payload).subscribe({
       next: (data) => {
         if (data['message'] == "Success")
           this._snackBar.open('Change is being made...', 'Close');
