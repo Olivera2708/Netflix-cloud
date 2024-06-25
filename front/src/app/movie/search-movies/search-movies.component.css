@@ -206,7 +206,3 @@ p {
   display: flex;
   justify-content: space-between;
 }
-
-mat-icon {
-  color: #ffb787;
-}

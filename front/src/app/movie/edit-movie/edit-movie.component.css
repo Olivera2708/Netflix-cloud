@@ -18,7 +18,7 @@ h3 {
 }
 
 #right {
-  padding: 2rem 8rem 2rem 8rem;
+  padding: 1rem 8rem 2rem 8rem;
   width: 50%;
 }
 
@@ -96,11 +96,7 @@ mat-list {
   margin-top: 2rem;
   display: flex;
   justify-content: space-between;
-}
-
-.inline {
-  display: flex;
-  align-items: center;
+  height: 3rem;
 }
 
 p {
@@ -133,4 +129,8 @@ span {
 
 #delete:hover{
   background: #600000;
+}
+
+#top {
+  margin-bottom: 1rem;
 }
