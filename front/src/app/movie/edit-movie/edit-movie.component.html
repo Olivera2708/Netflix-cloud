@@ -1,0 +1,115 @@
+<div id="main">
+  <div id="left"></div>
+  <div id="right">
+    <div class="buttons" id="top">
+      <h3>Edit movie</h3>
+      <button class="button-regular" id="delete" type="button" (click)="deleteMovie()">Delete</button>
+    </div>
+    <form class="new-movie-form" (ngSubmit)="onSubmit($event)">
+      <div>
+        <mat-form-field appearance="outline">
+          <mat-label>Title</mat-label>
+          <input matInput [(ngModel)]="title" name="title">
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field appearance="outline">
+          <mat-label>Description</mat-label>
+          <textarea matInput [(ngModel)]="description" name="description"></textarea>
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field appearance="outline">
+          <mat-label>Year</mat-label>
+          <input matInput [(ngModel)]="year" name="year" type="text" pattern="[0-9]*" maxlength="4" minlength="4">
+        </mat-form-field>
+      </div>
+      <div>
+        <div class="add-list">
+          <mat-form-field appearance="outline">
+            <mat-label>Genre</mat-label>
+            <input matInput [(ngModel)]="newGenre" name="genre">
+          </mat-form-field>
+          <button class="list-add" mat-icon-button (click)="addGenre()" type="button">
+            <mat-icon class="icon">add</mat-icon>
+          </button>
+        </div>
+        <mat-list>
+          <mat-list-item *ngFor="let genre of genres; let i = index">
+            <div class="list-element">
+              <div mat-line>{{ genre }}</div>
+              <button mat-icon-button (click)="removeGenre(i)" type="button">
+                <mat-icon class="icon">close</mat-icon>
+              </button>
+            </div>
+          </mat-list-item>
+        </mat-list>
+      </div>
+      <div>
+        <div class="add-list">
+          <mat-form-field appearance="outline">
+            <mat-label>Actors</mat-label>
+            <input matInput [(ngModel)]="newActor" name="actor">
+          </mat-form-field>
+          <button class="list-add" mat-icon-button (click)="addActor()" type="button">
+            <mat-icon class="icon">add</mat-icon>
+          </button>
+        </div>
+        <mat-list>
+          <mat-list-item *ngFor="let actor of actors; let i = index">
+            <div class="list-element">
+              <div mat-line>{{ actor }}</div>
+              <button mat-icon-button (click)="removeActor(i)" type="button">
+                <mat-icon class="icon">close</mat-icon>
+              </button>
+            </div>
+          </mat-list-item>
+        </mat-list>
+      </div>
+      <div>
+        <div class="add-list">
+          <mat-form-field appearance="outline">
+            <mat-label>Director</mat-label>
+            <input matInput [(ngModel)]="newDirector" name="director">
+          </mat-form-field>
+          <button class="list-add" mat-icon-button (click)="addDirector()" type="button">
+            <mat-icon class="icon">add</mat-icon>
+          </button>
+        </div>
+        <mat-list>
+          <mat-list-item *ngFor="let director of directors; let i = index">
+            <div class="list-element">
+              <div mat-line>{{ director }}</div>
+              <button mat-icon-button (click)="removeDirector(i)" type="button">
+                <mat-icon class="icon">close</mat-icon>
+              </button>
+            </div>
+          </mat-list-item>
+        </mat-list>
+      </div>
+      <div class="inline">
+        <mat-checkbox [(ngModel)]="checkbox" (change)="checkboxChanged($event.checked)" name="checkbox">
+          <span>Series</span></mat-checkbox>
+        <mat-form-field id="series" appearance="outline">
+          <mat-label>Series name</mat-label>
+          <input matInput [(ngModel)]="seriesName" name="series" [disabled]="!checkbox">
+        </mat-form-field>
+      </div>
+      <br>
+      <mat-error *ngIf="errors">{{ errors }}</mat-error>
+      <div class="buttons">
+        <div class="inline">
+          <div>
+            <label for="fileInput" class="custom-file-label">
+              <span>Upload movie</span>
+            </label>
+            <input type="file" name="movie" id="fileInput" (change)="onMovieSelected($event)" class="custom-file-input"
+                   accept="video/mp4"/>
+          </div>
+          <p>{{ movieText }}</p>
+        </div>
+        <button type="submit" class="button-regular">Submit</button>
+      </div>
+    </form>
+  </div>
+</div>

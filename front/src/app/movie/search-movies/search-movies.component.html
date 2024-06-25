@@ -1,6 +1,5 @@
 <div id="main">
-  <div id="search-bar">
-    <h3>Search movies</h3>
+  <div id="search-bar" *ngIf="role!=='Admin'">
     <form class="new-movie-form">
       <div>
         <mat-form-field appearance="outline">
@@ -8,7 +7,6 @@
           <input matInput [(ngModel)]="title" name="title">
         </mat-form-field>
       </div>
-
       <div>
         <div>
           <div class="add-list">
@@ -83,48 +81,64 @@
       </div>
       <br>
       <div>
-        <button  id="button-submit" (click)="search()">Search</button>
+        <button id="button-submit" (click)="search()">Search</button>
         <mat-error *ngIf="errors">{{ errors }}</mat-error>
       </div>
     </form>
   </div>
-  <div id="down">
+
+  <div class="tabs">
+    <button class="tab" [ngClass]="{'active': activeTab === 'movies'}" (click)="setActiveTab('movies')">Movies</button>
+    <button class="tab" [ngClass]="{'active': activeTab === 'series'}" style="margin-left: 4rem"
+            (click)="setActiveTab('series')">Series
+    </button>
+  </div>
+
+  <div class="container-new">
     <div class="container">
-      <div class="card" *ngFor="let movie of movies" (click)="onCardClick(movie.id)">
-        <h2>{{ movie.title }}</h2>
-        <div class="genres-container">
-          <div style="margin-right: 0.5rem">
-            <p>Description: </p>
-          </div>
-          <p>{{ movie.description }}</p>
+      <div class="card" (click)="onCardClick(movie.id)" *ngFor="let movie of shownMovies">
+        <div *ngIf="movie.displaySeries">
+          <h2 class="series-name">{{ movie.series }}</h2>
         </div>
-        <div class="genres-container">
-          <div style="margin-right: 0.5rem">
-            <p>Genres: </p>
+        <div *ngIf="!movie.displaySeries">
+          <div class="inline">
+            <h2>{{ movie.title }}</h2>
+            <button *ngIf="role==='Admin'" mat-icon-button aria-label="Edit" (click)="editMovie(movie.id)">
+              <mat-icon>edit</mat-icon>
+            </button>
           </div>
-          <div class="genre" *ngFor="let genre of movie.genres">
-            <span>{{genre}}</span>
+          <div class="genres-container">
+            <div style="margin-right: 0.5rem">
+              <p>Description: </p>
+            </div>
+            <p>{{ movie.description }}</p>
           </div>
-        </div>
-        <div class="genres-container">
-          <div style="margin-right: 0.5rem">
-            <p>Actors: </p>
+          <div style="margin-top: 1rem" class="genres-container">
+            <div style="margin-right: 0.5rem">
+              <p>Genres: </p>
+            </div>
+            <div class="genre" *ngFor="let genre of movie.genres">
+              <span>{{ genre }}</span>
+            </div>
           </div>
-          <div class="genre" *ngFor="let actor of movie.actors">
-            <span>{{actor}}</span>
+          <div class="genres-container">
+            <div style="margin-right: 0.5rem;">
+              <p>Actors: </p>
+            </div>
+            <div class="genre" *ngFor="let actor of movie.actors">
+              <span>{{ actor }}</span>
+            </div>
           </div>
-        </div>
-        <div class="genres-container">
-          <div style="margin-right: 0.5rem">
-            <p>Directors: </p>
-          </div>
-          <div class="genre" *ngFor="let director of movie.directors">
-            <span>{{director}}</span>
+          <div class="genres-container">
+            <div style="margin-right: 0.5rem">
+              <p>Directors: </p>
+            </div>
+            <div class="genre" *ngFor="let director of movie.directors">
+              <span>{{ director }}</span>
+            </div>
           </div>
         </div>
       </div>
-
     </div>
   </div>
-
 </div>

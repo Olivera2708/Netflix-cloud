@@ -26,6 +26,34 @@ def upload(event, context):
         unique_id = str(uuid.uuid4())
         input_data["id"] = f"{input_data['metadata']['title']}_{unique_id}/".replace(" ", "_")
 
+        #validation
+        for field in ['file_content', 'metadata']:
+            value = input_data[field]
+            if value is None or value == '':
+                return {
+                    'statusCode': 500,
+                    'headers': {
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Headers': 'Content-Type',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    },
+                    'body': json.dumps({'error': 'Data is missing'})
+                }
+            
+        metadata = input_data['metadata']
+        for field in ['title', 'description', 'actors', 'directors', 'year', 'genres']:
+            value = metadata[field]
+            if value is None or isinstance(value, (str, list)) and not value:
+                return {
+                    'statusCode': 500,
+                    'headers': {
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Headers': 'Content-Type',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    },
+                    'body': json.dumps({'error': 'Data is missing'})
+                }
+
         json_data = json.dumps(input_data)
         s3_key = f'input_data/{unique_id}.json'
         s3.put_object(Bucket=bucket_name, Key=s3_key, Body=json_data)

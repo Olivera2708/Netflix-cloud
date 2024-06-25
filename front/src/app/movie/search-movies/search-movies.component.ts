@@ -6,11 +6,13 @@ import {MatIconButton} from "@angular/material/button";
 import {MatInput} from "@angular/material/input";
 import {MatLine} from "@angular/material/core";
 import {MatList, MatListItem} from "@angular/material/list";
-import {NgForOf, NgIf} from "@angular/common";
+import {NgClass, NgForOf, NgIf} from "@angular/common";
 import {MovieService} from "../movie.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import { CardModule } from 'primeng/card';
 import {Router} from "@angular/router";
+import {NavbarAdminComponent} from "../../navbar/navbar-admin/navbar-admin.component";
+import {AuthenticationService} from "../../authentication/authentication.service";
 @Component({
   selector: 'app-search-movies',
   standalone: true,
@@ -27,7 +29,9 @@ import {Router} from "@angular/router";
     MatListItem,
     NgForOf,
     NgIf,
-    CardModule
+    CardModule,
+    NgClass,
+    NavbarAdminComponent
   ],
   templateUrl: './search-movies.component.html',
   styleUrl: './search-movies.component.css'
@@ -43,8 +47,13 @@ export class SearchMoviesComponent {
   description: string = '';
   errors: string = '';
   movies: any;
+  shownMovies: any[] = [];
+  activeTab: string = 'movies';
+  role: string = '';
 
-  constructor(private router: Router, private movieService: MovieService, private _snackBar: MatSnackBar) { }
+  constructor(private router: Router, private movieService: MovieService, private _snackBar: MatSnackBar, private authenticationService: AuthenticationService) {
+    this.role = authenticationService.getRole()
+  }
 
   ngOnInit(): void {
     this.search();
@@ -82,12 +91,8 @@ export class SearchMoviesComponent {
     this.directors.splice(index, 1);
   }
 
-
-
   search() {
-
     try {
-
       const payload = {
         metadata: {
           title: this.title,
@@ -97,9 +102,7 @@ export class SearchMoviesComponent {
           genres: this.genres,
         }
       }
-
       this.resetFields();
-
       this.movieService.searchMovie(payload.metadata.actors,
       payload.metadata.directors,
       payload.metadata.genres,
@@ -107,15 +110,13 @@ export class SearchMoviesComponent {
       payload.metadata.description)
       .subscribe({
         next: (data) => {
-
           this.movies = data
+          this.loadData()
         }
       })
     } catch (error) {
       console.error('Error converting file to base64:', error);
     }
-
-
   }
 
   private resetFields() {
@@ -133,5 +134,62 @@ export class SearchMoviesComponent {
 
   onCardClick(id: string) {
     this.router.navigate(['/movie', id]);
+  }
+
+  editMovie(id: string) {
+    this.router.navigate(['/edit', id]);
+  }
+
+  setActiveTab(tab: string) {
+    this.activeTab = tab;
+    this.loadData();
+  }
+
+  loadData(){
+    this.shownMovies = []
+    if (this.activeTab == "movies") {
+      this.movies.forEach((movie: {title: string}) => {
+        if (!movie.title.includes("/"))
+          this.shownMovies.push(movie)
+      });
+    }
+    else{
+      this.movies.forEach((movie: {series: string, title: string}) => {
+        if (movie.title.includes("/")) {
+          let newMovie = JSON.parse(JSON.stringify(movie));
+          newMovie.series = movie.title.split("/")[0]
+          newMovie.title = movie.title.split("/")[1]
+          this.shownMovies.push(newMovie)
+        }
+      });
+      this.shownMovies.sort((a, b) => {
+        if (a.series < b.series) {
+          return -1;
+        }
+        if (a.series > b.series) {
+          return 1;
+        }
+        if (a.title < b.title) {
+          return -1;
+        }
+        if (a.title > b.title) {
+          return 1;
+        }
+        return 0;
+      });
+      for (let index = 0; index < this.shownMovies.length; index++) {
+        const movie = this.shownMovies[index];
+        if (index === 0 || this.shownMovies[index - 1].series !== movie.series) {
+            const newMovie = {
+              series: movie.series,
+              displaySeries: true
+            };
+            this.shownMovies.splice(index, 0, newMovie);
+            index++;
+        } else {
+          movie.displaySeries = false;
+        }
+      }
+    }
   }
 }

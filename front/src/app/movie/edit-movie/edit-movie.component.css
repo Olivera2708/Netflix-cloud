@@ -1,0 +1,135 @@
+#main {
+  height: calc(100vh - 4rem);
+  padding-top: 4rem;
+  display: flex;
+  justify-content: center;
+}
+
+#left {
+  width: 50%;
+  height: 100vh;
+  background-image: linear-gradient(to right, rgba(255,255,255,0), rgb(25, 28, 28)), url('../../../assets/images/background.jpg');
+  background-size: cover;
+}
+
+h3 {
+  color: #1a9094;
+  margin-bottom: 3rem;
+}
+
+#right {
+  padding: 1rem 8rem 2rem 8rem;
+  width: 50%;
+}
+
+.list-element {
+  display: flex;
+  align-items: center;
+}
+
+.list-add {
+  margin-left: 1rem;
+  margin-right: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.add-list {
+  display: flex;
+  align-items: center;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+mat-list-item {
+  display: flex;
+  align-items: center;
+  padding-right: 1rem;
+  width: auto;
+}
+
+mat-list {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: -1rem;
+}
+
+.custom-file-input {
+  display: none;
+}
+
+.custom-file-label {
+  width: 8rem;
+  text-align: center;
+  background-color: #42b1b6;
+  color: #ffffff;
+  font-size: 1rem;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 2rem;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.custom-file-label:hover {
+  background-color: #2f7f83;
+}
+
+.button-regular {
+  width: 8rem;
+  font-size: 1rem;
+  background-color: #42b1b6;
+  color: #ffffff;
+  border: none;
+  border-radius: 2rem;
+  cursor: pointer;
+}
+
+.button-regular:hover {
+  background-color: #2f7f83;
+}
+
+.buttons {
+  margin-left: 2rem;
+  margin-right: 2rem;
+  margin-top: 2rem;
+  display: flex;
+  justify-content: space-between;
+  height: 3rem;
+}
+
+p {
+  margin: 0 0 0 1rem;
+  color: whitesmoke;
+}
+
+.inline {
+  display: flex;
+  justify-content: center;
+}
+
+#series {
+  margin-left: 2rem;
+}
+
+.icon {
+  color: #ffb787;
+}
+
+span {
+  font-size: 1.1rem;
+}
+
+#delete{
+  background: darkred;
+  max-height: 3rem;
+}
+
+#delete:hover{
+  background: #600000;
+}
+
+#top {
+  margin-bottom: 1rem;
+}
