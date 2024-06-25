@@ -24,6 +24,7 @@ form {
   padding-top: 4rem;
   width: 100%;
   overflow-x: hidden;
+  min-height: 93vh;
 }
 
 h3 {
@@ -182,7 +183,7 @@ p {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  margin: 10rem;
+  margin: 4rem 10rem 4rem 10rem;
 }
 
 .container > * {
@@ -205,4 +206,33 @@ p {
 .inline {
   display: flex;
   justify-content: space-between;
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+}
+
+.tab {
+  background-color: transparent;
+  color: whitesmoke;
+  border: none;
+  font-size: 1.2rem;
+  border-bottom: 0.2rem solid #ccc;
+  padding: 10px 20px;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.tab:hover {
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.tab.active {
+  display: block;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.05);
 }

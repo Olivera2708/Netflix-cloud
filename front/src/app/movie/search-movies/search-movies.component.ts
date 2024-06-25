@@ -6,7 +6,7 @@ import {MatIconButton} from "@angular/material/button";
 import {MatInput} from "@angular/material/input";
 import {MatLine} from "@angular/material/core";
 import {MatList, MatListItem} from "@angular/material/list";
-import {NgForOf, NgIf} from "@angular/common";
+import {NgClass, NgForOf, NgIf} from "@angular/common";
 import {MovieService} from "../movie.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import { CardModule } from 'primeng/card';
@@ -27,7 +27,8 @@ import {Router} from "@angular/router";
     MatListItem,
     NgForOf,
     NgIf,
-    CardModule
+    CardModule,
+    NgClass
   ],
   templateUrl: './search-movies.component.html',
   styleUrl: './search-movies.component.css'
@@ -43,6 +44,8 @@ export class SearchMoviesComponent {
   description: string = '';
   errors: string = '';
   movies: any;
+  shownMovies: any[] = [];
+  activeTab: string = 'movies';
 
   constructor(private router: Router, private movieService: MovieService, private _snackBar: MatSnackBar) { }
 
@@ -82,12 +85,8 @@ export class SearchMoviesComponent {
     this.directors.splice(index, 1);
   }
 
-
-
   search() {
-
     try {
-
       const payload = {
         metadata: {
           title: this.title,
@@ -97,9 +96,7 @@ export class SearchMoviesComponent {
           genres: this.genres,
         }
       }
-
       this.resetFields();
-
       this.movieService.searchMovie(payload.metadata.actors,
       payload.metadata.directors,
       payload.metadata.genres,
@@ -107,15 +104,13 @@ export class SearchMoviesComponent {
       payload.metadata.description)
       .subscribe({
         next: (data) => {
-
           this.movies = data
+          this.loadData()
         }
       })
     } catch (error) {
       console.error('Error converting file to base64:', error);
     }
-
-
   }
 
   private resetFields() {
@@ -137,5 +132,26 @@ export class SearchMoviesComponent {
 
   editMovie(id: string) {
     this.router.navigate(['/edit', id]);
+  }
+
+  setActiveTab(tab: string) {
+    this.activeTab = tab;
+    this.loadData();
+  }
+
+  loadData(){
+    this.shownMovies = []
+    if (this.activeTab == "movies") {
+      this.movies.forEach((movie: {title: string}) => {
+        if (!movie.title.includes("/"))
+          this.shownMovies.push(movie)
+      });
+    }
+    else{
+      this.movies.forEach((movie: {title: string}) => {
+        if (movie.title.includes("/"))
+          this.shownMovies.push(movie)
+      });
+    }
   }
 }

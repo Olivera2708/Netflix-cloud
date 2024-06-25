@@ -86,8 +86,14 @@
       </div>
     </form>
   </div>
+
+  <div class="tabs">
+    <button class="tab" [ngClass]="{'active': activeTab === 'movies'}" (click)="setActiveTab('movies')">Movies</button>
+    <button class="tab" [ngClass]="{'active': activeTab === 'series'}" style="margin-left: 4rem" (click)="setActiveTab('series')">Series</button>
+  </div>
+
   <div class="container">
-    <div class="card" *ngFor="let movie of movies" (click)="onCardClick(movie.id)">
+    <div class="card" *ngFor="let movie of shownMovies" (click)="onCardClick(movie.id)">
       <div class="inline">
         <h2>{{ movie.title }}</h2>
         <button mat-icon-button aria-label="Edit" (click)="editMovie(movie.id)">
