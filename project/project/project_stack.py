@@ -276,6 +276,17 @@ class Team3Stack(Stack):
             }
         )
 
+        update_user_function = create_lambda_function(
+            "edit_user",
+            "edit_user.edit_user",
+            "edit_user",
+            "PUT",
+            [util_layer],
+            environment={
+                "TABLE_FEED": feed_table.table_name
+            }
+        )
+
         get_movie_url_function = create_lambda_function(
             "get_movie_url",
             "get_movie_url.get_movie_url",
@@ -473,6 +484,8 @@ class Team3Stack(Stack):
         feed_resource = api.root.add_resource("feed")
         upload_user_integration = apigateway.LambdaIntegration(upload_user_function)
         feed_resource.add_method("POST", upload_user_integration)
+        edit_user_integration = apigateway.LambdaIntegration(update_user_function)
+        feed_resource.add_method("PUT", edit_user_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
 
         movie_resource = api.root.add_resource("movie")
         get_movie_url_integration = apigateway.LambdaIntegration(get_movie_url_function)

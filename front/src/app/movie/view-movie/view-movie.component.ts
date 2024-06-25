@@ -42,7 +42,7 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
   actorList : any
   directorList : any
 
-  constructor(private route: ActivatedRoute, private movieService: MovieService, private _snackBar: MatSnackBar, private authenticationService: AuthenticationService){
+  constructor(private authService: AuthenticationService, private route: ActivatedRoute, private movieService: MovieService, private _snackBar: MatSnackBar, private authenticationService: AuthenticationService){
     this.role = authenticationService.getRole()
   }
   ngOnInit(): void {
@@ -108,6 +108,19 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
   }
 
   subscribeTo(genre: string, genre2: any) {
+    this.authenticationService.getCurrentUserEmail().then(email => {
+      const body = {
+        user_id: email,
+        for_update: "subscriptions",
+        payload: {
+          command: "add",
+          for_update: "genres",
+          value: "Drama"
+        }
+      }
+    }).catch(error => {
+      console.error('Error fetching user email:', error);
+    });
 
   }
 }
