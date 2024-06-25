@@ -182,4 +182,34 @@ export class AuthenticationService {
       {"id":id },
       {'headers': {'Content-Type': 'application/json'}})
   }
+
+  getCurrentUserEmail(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const cognitoUser = this.userPool.getCurrentUser();
+      if (cognitoUser) {
+        cognitoUser.getSession((err: any, session: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+
+          cognitoUser.getUserAttributes((err, attributes) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+            if (attributes == undefined) return;
+            const emailAttribute = attributes.find(attr => attr.Name === 'email');
+            if (emailAttribute) {
+              resolve(emailAttribute.Value);
+            } else {
+              reject(new Error('Email attribute not found'));
+            }
+          });
+        });
+      } else {
+        reject(new Error('No user is currently authenticated'));
+      }
+    });
+  }
 }

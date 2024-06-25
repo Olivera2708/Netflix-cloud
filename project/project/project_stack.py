@@ -117,8 +117,8 @@ class Team3Stack(Stack):
         )
 
         feed_table = dynamodb.Table(
-            self, "feed-table-team3",
-            table_name="feed-table-team3",
+            self, "user-table-team3",
+            table_name="user-table-team3",
             partition_key=dynamodb.Attribute(
                 name="id",
                 type=dynamodb.AttributeType.STRING
@@ -272,6 +272,17 @@ class Team3Stack(Stack):
             [util_layer],
             environment={
                 "TABLE_MOVIES": movies_table.table_name,
+                "TABLE_FEED": feed_table.table_name
+            }
+        )
+
+        update_user_function = create_lambda_function(
+            "edit_user",
+            "edit_user.edit_user",
+            "edit_user",
+            "PUT",
+            [util_layer],
+            environment={
                 "TABLE_FEED": feed_table.table_name
             }
         )
@@ -473,6 +484,8 @@ class Team3Stack(Stack):
         feed_resource = api.root.add_resource("feed")
         upload_user_integration = apigateway.LambdaIntegration(upload_user_function)
         feed_resource.add_method("POST", upload_user_integration)
+        edit_user_integration = apigateway.LambdaIntegration(update_user_function)
+        feed_resource.add_method("PUT", edit_user_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
 
         movie_resource = api.root.add_resource("movie")
         get_movie_url_integration = apigateway.LambdaIntegration(get_movie_url_function)

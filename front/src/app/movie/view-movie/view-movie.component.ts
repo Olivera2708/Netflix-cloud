@@ -2,11 +2,12 @@ import {AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild} from '@a
 import {MovieService} from "../movie.service";
 import {MatMenu, MatMenuItem, MatMenuTrigger} from "@angular/material/menu";
 import {MatButton} from "@angular/material/button";
-import {NgIf} from "@angular/common";
+import {NgForOf, NgIf} from "@angular/common";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
 import {ActivatedRoute} from "@angular/router";
 import {AuthenticationService} from "../../authentication/authentication.service";
+import {MatIcon} from "@angular/material/icon";
 
 
 @Component({
@@ -17,7 +18,9 @@ import {AuthenticationService} from "../../authentication/authentication.service
     MatButton,
     MatMenuItem,
     MatMenuTrigger,
-    NgIf
+    NgIf,
+    MatIcon,
+    NgForOf
   ],
   templateUrl: './view-movie.component.html',
   styleUrl: './view-movie.component.css'
@@ -34,9 +37,12 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
   year: string = ""
   selectedResolution = 'original';
   videoURL = "";
-  role : string = ''
+  role : string = '';
+  genreList : any
+  actorList : any
+  directorList : any
 
-  constructor(private route: ActivatedRoute, private movieService: MovieService, private _snackBar: MatSnackBar, private authenticationService: AuthenticationService){
+  constructor(private authService: AuthenticationService, private route: ActivatedRoute, private movieService: MovieService, private _snackBar: MatSnackBar, private authenticationService: AuthenticationService){
     this.role = authenticationService.getRole()
   }
   ngOnInit(): void {
@@ -82,6 +88,9 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
         }
         this.description = data.description
         this.year = data.year
+        this.genreList = data.genres;
+        this.directorList = data.directors;
+        this.actorList = data.actors;
         this.genres = data.genres.join(", ")
         this.actors = data.actors.join(", ")
         this.directors = data.directors.join(", ")
@@ -96,5 +105,28 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
       case "720p": return "1280_720"
       default: return "original"
     }
+  }
+
+  subscribeTo(forUpdate: string, value: any) {
+    this.authenticationService.getCurrentUserEmail().then(email => {
+      const body = {
+        user_id: email,
+        for_update: "subscriptions",
+        payload: {
+          command: "add",
+          for_update: forUpdate,
+          value: value
+        }
+      }
+      this.movieService.editUser(body).subscribe({
+        next: (data) => {
+          console.log(data);
+        }
+      });
+
+    }).catch(error => {
+      console.error('Error fetching user email:', error);
+    });
+
   }
 }
