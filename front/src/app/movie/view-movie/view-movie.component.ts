@@ -6,6 +6,7 @@ import {NgIf} from "@angular/common";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
 import {ActivatedRoute} from "@angular/router";
+import {AuthenticationService} from "../../authentication/authentication.service";
 
 
 @Component({
@@ -33,13 +34,21 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
   year: string = ""
   selectedResolution = 'original';
   videoURL = "";
+  role : string = ''
 
-  constructor(private route: ActivatedRoute, private movieService: MovieService, private _snackBar: MatSnackBar){}
+  constructor(private route: ActivatedRoute, private movieService: MovieService, private _snackBar: MatSnackBar, private authenticationService: AuthenticationService){
+    this.role = authenticationService.getRole()
+  }
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
       this.id = params.get('id') || '';
       this.setInformation();
     });
+
+    let video = document.getElementById('video');
+    if (video != null && this.role === 'Admin') {
+      video.setAttribute('controlsList', 'nodownload');
+    }
   }
 
   ngAfterViewInit(): void {
