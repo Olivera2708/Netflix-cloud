@@ -38,6 +38,7 @@ def upload_user(event, context):
             feed[item['id']] = {
                 'score': 0
             }
+
         item = {
             'id': user_id,
             'subscriptions': {
@@ -46,10 +47,12 @@ def upload_user(event, context):
                 'directors': []
             },
             'feed': feed,
-            'ratings': []
+            'ratings': [],
+            'downloaded_genres': []
         }
+
         table_feed.put_item(Item=item)
-        true = True
+        
         return {
             'statusCode': 200,
             'headers': {
