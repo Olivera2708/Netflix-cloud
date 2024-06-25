@@ -14,7 +14,7 @@ def edit_user(event, context):
         #     user_id: "gligoric383@gmail.com"
         #     for_update: "subscriptions",
         #     payload: {
-        #         command: "add",
+        #         command: "add"/"remove",
         #         for_update: "genres",
         #         value: "Drama"
         #     }

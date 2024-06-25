@@ -117,8 +117,8 @@ class Team3Stack(Stack):
         )
 
         feed_table = dynamodb.Table(
-            self, "feed-table-team3",
-            table_name="feed-table-team3",
+            self, "user-table-team3",
+            table_name="user-table-team3",
             partition_key=dynamodb.Attribute(
                 name="id",
                 type=dynamodb.AttributeType.STRING

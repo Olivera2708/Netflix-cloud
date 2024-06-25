@@ -107,17 +107,23 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
     }
   }
 
-  subscribeTo(genre: string, genre2: any) {
+  subscribeTo(forUpdate: string, value: any) {
     this.authenticationService.getCurrentUserEmail().then(email => {
       const body = {
         user_id: email,
         for_update: "subscriptions",
         payload: {
           command: "add",
-          for_update: "genres",
-          value: "Drama"
+          for_update: forUpdate,
+          value: value
         }
       }
+      this.movieService.editUser(body).subscribe({
+        next: (data) => {
+          console.log(data);
+        }
+      });
+
     }).catch(error => {
       console.error('Error fetching user email:', error);
     });

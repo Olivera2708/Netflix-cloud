@@ -46,4 +46,9 @@ export class MovieService {
     return this.httpClient.delete<any>(environment.apiGateway + "movie/" + id,
       {'headers': {'Content-Type': 'application/json'}})
   }
+
+  editUser(data: any): Observable<any> {
+    return this.httpClient.put<any>(environment.apiGateway + "feed", data,
+      {'headers': {'Content-Type': 'application/json'}})
+  }
 }

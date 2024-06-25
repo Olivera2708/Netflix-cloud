@@ -52,6 +52,7 @@ def upload_user(event, context):
         }
 
         table_feed.put_item(Item=item)
+        true = True
         return {
             'statusCode': 200,
             'headers': {
