@@ -160,8 +160,10 @@ export class EditMovieComponent implements OnInit {
             if ("Movie deleted successfully" == data["message"]){
               this.movieService.addNewMovie(payload).subscribe({
                 next: (data) => {
-                  if (data['message'] == "Success")
+                  if (data['message'] == "Success") {
                     this._snackBar.open('Movie is uploading...', 'Close');
+                    this.router.navigate(['/search']);
+                  }
                   else
                     this._snackBar.open('There was an error while uploading movie', 'Close');
                 }
@@ -177,29 +179,16 @@ export class EditMovieComponent implements OnInit {
         this._snackBar.open('There is an error while converting file', 'Close');
       }
     }
-
-    this.actors = [];
-    this.newActor = '';
-    this.genres = [];
-    this.newGenre = '';
-    this.directors = [];
-    this.newDirector = '';
-    this.file = null;
-    this.title = '';
-    this.movieText= '';
-    this.description = '';
-    this.year = '';
-    this.errors = '';
-    this.seriesName = '';
-
-    this.movieService.editMetadata(payload).subscribe({
-      next: (data) => {
-        if (data['message'] == "Success")
-          this._snackBar.open('Change is being made...', 'Close');
-        else
-          this._snackBar.open('There was an error while adding movie', 'Close');
-      }
-    })
+    else {
+      this.movieService.editMetadata(payload).subscribe({
+        next: (data) => {
+          if (data['message'] == "Success")
+            this._snackBar.open('Change is successful!', 'Close');
+          else
+            this._snackBar.open('There was an error while adding movie', 'Close');
+        }
+      })
+    }
   }
 
   validateForm(): boolean {

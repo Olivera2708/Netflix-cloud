@@ -286,6 +286,17 @@ class Team3Stack(Stack):
                 "TABLE": movies_table.table_name
             }
         )
+
+        edit_metadata_function = create_lambda_function(
+            "edit_metadata",
+            "edit_metadata.edit_metadata",
+            "edit_metadata",
+            "PUT",
+            [util_layer],
+            environment={
+                "TABLE": movies_table.table_name
+            }
+        )
         
         get_metadata_function = create_lambda_function(
             "get_metadata",
@@ -410,7 +421,6 @@ class Team3Stack(Stack):
 
         # Step Function Definition -> chaining tasks
         definition = parallel_state.next(send_to_queue_task)
-        # definition_edit = parallel_state.next(send_to_queue_task)
         
         # Step Function
         state_machine = _sfn.StateMachine(
@@ -419,13 +429,6 @@ class Team3Stack(Stack):
             comment="Transcoding and uploading new movies",
             timeout=Duration.minutes(5)
         )
-
-        # state_machine_edit = _sfn.StateMachine(
-        #     self, "Edit",
-        #     definition=definition_edit,
-        #     comment="Edit video and video data",
-        #     timeout=Duration.minutes(5)
-        # )
 
         upload_function = create_lambda_function(
             "upload",
@@ -458,4 +461,6 @@ class Team3Stack(Stack):
         movie_metadata_resource = api.root.add_resource("metadata")
         movie_metadata_integration = apigateway.LambdaIntegration(get_metadata_function)
         movie_metadata_resource.add_method("GET", movie_metadata_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
+        edit_metadata_integration = apigateway.LambdaIntegration(edit_metadata_function)
+        movie_metadata_resource.add_method("PUT", edit_metadata_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
 

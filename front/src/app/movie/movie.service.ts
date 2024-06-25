@@ -17,7 +17,7 @@ export class MovieService {
   }
 
   editMetadata(data: any): Observable<any> {
-    return this.httpClient.post<any>(environment.apiGateway + "edit", data,
+    return this.httpClient.put<any>(environment.apiGateway + "metadata", data,
       {'headers': {'Content-Type': 'application/json'}})
   }
 
