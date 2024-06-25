@@ -22,14 +22,14 @@ def delete_data(event, context):
                     'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,DELETE'
                 }
             }
+        
+        dynamo_key = {'id': {'S': object_key}}
+        dynamo_client.delete_item(TableName=table, Key=dynamo_key)
 
         s3_objects = s3_client.list_objects_v2(Bucket=bucket, Prefix=object_key)
         if 'Contents' in s3_objects:
             for obj in s3_objects['Contents']:
                 s3_client.delete_object(Bucket=bucket, Key=obj['Key'])
-                
-        dynamo_key = {'id': {'S': object_key}}
-        dynamo_client.delete_item(TableName=table, Key=dynamo_key)
         
         return {
             'statusCode': 200,
