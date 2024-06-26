@@ -1,55 +1,103 @@
-<div class="main">
-  <div class="container">
-    <div class="left">
-      <div class="video-container">
-        <video #videoPlayer controls id="video">
-          <source [src]="videoURL" type="video/mp4">
-          Your browser does not support the video tag.
-        </video>
-      </div>
-      <div class="inline">
-        <h3>{{ title }}</h3>
-        <div class="resolution">
-          <p class="res">Resolution: </p>
-          <button class="menu" mat-button [matMenuTriggerFor]="menu">{{ selectedResolution }}</button>
-          <mat-menu #menu="matMenu">
-            <button mat-menu-item (click)="changeResolution('original')">original</button>
-            <button mat-menu-item (click)="changeResolution('360p')">360p</button>
-            <button mat-menu-item (click)="changeResolution('480p')">480p</button>
-            <button mat-menu-item (click)="changeResolution('720p')">720p</button>
-          </mat-menu>
+<div class="main-main">
+  <div class="main">
+    <div class="container">
+      <div class="left">
+        <div class="video-container">
+          <video #videoPlayer controls id="video">
+            <source [src]="videoURL" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
         </div>
+        <div class="inline">
+          <h3>{{ title }}</h3>
+          <div class="resolution">
+            <p class="res">Resolution: </p>
+            <button class="menu" mat-button [matMenuTriggerFor]="menu">{{ selectedResolution }}</button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="changeResolution('original')">original</button>
+              <button mat-menu-item (click)="changeResolution('360p')">360p</button>
+              <button mat-menu-item (click)="changeResolution('480p')">480p</button>
+              <button mat-menu-item (click)="changeResolution('720p')">720p</button>
+            </mat-menu>
+          </div>
+        </div>
+        <p class="series">{{ subtitle }}</p>
       </div>
-      <p class="series">{{ subtitle }}</p>
-    </div>
-    <div class="right">
-      <p class="subtitle">Description</p>
+      <div class="right">
+        <p class="subtitle">Description</p>
 
-      <p class="value">{{ description }}</p>
-      <p class="subtitle">Genres</p>
-      <div class="genres-container">
-        <div class="genre" *ngFor="let genre of genreList" >
-          {{genre}} <mat-icon class="subscribe" (click)="subscribeTo('genres', genre)" >add_alert</mat-icon>
+        <p class="value">{{ description }}</p>
+        <p class="subtitle">Genres</p>
+        <div class="genres-container">
+          <div class="genre" *ngFor="let genre of genreList">
+            {{ genre }}
+            <mat-icon class="subscribe" (click)="subscribeTo('genres', genre)">add_alert</mat-icon>
+          </div>
         </div>
-      </div>
 
-<!--      <p class="value" >{{ genres }}</p>-->
-      <p class="subtitle">Year</p>
-      <p class="value">{{ year }}</p>
-      <p class="subtitle">Actors</p>
-      <div class="genres-container">
-        <div class="genre" *ngFor="let actor of actorList" >
-          {{actor}} <mat-icon class="subscribe" (click)="subscribeTo('actors', actor)" >add_alert</mat-icon>
+        <!--      <p class="value" >{{ genres }}</p>-->
+        <p class="subtitle">Year</p>
+        <p class="value">{{ year }}</p>
+        <p class="subtitle">Actors</p>
+        <div class="genres-container">
+          <div class="genre" *ngFor="let actor of actorList">
+            {{ actor }}
+            <mat-icon class="subscribe" (click)="subscribeTo('actors', actor)">add_alert</mat-icon>
+          </div>
         </div>
-      </div>
-<!--      <p class="value">{{ actors }}</p>-->
-      <p class="subtitle">Director</p>
-      <div class="genres-container">
-        <div class="genre" *ngFor="let director of directorList" >
-          {{director}} <mat-icon class="subscribe" (click)="subscribeTo('directors', director)" >add_alert</mat-icon>
+        <!--      <p class="value">{{ actors }}</p>-->
+        <p class="subtitle">Director</p>
+        <div class="genres-container">
+          <div class="genre" *ngFor="let director of directorList">
+            {{ director }}
+            <mat-icon class="subscribe" (click)="subscribeTo('directors', director)">add_alert</mat-icon>
+          </div>
         </div>
+        <!--      <p class="value">{{ directors }}</p>-->
       </div>
-<!--      <p class="value">{{ directors }}</p>-->
     </div>
   </div>
+  <form [formGroup]="ratingForm" (ngSubmit)="submitRating()" class="movie-rating-container">
+    <h3>Rate the Movie</h3>
+    <div class="suggest-section">
+
+      <div class="rating-section">
+        <mat-form-field appearance="fill">
+          <mat-label>Rating (1-5)</mat-label>
+          <input matInput type="number" formControlName="rating">
+          <mat-error
+            *ngIf="ratingForm.get('rating')?.invalid && (ratingForm.get('rating')?.touched || ratingForm.get('rating')?.dirty)">
+            Rating is required and must be between 1 and 5
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div class="likes-section">
+        <mat-form-field appearance="fill">
+          <mat-label>What did you like the most?</mat-label>
+          <mat-select formControlName="likes">
+            <mat-option *ngFor="let option of likeOptions" [value]="option">{{ option }}</mat-option>
+          </mat-select>
+          <mat-error
+            *ngIf="ratingForm.get('likes')?.invalid && (ratingForm.get('likes')?.touched || ratingForm.get('likes')?.dirty)">
+            This field is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div class="suggest-section">
+        <p  >Would you suggest it?</p>
+        <mat-radio-group formControlName="suggest" class="radio-group">
+          <mat-radio-button value="yes">I will suggest it</mat-radio-button>
+          <mat-radio-button value="no">I won't suggest it</mat-radio-button>
+        </mat-radio-group>
+        <mat-error
+          *ngIf="ratingForm.get('suggest')?.invalid && (ratingForm.get('suggest')?.touched || ratingForm.get('suggest')?.dirty)">
+          Suggestion is required
+        </mat-error>
+      </div>
+
+      <button mat-raised-button class="button-regular" [disabled]="ratingForm.invalid">Rate</button>
+    </div>
+  </form>
 </div>
+
+

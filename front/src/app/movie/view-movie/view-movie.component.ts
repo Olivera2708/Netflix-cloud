@@ -8,6 +8,11 @@ import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
 import {ActivatedRoute} from "@angular/router";
 import {AuthenticationService} from "../../authentication/authentication.service";
 import {MatIcon} from "@angular/material/icon";
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
+import {MatError, MatFormField, MatLabel} from "@angular/material/form-field";
+import {MatInput} from "@angular/material/input";
+import {MatRadioButton, MatRadioGroup} from "@angular/material/radio";
+import {MatOption, MatSelect} from "@angular/material/select";
 
 
 @Component({
@@ -20,7 +25,17 @@ import {MatIcon} from "@angular/material/icon";
     MatMenuTrigger,
     NgIf,
     MatIcon,
-    NgForOf
+    NgForOf,
+    FormsModule,
+    MatFormField,
+    MatInput,
+    MatLabel,
+    MatRadioGroup,
+    MatSelect,
+    MatRadioButton,
+    MatOption,
+    ReactiveFormsModule,
+    MatError
   ],
   templateUrl: './view-movie.component.html',
   styleUrl: './view-movie.component.css'
@@ -42,8 +57,16 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
   actorList : any
   directorList : any
 
-  constructor(private authService: AuthenticationService, private route: ActivatedRoute, private movieService: MovieService, private _snackBar: MatSnackBar, private authenticationService: AuthenticationService){
-    this.role = authenticationService.getRole()
+  likeOptions = ['Actors', "Effects", "Story", "Nothing"]
+  ratingForm: FormGroup;
+
+  constructor(private fb: FormBuilder, private authService: AuthenticationService, private route: ActivatedRoute, private movieService: MovieService, private _snackBar: MatSnackBar, private authenticationService: AuthenticationService){
+    this.role = authenticationService.getRole();
+    this.ratingForm = this.fb.group({
+      rating: [null, [Validators.required, Validators.min(1), Validators.max(5)]],
+      suggest: [null, Validators.required],
+      likes: [null, Validators.required]
+    });
   }
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
@@ -55,6 +78,10 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
     if (video != null && this.role === 'Admin') {
       video.setAttribute('controlsList', 'nodownload');
     }
+
+    //Proveri da li je ovaj user vec ocenio ovaj film
+
+    //prikaz prosecnih ocena
   }
 
   ngAfterViewInit(): void {
@@ -127,6 +154,15 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
     }).catch(error => {
       console.error('Error fetching user email:', error);
     });
+  }
 
+  submitRating() {
+    if (this.ratingForm.valid) {
+      console.log('Rating:', this.ratingForm.value.rating);
+      console.log('Suggest:', this.ratingForm.value.suggest);
+      console.log('Likes:', this.ratingForm.value.likes);
+    } else {
+      //request da se upise u bazu
+    }
   }
 }
