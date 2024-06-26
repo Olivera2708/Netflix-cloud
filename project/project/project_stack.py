@@ -710,7 +710,11 @@ class Team3ProjectStack(Stack):
             "POST",
             [util_layer],
             environment={
-                "USER_TABLE": feed_table.table_name
+                "USER_TABLE": feed_table.table_name,
+                "MOVIES_TABLE": movies_table.table_name,
+                "GENRES_TABLE": genres_table.table_name,
+                "ACTORS_TABLE": actors_table.table_name,
+                "DIRECTORS_TABLE": directors_table.table_name,
             }
         )
 
