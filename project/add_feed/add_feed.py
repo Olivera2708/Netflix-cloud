@@ -1,3 +1,4 @@
+from decimal import Decimal
 import json
 import boto3
 import os
@@ -9,24 +10,50 @@ stepfunctions_client = boto3.client('stepfunctions')
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(user_table)
 
+def custom_serializer(obj):
+    if isinstance(obj, Decimal):
+        return int(obj)
+    raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
+
+def convert_dynamodb_to_json(data):
+    if isinstance(data, dict):
+        if 'M' in data:
+            return {key: convert_dynamodb_to_json(value) for key, value in data['M'].items()}
+        elif 'L' in data:
+            return [convert_dynamodb_to_json(item) for item in data['L']]
+        elif 'NULL' in data:
+            return None
+        elif 'BOOL' in data:
+            return data['BOOL']
+        elif 'S' in data:
+            return data['S']
+        elif 'N' in data:
+            return int(data['N']) if data['N'].isdigit() else float(data['N'])
+        else:
+            return data
+    else:
+        return data
+
 def add_feed(event, context):
-    message = ""
-    # message += "Received event: " + json.dumps(event, indent=2)
     for record in event['Records']:
         if record['eventName'] == 'INSERT' or record['eventName'] == 'MODIFY':
             response = table.scan()
             new_image = record['dynamodb']['NewImage']
-            new_image = {k: convert_dynamodb_json(v) for k, v in new_image.items()}
+            new_image = {key: convert_dynamodb_to_json(value) for key, value in new_image.items()}
             for item in response["Items"]:
-                print(item)
-                item = {k: convert_dynamodb_json(v) for k, v in item.items()}
                 combined_input = {
-                    'item': item,
-                    'new_image': new_image
+                    'downloaded_genres': item['downloaded_genres'],
+                    'user_id': item['id'],
+                    'subscriptions': item['subscriptions'],
+                    'ratings': item.get('ratings', []),
+                    'actors': new_image['actors'],
+                    'genres': new_image['genres'],
+                    'directors': new_image['directors'],
+                    'id': new_image['id'],
                 }
                 stepfunctions_client.start_execution(
                     stateMachineArn=state_machine_arn,
-                    input=json.dumps(combined_input)
+                    input=json.dumps(combined_input, default=custom_serializer)
                 )
 
     return {
@@ -36,22 +63,5 @@ def add_feed(event, context):
                 'Access-Control-Allow-Headers': 'Content-Type',
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             },
-            'body': json.dumps(str(message))
+            'body': json.dumps("Success")
         }
-
-def convert_dynamodb_json(value):
-    if 'S' in value:
-        return value['S']
-    elif 'N' in value:
-        return int(value['N'])
-    elif 'BOOL' in value:
-        return value['BOOL']
-    elif 'M' in value:
-        return {k: convert_dynamodb_json(v) for k, v in value['M'].items()}
-    elif 'L' in value:
-        return [convert_dynamodb_json(v) for v in value['L']]
-    elif 'NULL' in value:
-        return None
-    else:
-        raise TypeError("Unknown DynamoDB JSON type: {}".format(value))
-        
