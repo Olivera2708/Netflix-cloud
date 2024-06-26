@@ -47,21 +47,24 @@ def get_metadata(event, context):
         genres_response = genres_table.query(
             IndexName='MovieIndex',
             KeyConditionExpression='movie_id = :id',
-            ExpressionAttributeValues={':id': movie_id}
+            ExpressionAttributeValues={':id': movie_id},
+            ProjectionExpression='genre'
         )
         genres = [genre_item['genre'] for genre_item in genres_response.get('Items', [])]
 
         actors_response = actors_table.query(
             IndexName='MovieIndex',
             KeyConditionExpression='movie_id = :id',
-            ExpressionAttributeValues={':id': movie_id}
+            ExpressionAttributeValues={':id': movie_id},
+            ProjectionExpression='actor'
         )
         actors = [actor_item['actor'] for actor_item in actors_response.get('Items', [])]
 
         directors_response = directors_table.query(
             IndexName='MovieIndex',
             KeyConditionExpression='movie_id = :id',
-            ExpressionAttributeValues={':id': movie_id}
+            ExpressionAttributeValues={':id': movie_id},
+            ProjectionExpression='director'
         )
         directors = [director_item['director'] for director_item in directors_response.get('Items', [])]
 

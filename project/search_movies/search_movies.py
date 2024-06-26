@@ -3,10 +3,16 @@ import boto3
 import os
 from boto3.dynamodb.conditions import Attr
 
-# Initialize DynamoDB resource
+movies_table_name = os.environ['MOVIES_TABLE']
+genres_table_name = os.environ['GENRES_TABLE']
+actors_table_name = os.environ['ACTORS_TABLE']
+directors_table_name = os.environ['DIRECTORS_TABLE']
+
 dynamodb = boto3.resource('dynamodb')
-table_name = os.environ['TABLE']
-table = dynamodb.Table(table_name)
+movies_table = dynamodb.Table(movies_table_name)
+genres_table = dynamodb.Table(genres_table_name)
+actors_table = dynamodb.Table(actors_table_name)
+directors_table = dynamodb.Table(directors_table_name)
 
 
 def search_movies(event, context):
@@ -23,59 +29,50 @@ def search_movies(event, context):
                 'body': json.dumps({'error': 'Invalid input: body is required'})
             }
 
-        # # Extract query parameters from event
-        title = input_data['title']
-        description = input_data['description']
-        actors = input_data['actors']
-        directors = input_data['directors']
-        genres = input_data['genres']
-        # return {
-        #     'statusCode': 200,
-        #     'headers': {
-        #         'Access-Control-Allow-Origin': '*',
-        #         'Access-Control-Allow-Headers': 'Content-Type',
-        #         'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-        #     },
-        #     'body': json.dumps(actors)
-        # }
-        # return {
-        #     'statusCode': 400,
-        #     'headers': {
-        #         'Access-Control-Allow-Origin': '*',
-        #         'Access-Control-Allow-Headers': 'Content-Type',
-        #         'Access-Control-Allow-Methods': 'GET,POST,OPTIONS'
-        #     },
-        #     'genres': genres,
-        #     'directors': directors
-        # }
-
-        filter_expression = Attr('title').contains(title)
-
-        filter_expression = filter_expression & Attr('description').contains(
-            description) if filter_expression else Attr('description').contains(description)
-
-        for actor in actors:
-            filter_expression = filter_expression & Attr('actors').contains(actor) if filter_expression else Attr(
-                'actors').contains(actor)
-
-        for director in directors:
-            filter_expression = filter_expression & Attr('directors').contains(
-                director) if filter_expression else Attr('directors').contains(director)
-
-        for genre in genres:
-            filter_expression = filter_expression & Attr('genres').contains(genre) if filter_expression else Attr(
-                'genres').contains(genre)
-
-        response = table.scan(
-            FilterExpression=filter_expression
+        search_value = input_data["value"]
+        all_movie_ids = set()
+        
+        genres_response = genres_table.query(
+            IndexName='MovieIndex',
+            KeyConditionExpression=Key('genre').eq(search_value),
+            ProjectionExpression='movie_id'
         )
+        for item in genres_response.get('Items', []):
+            all_movie_ids.add(item['movie_id'])
 
-        items = response['Items']
-        for item in items:
-            if 'file_size' in item:
-                del item['file_size']
-            if 'ratings' in item:
-                del item['ratings']
+        actors_response = actors_table.query(
+            IndexName='MovieIndex',
+            KeyConditionExpression=Key('actor').eq(search_value),
+            ProjectionExpression='movie_id'
+        )
+        for item in actors_response.get('Items', []):
+            all_movie_ids.add(item['movie_id'])
+
+        directors_response = directors_table.query(
+            IndexName='MovieIndex',
+            KeyConditionExpression=Key('director').eq(search_value),
+            ProjectionExpression='movie_id'
+        )
+        for item in directors_response.get('Items', []):
+            all_movie_ids.add(item['movie_id'])
+
+        title_response = movie_table.query(
+            IndexName='TitleIndex',
+            KeyConditionExpression=Key('title').eq(search_value),
+            ProjectionExpression='id'
+        )
+        for item in title_response.get('Items', []):
+            all_movie_ids.add(item['id'])
+
+        description_response = movie_table.query(
+            IndexName='DescriptionIndex',
+            KeyConditionExpression=Key('description').eq(search_value),
+            ProjectionExpression='id'
+        )
+        for item in description_response.get('Items', []):
+            all_movie_ids.add(item['id'])
+
+        #for each all_movies_ids call lambda to get all data for that movie 
 
         return {
             'statusCode': 200,
@@ -97,3 +94,22 @@ def search_movies(event, context):
             },
             'body': json.dumps(f"An error occurred: {str(e)}")
         }
+
+def batch_get_items(keys):
+    responses = []
+    while keys:
+        batch_keys = keys[:100]
+        keys = keys[100:]
+
+        response = dynamodb.batch_get_item(
+            RequestItems={movies_table: {'Keys': batch_keys}}
+        )
+        responses.extend(response['Responses'][movies_table])
+        unprocessed_keys = response['UnprocessedKeys']
+
+        while unprocessed_keys:
+            response = dynamodb.batch_get_item(RequestItems=unprocessed_keys)
+            responses.extend(response['Responses'][table_name])
+            unprocessed_keys = response['UnprocessedKeys']
+
+    return responses
