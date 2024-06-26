@@ -3,23 +3,24 @@
     <div class="container">
       <div class="left">
         <div class="video-container">
-          <video #videoPlayer controls id="video">
+          <video #videoPlayer controls controlsList="nodownload" id="video">
             <source [src]="videoURL" type="video/mp4">
             Your browser does not support the video tag.
           </video>
         </div>
         <div class="inline">
           <h3>{{ title }}</h3>
-          <div class="resolution">
-            <p class="res">Resolution: </p>
-            <button class="menu" mat-button [matMenuTriggerFor]="menu">{{ selectedResolution }}</button>
-            <mat-menu #menu="matMenu">
-              <button mat-menu-item (click)="changeResolution('original')">original</button>
-              <button mat-menu-item (click)="changeResolution('360p')">360p</button>
-              <button mat-menu-item (click)="changeResolution('480p')">480p</button>
-              <button mat-menu-item (click)="changeResolution('720p')">720p</button>
-            </mat-menu>
-          </div>
+            <div class="resolution">
+              <p class="res">Resolution: </p>
+              <button class="menu" mat-button [matMenuTriggerFor]="menu">{{ selectedResolution }}</button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="changeResolution('original')">original</button>
+                <button mat-menu-item (click)="changeResolution('360p')">360p</button>
+                <button mat-menu-item (click)="changeResolution('480p')">480p</button>
+                <button mat-menu-item (click)="changeResolution('720p')">720p</button>
+              </mat-menu>
+              <button class="button-regular download" *ngIf="role !== 'Admin'" (click)="downloadMovie()">Download</button>
+            </div>
         </div>
         <p class="series">{{ subtitle }}</p>
       </div>
@@ -56,14 +57,15 @@
         <!--      <p class="value">{{ directors }}</p>-->
         <div class="rating-view">
           <p class="subtitle">Rating</p>
-          <p class="value">Average rating for this movie is {{avgRating}}/5</p>
-          <p class="value">{{suggestProc}}% of the users will suggest this movie</p>
-          <p class="value">Best thing about this movie is {{mostLiked}}</p>
+          <p class="value">Average rating for this movie is {{ avgRating }}/5</p>
+          <p class="value">{{ suggestProc }}% of the users will suggest this movie</p>
+          <p class="value">Best thing about this movie is {{ mostLiked }}</p>
         </div>
       </div>
     </div>
   </div>
-  <form [formGroup]="ratingForm" (ngSubmit)="submitRating()" class="movie-rating-container" *ngIf="!alreadyRated && role!=='Admin'">
+  <form [formGroup]="ratingForm" (ngSubmit)="submitRating()" class="movie-rating-container"
+        *ngIf="!alreadyRated && role!=='Admin'">
     <h3>Rate the Movie</h3>
     <div class="suggest-section">
 
@@ -90,7 +92,7 @@
         </mat-form-field>
       </div>
       <div class="suggest-section">
-        <p  >Would you suggest it?</p>
+        <p>Would you suggest it?</p>
         <mat-radio-group formControlName="suggest" class="radio-group">
           <mat-radio-button value="yes">I would suggest it</mat-radio-button>
           <mat-radio-button value="no">I would not suggest it</mat-radio-button>
