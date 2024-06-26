@@ -15,10 +15,19 @@ def add_feed(event, context):
     for record in event['Records']:
         if record['eventName'] == 'INSERT' or record['eventName'] == 'MODIFY':
             response = table.scan()
-            stepfunctions_client.start_execution(
-                stateMachineArn=state_machine_arn,
-                input=json.dumps(response)
-            )
+            new_image = record['dynamodb']['NewImage']
+            new_image = {k: convert_dynamodb_json(v) for k, v in new_image.items()}
+            for item in response["Items"]:
+                print(item)
+                item = {k: convert_dynamodb_json(v) for k, v in item.items()}
+                combined_input = {
+                    'item': item,
+                    'new_image': new_image
+                }
+                stepfunctions_client.start_execution(
+                    stateMachineArn=state_machine_arn,
+                    input=json.dumps(combined_input)
+                )
 
     return {
             'statusCode': 200,
@@ -29,3 +38,20 @@ def add_feed(event, context):
             },
             'body': json.dumps(str(message))
         }
+
+def convert_dynamodb_json(value):
+    if 'S' in value:
+        return value['S']
+    elif 'N' in value:
+        return int(value['N'])
+    elif 'BOOL' in value:
+        return value['BOOL']
+    elif 'M' in value:
+        return {k: convert_dynamodb_json(v) for k, v in value['M'].items()}
+    elif 'L' in value:
+        return [convert_dynamodb_json(v) for v in value['L']]
+    elif 'NULL' in value:
+        return None
+    else:
+        raise TypeError("Unknown DynamoDB JSON type: {}".format(value))
+        
