@@ -356,6 +356,17 @@ class Team3Stack(Stack):
                 "TABLE": movies_table.table_name
             }
         )
+
+        add_downloaded_genres_function = create_lambda_function(
+            "add_downloaded_genres",
+            "add_downloaded_genres.add_downloaded_genres",
+            "add_downloaded_genres",
+            "POST",
+            [util_layer],
+            environment={
+                "TABLE_FEED": feed_table.table_name
+            }
+        )
         
         get_metadata_function = create_lambda_function(
             "get_metadata",
@@ -622,6 +633,9 @@ class Team3Stack(Stack):
         feed_resource.add_method("POST", upload_user_integration)
         edit_user_integration = apigateway.LambdaIntegration(update_user_function)
         feed_resource.add_method("PUT", edit_user_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
+        downloaded_resource = feed_resource.add_resource('downloaded')
+        add_downloaded_genres_integration = apigateway.LambdaIntegration(add_downloaded_genres_function)
+        downloaded_resource.add_method("POST", add_downloaded_genres_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
 
         movie_resource = api.root.add_resource("movie")
         get_movie_url_integration = apigateway.LambdaIntegration(get_movie_url_function)

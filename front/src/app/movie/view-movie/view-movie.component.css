@@ -175,6 +175,7 @@ h3 {
 
 .button-regular {
   width: 8rem;
+  height: 2.5rem;
   font-size: 1rem;
   background-color: #42b1b6;
   color: #ffffff;
@@ -183,6 +184,10 @@ h3 {
   cursor: pointer;
   margin-bottom: 1rem;
   margin-left: 5rem;
+}
+
+.download {
+  margin: 0 1rem 0 1rem;
 }
 
 .button-regular:hover {
