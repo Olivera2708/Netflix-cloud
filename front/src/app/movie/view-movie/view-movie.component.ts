@@ -56,6 +56,11 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
   genreList : any
   actorList : any
   directorList : any
+  ratings:any[] = []
+  alreadyRated = true
+  avgRating = 0;
+  suggestProc = 0;
+  mostLiked : string = "";
 
   likeOptions = ['Actors', "Effects", "Story", "Nothing"]
   ratingForm: FormGroup;
@@ -79,9 +84,51 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
       video.setAttribute('controlsList', 'nodownload');
     }
 
-    //Proveri da li je ovaj user vec ocenio ovaj film
+    this.checkAlreadyRated().then(result => {
+      this.alreadyRated = result;
+    });
+  }
 
-    //prikaz prosecnih ocena
+  calculateRatings(){
+    if (this.ratings.length != 0) {
+      let num = 0;
+      let mostLikes: any = {};
+      for (const rating of this.ratings) {
+        num += 1;
+        this.avgRating += Number(rating.rating);
+        if (rating.suggest === 'yes') {
+          this.suggestProc += 1;
+        }
+        if (!mostLikes[rating.likes]) {
+          mostLikes[rating.likes] = 0;
+        }
+        mostLikes[rating.likes] += 1;
+      }
+      this.avgRating /= num;
+      this.suggestProc = this.suggestProc/num * 100;
+
+      let maxLikes = 0;
+      for (const key in mostLikes) {
+        if (mostLikes.hasOwnProperty(key)) {
+          const count = mostLikes[key];
+          if (count > maxLikes) {
+            maxLikes = count;
+            this.mostLiked = key;
+          }
+        }
+      }
+    }
+  }
+
+  checkAlreadyRated(): Promise<boolean> {
+    return this.authenticationService.getCurrentUserEmail().then(email => {
+      for (const rating of this.ratings) {
+        if (rating.id === email) {
+          return true;
+        }
+      }
+      return false;
+    });
   }
 
   ngAfterViewInit(): void {
@@ -121,6 +168,9 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
         this.genres = data.genres.join(", ")
         this.actors = data.actors.join(", ")
         this.directors = data.directors.join(", ")
+        this.ratings = data.ratings
+
+        this.calculateRatings()
       }
     })
   }
@@ -158,11 +208,27 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
 
   submitRating() {
     if (this.ratingForm.valid) {
-      console.log('Rating:', this.ratingForm.value.rating);
-      console.log('Suggest:', this.ratingForm.value.suggest);
-      console.log('Likes:', this.ratingForm.value.likes);
-    } else {
-      //request da se upise u bazu
+      this.authenticationService.getCurrentUserEmail().then(email => {
+        let data = {
+          "id": email,
+          "movie_id": this.id,
+          "rating": ''+this.ratingForm.value.rating,
+          "suggest": ''+this.ratingForm.value.suggest,
+          "likes": ''+this.ratingForm.value.likes,
+          "genres": this.genres
+        }
+
+        this.movieService.addRating(data).subscribe({
+          next: (val) => {
+            if (val["message"] == "success") {
+              this._snackBar.open("Rating submitted!", "Close")
+              this.alreadyRated = true;
+            }
+            else
+              this._snackBar.open("There was an error!", "Close")
+          }
+        })
+      });
     }
   }
 }

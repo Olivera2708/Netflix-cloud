@@ -22,7 +22,11 @@ def add_rating(event, context):
         if not event_body:
             return {
                 'statusCode': 400,
-                'headers': cors_headers,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,DELETE'
+                },
                 'body': json.dumps({'error': 'Invalid input: body is required'})
             }
         
@@ -37,7 +41,7 @@ def add_rating(event, context):
             return {
                 'statusCode': 400,
                 'headers': cors_headers,
-                'body': json.dumps({'error': 'Missing required fields'})
+                'body': json.dumps({'error': 'Missing required fields', "body": event_body})
             }
 
         # Update movie table

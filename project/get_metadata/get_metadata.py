@@ -33,7 +33,8 @@ def get_metadata(event, context):
             'genres': item.get('genres'),
             'actors': item.get('actors'),
             'year': item.get('year'),
-            'directors': item.get('directors')
+            'directors': item.get('directors'),
+            'ratings': item.get("ratings", [])
         }
 
         if not item:

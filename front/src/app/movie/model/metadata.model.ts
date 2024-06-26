@@ -5,4 +5,5 @@ export interface Metadata {
   actors: string[];
   directors: string[];
   year: string;
+  ratings: any[];
 }

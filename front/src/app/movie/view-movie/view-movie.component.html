@@ -54,10 +54,16 @@
           </div>
         </div>
         <!--      <p class="value">{{ directors }}</p>-->
+        <div class="rating-view">
+          <p class="subtitle">Rating</p>
+          <p class="value">Average rating for this movie is {{avgRating}}/5</p>
+          <p class="value">{{suggestProc}}% of the users will suggest this movie</p>
+          <p class="value">Best thing about this movie is {{mostLiked}}</p>
+        </div>
       </div>
     </div>
   </div>
-  <form [formGroup]="ratingForm" (ngSubmit)="submitRating()" class="movie-rating-container">
+  <form [formGroup]="ratingForm" (ngSubmit)="submitRating()" class="movie-rating-container" *ngIf="!alreadyRated && role!=='Admin'">
     <h3>Rate the Movie</h3>
     <div class="suggest-section">
 
@@ -87,7 +93,7 @@
         <p  >Would you suggest it?</p>
         <mat-radio-group formControlName="suggest" class="radio-group">
           <mat-radio-button value="yes">I will suggest it</mat-radio-button>
-          <mat-radio-button value="no">I won't suggest it</mat-radio-button>
+          <mat-radio-button value="no">I would not suggest it</mat-radio-button>
         </mat-radio-group>
         <mat-error
           *ngIf="ratingForm.get('suggest')?.invalid && (ratingForm.get('suggest')?.touched || ratingForm.get('suggest')?.dirty)">
