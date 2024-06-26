@@ -112,8 +112,36 @@ class Team3Stack(Stack):
                 name="id",
                 type=dynamodb.AttributeType.STRING
             ),
-            read_capacity=1,
-            write_capacity=1,
+            stream=dynamodb.StreamViewType.NEW_AND_OLD_IMAGES
+        )
+
+        genres_table = dynamodb.Table(
+            self, "genres-table-team3",
+            table_name="genres-table-team3",
+            partition_key=dynamodb.Attribute(
+                name="id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            stream=dynamodb.StreamViewType.NEW_AND_OLD_IMAGES
+        )
+
+        actors_table = dynamodb.Table(
+            self, "actors-table-team3",
+            table_name="actors-table-team3",
+            partition_key=dynamodb.Attribute(
+                name="id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            stream=dynamodb.StreamViewType.NEW_AND_OLD_IMAGES
+        )
+
+        directors_table = dynamodb.Table(
+            self, "directors-table-team3",
+            table_name="directors-table-team3",
+            partition_key=dynamodb.Attribute(
+                name="id",
+                type=dynamodb.AttributeType.STRING
+            ),
             stream=dynamodb.StreamViewType.NEW_AND_OLD_IMAGES
         )
 
@@ -124,8 +152,6 @@ class Team3Stack(Stack):
                 name="id",
                 type=dynamodb.AttributeType.STRING
             ),
-            read_capacity=1,
-            write_capacity=1,
             stream=dynamodb.StreamViewType.NEW_AND_OLD_IMAGES
         )
 
@@ -136,29 +162,47 @@ class Team3Stack(Stack):
                 name="title",
                 type=dynamodb.AttributeType.STRING
             ),
-            sort_key=dynamodb.Attribute(
-                name="year",
-                type=dynamodb.AttributeType.STRING
-            ),
-            projection_type=dynamodb.ProjectionType.ALL,
-            read_capacity=1,
-            write_capacity=1
+            projection_type=dynamodb.ProjectionType.ALL
         )
 
-        #index by genres
+        #index by description
         movies_table.add_global_secondary_index(
             index_name="DescriptionIndex",
             partition_key=dynamodb.Attribute(
                 name="description",
                 type=dynamodb.AttributeType.STRING
             ),
-            sort_key=dynamodb.Attribute(
-                name="title",
+            projection_type=dynamodb.ProjectionType.ALL
+        )
+
+        #index by genres
+        genres_table.add_global_secondary_index(
+            index_name="GenreIndex",
+            partition_key=dynamodb.Attribute(
+                name="genre",
                 type=dynamodb.AttributeType.STRING
             ),
-            projection_type=dynamodb.ProjectionType.ALL,
-            read_capacity=1,
-            write_capacity=1
+            projection_type=dynamodb.ProjectionType.ALL
+        )
+
+        #index by actors
+        actors_table.add_global_secondary_index(
+            index_name="ActorIndex",
+            partition_key=dynamodb.Attribute(
+                name="actor",
+                type=dynamodb.AttributeType.STRING
+            ),
+            projection_type=dynamodb.ProjectionType.ALL
+        )
+
+        #index by directors
+        directors_table.add_global_secondary_index(
+            index_name="DirectorIndex",
+            partition_key=dynamodb.Attribute(
+                name="director",
+                type=dynamodb.AttributeType.STRING
+            ),
+            projection_type=dynamodb.ProjectionType.ALL
         )
 
         api = apigateway.RestApi(
