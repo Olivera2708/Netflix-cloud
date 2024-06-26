@@ -175,7 +175,7 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
           "rating": this.ratingForm.value.rating,
           "suggest": this.ratingForm.value.suggest,
           "likes": this.ratingForm.value.likes,
-          "genres": this.genres
+          "genres": this.genreList
         }
 
         this.movieService.addRating(data).subscribe({
