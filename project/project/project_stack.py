@@ -612,7 +612,7 @@ class Team3Stack(Stack):
                 "USER_TABLE": feed_table.table_name
             }
         )
-
+        
 
         dynamo_event_source = lambda_event_sources.DynamoEventSource(
             movies_table,
@@ -621,7 +621,25 @@ class Team3Stack(Stack):
         )
 
         add_feed_function.add_event_source(dynamo_event_source)
-        
+
+        update_feed_function = create_lambda_function(
+            "update_feed",
+            "update_feed.update_feed",
+            "update_feed",
+            "POST",
+            [util_layer],
+            environment={
+                "USER_TABLE": feed_table.table_name
+            }
+        )
+
+        user_dynamo_event_source = lambda_event_sources.DynamoEventSource(
+            feed_table,
+            starting_position=_lambda.StartingPosition.LATEST,
+            batch_size=1
+        )
+
+        update_feed_function.add_event_source(user_dynamo_event_source)
 
         #endpoints
         upload_resource = api.root.add_resource("upload")
