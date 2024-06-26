@@ -117,14 +117,15 @@ class Team3Stack(Stack):
         )
 
         feed_table = dynamodb.Table(
-            self, "user-table-team3",
-            table_name="user-table-team3",
+            self, "user-info-table-team3",
+            table_name="user-info-table-team3",
             partition_key=dynamodb.Attribute(
                 name="id",
                 type=dynamodb.AttributeType.STRING
             ),
             read_capacity=1,
-            write_capacity=1
+            write_capacity=1,
+            stream=dynamodb.StreamViewType.NEW_AND_OLD_IMAGES
         )
 
         #index by title
@@ -378,6 +379,23 @@ class Team3Stack(Stack):
                 "BUCKET": movies_bucket.bucket_name
             }
         )
+
+        add_feed_function = create_lambda_function(
+            "add_feed",
+            "add_feed.add_feed",
+            "add_feed",
+            "POST",
+            [util_layer]
+        )
+
+        # feed_table.grant_read_write_data(add_feed_function)
+
+        event_source = lambda_event_sources.DynamoEventSource(
+            feed_table,
+            starting_position=_lambda.StartingPosition.LATEST,
+            batch_size=1
+        )
+        add_feed_function.add_event_source(event_source)
 
         #sqs
         dead_letter_queue = _sqs.Queue(self, "Team3UploadDeadLetterQueue", queue_name="upload-dead-queue-team3")
