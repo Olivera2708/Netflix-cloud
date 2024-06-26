@@ -2,11 +2,20 @@ import json
 import os
 import boto3
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError
+from boto3.dynamodb.conditions import Key
 
 s3_client = boto3.client('s3')
-dynamo_client = boto3.client('dynamodb')
-table = os.environ['TABLE']
 bucket = os.environ['BUCKET']
+movies_table_name = os.environ['MOVIES_TABLE']
+genres_table_name = os.environ['GENRES_TABLE']
+actors_table_name = os.environ['ACTORS_TABLE']
+directors_table_name = os.environ['DIRECTORS_TABLE']
+
+dynamodb = boto3.resource('dynamodb')
+movies_table = dynamodb.Table(movies_table_name)
+genres_table = dynamodb.Table(genres_table_name)
+actors_table = dynamodb.Table(actors_table_name)
+directors_table = dynamodb.Table(directors_table_name)
 
 def delete_data(event, context):
     try:
@@ -23,8 +32,36 @@ def delete_data(event, context):
                 }
             }
         
-        dynamo_key = {'id': {'S': object_key}}
-        dynamo_client.delete_item(TableName=table, Key=dynamo_key)
+        movies_table.delete_item(
+            Key={'id': object_key}
+        )
+
+        response = genres_table.query(
+            IndexName='MovieIndex',
+            KeyConditionExpression=Key('movie_id').eq(object_key)
+        )
+        for item in response['Items']:
+            genres_table.delete_item(
+                Key={'id': item['id']}
+            )
+
+        response = actors_table.query(
+            IndexName='MovieIndex',
+            KeyConditionExpression=Key('movie_id').eq(object_key)
+        )
+        for item in response['Items']:
+            actors_table.delete_item(
+                Key={'id': item['id']}
+            )
+
+        response = directors_table.query(
+            IndexName='MovieIndex',
+            KeyConditionExpression=Key('movie_id').eq(object_key)
+        )
+        for item in response['Items']:
+            directors_table.delete_item(
+                Key={'id': item['id']}
+            )
 
         s3_objects = s3_client.list_objects_v2(Bucket=bucket, Prefix=object_key)
         if 'Contents' in s3_objects:

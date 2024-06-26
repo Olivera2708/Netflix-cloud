@@ -38,7 +38,7 @@ def update_subscription_score(new_items, old_items, film_items):
     return 10 if new_item in film_items else 0
 
 
-def upload_feed(event, context):
+def update_feed(event, context):
     for record in event['Records']:
         if record['eventName'] == 'MODIFY':
             new_image = record['dynamodb']['NewImage']

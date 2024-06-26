@@ -14,15 +14,15 @@ from constructs import Construct
 from aws_cdk.aws_lambda_python_alpha import PythonLayerVersion
 import aws_cdk.aws_lambda_event_sources as lambda_event_sources
 
-class Team3Stack(Stack):
+class Team3ProjectStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         user_pool = cognito.UserPool(
             self,
-            id = "UserPoolTeam3",
-            user_pool_name="UserPoolTeam3",
+            id = "user-pool-team-3",
+            user_pool_name="user-pool-team-3",
             self_sign_up_enabled=True,
             sign_in_aliases=cognito.SignInAliases(
                 username=True,
@@ -53,13 +53,13 @@ class Team3Stack(Stack):
             }
         )
 
-        authorizer = apigateway.CognitoUserPoolsAuthorizer(self, "Authorizer",
-            cognito_user_pools=[user_pool]
-        )
+        # authorizer = apigateway.CognitoUserPoolsAuthorizer(self, "authorizer",
+        #     cognito_user_pools=[user_pool]
+        # )
 
 
         user_pool_client = user_pool.add_client(
-            "UserPoolClient",
+            "user-pool-client",
             generate_secret=False,
             auth_flows=cognito.AuthFlow(
                 admin_user_password=True,
@@ -77,7 +77,7 @@ class Team3Stack(Stack):
         )
 
         user_pool.add_domain(
-            "CognitoDomain",
+            "cognito-domain-team-3",
             cognito_domain=cognito.CognitoDomainOptions(
                 domain_prefix="moviefy"
             )
@@ -85,7 +85,7 @@ class Team3Stack(Stack):
 
         admin_group = cognito.CfnUserPoolGroup(
             self,
-            id="AdminGroup",
+            id="admin-group",
             user_pool_id=user_pool.user_pool_id,
             group_name="Admin",
             description="Administrators group"
@@ -93,7 +93,7 @@ class Team3Stack(Stack):
 
         regular_user_group = cognito.CfnUserPoolGroup(
             self,
-            id="RegularUserGroup",
+            id="regular-user-group",
             user_pool_id=user_pool.user_pool_id,
             group_name="RegularUser",
             description="Regular user group"
@@ -101,31 +101,57 @@ class Team3Stack(Stack):
 
         movies_bucket = s3.Bucket(
             self,
-            id="movies-team3",
-            bucket_name="movies-team3"
+            id="movies-team-3",
+            bucket_name="movies-team-3"
             )
 
         movies_table = dynamodb.Table(
-            self, "movies-table-team3",
-            table_name="movies-table-team3",
+            self, "movies-table-team-3",
+            table_name="movies-table-team-3",
             partition_key=dynamodb.Attribute(
                 name="id",
                 type=dynamodb.AttributeType.STRING
             ),
-            read_capacity=1,
-            write_capacity=1,
+            stream=dynamodb.StreamViewType.NEW_AND_OLD_IMAGES
+        )
+
+        genres_table = dynamodb.Table(
+            self, "genres-table-team-3",
+            table_name="genres-table-team-3",
+            partition_key=dynamodb.Attribute(
+                name="id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            stream=dynamodb.StreamViewType.NEW_AND_OLD_IMAGES
+        )
+
+        actors_table = dynamodb.Table(
+            self, "actors-table-team-3",
+            table_name="actors-table-team-3",
+            partition_key=dynamodb.Attribute(
+                name="id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            stream=dynamodb.StreamViewType.NEW_AND_OLD_IMAGES
+        )
+
+        directors_table = dynamodb.Table(
+            self, "directors-table-team-3",
+            table_name="directors-table-team-3",
+            partition_key=dynamodb.Attribute(
+                name="id",
+                type=dynamodb.AttributeType.STRING
+            ),
             stream=dynamodb.StreamViewType.NEW_AND_OLD_IMAGES
         )
 
         feed_table = dynamodb.Table(
-            self, "user-table-team3",
-            table_name="user-table-team3",
+            self, "user-table-team-3",
+            table_name="user-table-team-3",
             partition_key=dynamodb.Attribute(
                 name="id",
                 type=dynamodb.AttributeType.STRING
             ),
-            read_capacity=1,
-            write_capacity=1,
             stream=dynamodb.StreamViewType.NEW_AND_OLD_IMAGES
         )
 
@@ -136,34 +162,76 @@ class Team3Stack(Stack):
                 name="title",
                 type=dynamodb.AttributeType.STRING
             ),
-            sort_key=dynamodb.Attribute(
-                name="year",
-                type=dynamodb.AttributeType.STRING
-            ),
-            projection_type=dynamodb.ProjectionType.ALL,
-            read_capacity=1,
-            write_capacity=1
+            projection_type=dynamodb.ProjectionType.ALL
         )
 
-        #index by genres
+        #index by description
         movies_table.add_global_secondary_index(
             index_name="DescriptionIndex",
             partition_key=dynamodb.Attribute(
                 name="description",
                 type=dynamodb.AttributeType.STRING
             ),
-            sort_key=dynamodb.Attribute(
-                name="title",
+            projection_type=dynamodb.ProjectionType.ALL
+        )
+
+        #index by genres
+        genres_table.add_global_secondary_index(
+            index_name="GenreIndex",
+            partition_key=dynamodb.Attribute(
+                name="genre",
                 type=dynamodb.AttributeType.STRING
             ),
-            projection_type=dynamodb.ProjectionType.ALL,
-            read_capacity=1,
-            write_capacity=1
+            projection_type=dynamodb.ProjectionType.ALL
+        )
+        genres_table.add_global_secondary_index(
+            index_name="MovieIndex",
+            partition_key=dynamodb.Attribute(
+                name="movie_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            projection_type=dynamodb.ProjectionType.ALL
+        )
+
+        #index by actors
+        actors_table.add_global_secondary_index(
+            index_name="ActorIndex",
+            partition_key=dynamodb.Attribute(
+                name="actor",
+                type=dynamodb.AttributeType.STRING
+            ),
+            projection_type=dynamodb.ProjectionType.ALL
+        )
+        actors_table.add_global_secondary_index(
+            index_name="MovieIndex",
+            partition_key=dynamodb.Attribute(
+                name="movie_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            projection_type=dynamodb.ProjectionType.ALL
+        )
+
+        #index by directors
+        directors_table.add_global_secondary_index(
+            index_name="DirectorIndex",
+            partition_key=dynamodb.Attribute(
+                name="director",
+                type=dynamodb.AttributeType.STRING
+            ),
+            projection_type=dynamodb.ProjectionType.ALL
+        )
+        directors_table.add_global_secondary_index(
+            index_name="MovieIndex",
+            partition_key=dynamodb.Attribute(
+                name="movie_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            projection_type=dynamodb.ProjectionType.ALL
         )
 
         api = apigateway.RestApi(
-            self, "APIGatewayTeam3",
-            rest_api_name="API Gateway Team 3",
+            self, "api-gateway-team-3",
+            rest_api_name="Team 3",
             endpoint_types=[apigateway.EndpointType.REGIONAL],
             default_cors_preflight_options=apigateway.CorsOptions(
                 allow_origins=apigateway.Cors.ALL_ORIGINS,
@@ -174,7 +242,7 @@ class Team3Stack(Stack):
 
         # IAM Role for Lambda Functions
         lambda_role = iam.Role(
-            self, "LambdaRole-team3",
+            self, "lambda-role-team-3",
             assumed_by=iam.ServicePrincipal("lambda.amazonaws.com")
         )
         lambda_role.add_managed_policy(
@@ -262,7 +330,10 @@ class Team3Stack(Stack):
             [util_layer],
             environment={
                 "BUCKET": movies_bucket.bucket_name,
-                "TABLE": movies_table.table_name
+                "MOVIES_TABLE": movies_table.table_name,
+                "ACTORS_TABLE": actors_table.table_name,
+                "DIRECTORS_TABLE": directors_table.table_name,
+                "GENRES_TABLE": genres_table.table_name
             }
         )
 
@@ -331,7 +402,10 @@ class Team3Stack(Stack):
             [util_layer],
             environment={
                 "BUCKET": movies_bucket.bucket_name,
-                "TABLE": movies_table.table_name
+                "MOVIES_TABLE": movies_table.table_name,
+                "ACTORS_TABLE": actors_table.table_name,
+                "DIRECTORS_TABLE": directors_table.table_name,
+                "GENRES_TABLE": genres_table.table_name
             }
         )
 
@@ -353,7 +427,10 @@ class Team3Stack(Stack):
             "PUT",
             [util_layer],
             environment={
-                "TABLE": movies_table.table_name
+                "MOVIES_TABLE": movies_table.table_name,
+                "ACTORS_TABLE": actors_table.table_name,
+                "DIRECTORS_TABLE": directors_table.table_name,
+                "GENRES_TABLE": genres_table.table_name
             }
         )
 
@@ -375,7 +452,10 @@ class Team3Stack(Stack):
             "GET",
             [util_layer],
             environment={
-                "TABLE": movies_table.table_name
+                "MOVIES_TABLE": movies_table.table_name,
+                "ACTORS_TABLE": actors_table.table_name,
+                "DIRECTORS_TABLE": directors_table.table_name,
+                "GENRES_TABLE": genres_table.table_name
             }
         )
 
@@ -450,13 +530,13 @@ class Team3Stack(Stack):
             }
         )
 
-        #sqs
-        dead_letter_queue = _sqs.Queue(self, "Team3UploadDeadLetterQueue", queue_name="upload-dead-queue-team3")
+        # #sqs
+        dead_letter_queue = _sqs.Queue(self, "upload-dead-queue-team3", queue_name="upload-dead-queue-team-3")
 
         upload_queue = _sqs.Queue(
-            self, "UploadQueueTeam3",
+            self, "upload-queue-team-3",
             visibility_timeout=Duration.minutes(5),
-            queue_name="upload-queue-team3",
+            queue_name="upload-queue-team-3",
             dead_letter_queue=_sqs.DeadLetterQueue(max_receive_count=5, queue=dead_letter_queue)
         )
 
@@ -465,7 +545,7 @@ class Team3Stack(Stack):
 
         # Step Function Tasks
         upload_movie_task = _sfn_tasks.LambdaInvoke(
-            self, "UploadMovie",
+            self, "upload-movie-team-3",
             lambda_function=upload_movie_function,
             output_path='$.Payload'
         ).add_retry(
@@ -475,7 +555,7 @@ class Team3Stack(Stack):
         )
 
         send_to_queue_task = _sfn_tasks.SqsSendMessage(
-            self, "SendToQueue",
+            self, "send-to-queue-team-3",
             queue=upload_queue,
             message_body=_sfn.TaskInput.from_json_path_at("$")
         ).add_retry(
@@ -576,14 +656,14 @@ class Team3Stack(Stack):
         
         # Step Function
         state_machine = _sfn.StateMachine(
-            self, "TranscodingAndUploading",
+            self, "transcoding-team-3",
             definition=definition,
             comment="Transcoding and uploading new movies",
             timeout=Duration.minutes(5)
         )
 
         state_machine2 = _sfn.StateMachine(
-            self, "AddingNewFeed",
+            self, "adding-new-feed-team-3",
             definition=definition2,
             comment="Adding new movie to feed",
             timeout=Duration.minutes(5)
@@ -609,18 +689,19 @@ class Team3Stack(Stack):
             [util_layer],
             environment={
                 "STATE_MACHINE_ARN": state_machine2.state_machine_arn,
-                "USER_TABLE": feed_table.table_name
+                "USER_TABLE": feed_table.table_name,
+                "MOVIES_TABLE": movies_table.table_name,
+                "GENRES_TABLE": genres_table.table_name,
+                "ACTORS_TABLE": actors_table.table_name,
+                "DIRECTORS_TABLE": directors_table.table_name,
             }
         )
-        
 
         dynamo_event_source = lambda_event_sources.DynamoEventSource(
             movies_table,
             starting_position=_lambda.StartingPosition.LATEST,
             batch_size=1
         )
-
-        add_feed_function.add_event_source(dynamo_event_source)
 
         update_feed_function = create_lambda_function(
             "update_feed",
@@ -641,39 +722,41 @@ class Team3Stack(Stack):
 
         update_feed_function.add_event_source(user_dynamo_event_source)
 
+        add_feed_function.add_event_source(dynamo_event_source)
+
         #endpoints
         upload_resource = api.root.add_resource("upload")
         upload_integration = apigateway.LambdaIntegration(upload_function)
-        upload_resource.add_method("POST", upload_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
+        upload_resource.add_method("POST", upload_integration)
 
         feed_resource = api.root.add_resource("feed")
         upload_user_integration = apigateway.LambdaIntegration(upload_user_function)
         feed_resource.add_method("POST", upload_user_integration)
         edit_user_integration = apigateway.LambdaIntegration(update_user_function)
-        feed_resource.add_method("PUT", edit_user_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
+        feed_resource.add_method("PUT", edit_user_integration)
         downloaded_resource = feed_resource.add_resource('downloaded')
         add_downloaded_genres_integration = apigateway.LambdaIntegration(add_downloaded_genres_function)
-        downloaded_resource.add_method("POST", add_downloaded_genres_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
+        downloaded_resource.add_method("POST", add_downloaded_genres_integration)
 
         movie_resource = api.root.add_resource("movie")
         get_movie_url_integration = apigateway.LambdaIntegration(get_movie_url_function)
-        movie_resource.add_method("GET", get_movie_url_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
+        movie_resource.add_method("GET", get_movie_url_integration)
         delete_resource = movie_resource.add_resource('{id}')
         delete_data_integration = apigateway.LambdaIntegration(delete_data_function)
-        delete_resource.add_method("DELETE", delete_data_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
+        delete_resource.add_method("DELETE", delete_data_integration)
 
         search_resource = api.root.add_resource("search")
         search_movies_integration = apigateway.LambdaIntegration(search_movies_function)
-        search_resource.add_method("POST", search_movies_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
+        search_resource.add_method("POST", search_movies_integration)
         
         movie_metadata_resource = api.root.add_resource("metadata")
         movie_metadata_integration = apigateway.LambdaIntegration(get_metadata_function)
-        movie_metadata_resource.add_method("GET", movie_metadata_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
+        movie_metadata_resource.add_method("GET", movie_metadata_integration)
         edit_metadata_integration = apigateway.LambdaIntegration(edit_metadata_function)
-        movie_metadata_resource.add_method("PUT", edit_metadata_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
+        movie_metadata_resource.add_method("PUT", edit_metadata_integration)
 
         rating_resource = api.root.add_resource("rating")
         add_rating_integration = apigateway.LambdaIntegration(add_rating_function)
-        rating_resource.add_method("POST", add_rating_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
+        rating_resource.add_method("POST", add_rating_integration)
         get_rating_integration = apigateway.LambdaIntegration(get_rating_function)
-        rating_resource.add_method("GET", get_rating_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
+        rating_resource.add_method("GET", get_rating_integration)
