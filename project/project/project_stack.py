@@ -424,7 +424,10 @@ class Team3ProjectStack(Stack):
             "PUT",
             [util_layer],
             environment={
-                "TABLE": movies_table.table_name
+                "MOVIES_TABLE": movies_table.table_name,
+                "ACTORS_TABLE": actors_table.table_name,
+                "DIRECTORS_TABLE": directors_table.table_name,
+                "GENRES_TABLE": genres_table.table_name
             }
         )
 
