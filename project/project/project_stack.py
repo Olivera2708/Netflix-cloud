@@ -413,10 +413,13 @@ class Team3ProjectStack(Stack):
             "search_movies",
             "search_movies.search_movies",
             "search_movies",
-            "POST",
+            "GET",
             [util_layer],
             environment={
-                "TABLE": movies_table.table_name
+                "MOVIES_TABLE": movies_table.table_name,
+                "ACTORS_TABLE": actors_table.table_name,
+                "DIRECTORS_TABLE": directors_table.table_name,
+                "GENRES_TABLE": genres_table.table_name
             }
         )
 
@@ -724,7 +727,7 @@ class Team3ProjectStack(Stack):
 
         search_resource = api.root.add_resource("search")
         search_movies_integration = apigateway.LambdaIntegration(search_movies_function)
-        search_resource.add_method("POST", search_movies_integration)
+        search_resource.add_method("GET", search_movies_integration)
         
         movie_metadata_resource = api.root.add_resource("metadata")
         movie_metadata_integration = apigateway.LambdaIntegration(get_metadata_function)
