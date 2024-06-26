@@ -74,6 +74,8 @@ def search_movies(event, context):
         for item in items:
             if 'file_size' in item:
                 del item['file_size']
+            if 'ratings' in item:
+                del item['ratings']
 
         return {
             'statusCode': 200,

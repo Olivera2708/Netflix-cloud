@@ -276,6 +276,17 @@ class Team3Stack(Stack):
             }
         )
 
+        get_rating_function = create_lambda_function(
+            "get_rating",
+            "get_rating.get_rating",
+            "get_rating",
+            "GET",
+            [util_layer],
+            environment={
+                "TABLE": movies_table.table_name
+            }
+        )
+
         add_rating_function = create_lambda_function(
             "add_rating",
             "add_rating.add_rating",
@@ -519,4 +530,5 @@ class Team3Stack(Stack):
         rating_resource = api.root.add_resource("rating")
         add_rating_integration = apigateway.LambdaIntegration(add_rating_function)
         rating_resource.add_method("POST", add_rating_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
-
+        get_rating_integration = apigateway.LambdaIntegration(get_rating_function)
+        rating_resource.add_method("GET", get_rating_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
