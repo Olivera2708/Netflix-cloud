@@ -60,8 +60,8 @@ def get_rating(event, context):
             mostLiked = max(likes, key=likes.get)
 
         result = {
-            'avgRating': avgRating,
-            'suggestProc': suggestProc,
+            'avgRating': round(avgRating, 2),
+            'suggestProc': round(suggestProc, 0),
             'mostLiked': mostLiked
         }
         result_str = {key: str(value) for key, value in result.items() if key != 'alreadyRated'}

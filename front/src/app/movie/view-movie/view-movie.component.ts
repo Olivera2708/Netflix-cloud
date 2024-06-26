@@ -78,11 +78,6 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
       this.id = params.get('id') || '';
       this.setInformation();
     });
-
-    let video = document.getElementById('video');
-    if (video != null && this.role === 'Admin') {
-      video.setAttribute('controlsList', 'nodownload');
-    }
   }
 
   ngAfterViewInit(): void {
@@ -128,8 +123,8 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
       this.movieService.getRating(email, this.id).subscribe({
         next: (ratings) => {
           this.alreadyRated = ratings.alreadyRated;
-          this.avgRating = ratings.avgRating.toFixed(2);
-          this.suggestProc = ratings.suggestProc.toFixed(0);
+          this.avgRating = ratings.avgRating;
+          this.suggestProc = ratings.suggestProc;
           this.mostLiked = ratings.mostLiked;
         }
       });
@@ -191,5 +186,10 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
         })
       });
     }
+  }
+
+  downloadMovie(){
+    //da preuzme
+    //da doda u one downloaded genres
   }
 }
