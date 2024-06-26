@@ -515,7 +515,7 @@ class Team3Stack(Stack):
         )
 
         calculate_rating_task = _sfn_tasks.LambdaInvoke(
-            self, "CalculatePrice",
+            self, "CalculateRating",
             lambda_function=calculate_rating_function,
             output_path="$.Payload"
         ).add_retry(
