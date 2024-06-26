@@ -343,6 +343,17 @@ class Team3Stack(Stack):
             }
         )
 
+        get_subscriptions_function = create_lambda_function(
+            "get_subscriptions",
+            "get_subscriptions.get_subscriptions",
+            "get_subscriptions",
+            "GET",
+            [util_layer],
+            environment={
+                "TABLE": feed_table.table_name
+            }
+        )
+
         transcode_720p_function = create_lambda_function(
             "transcode_720p_function",
             "transcoding_uploading.transcoding_uploading",
@@ -486,6 +497,10 @@ class Team3Stack(Stack):
         feed_resource.add_method("POST", upload_user_integration)
         edit_user_integration = apigateway.LambdaIntegration(update_user_function)
         feed_resource.add_method("PUT", edit_user_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
+
+        subscriptions_resource = api.root.add_resource("subscriptions")
+        get_subscriptions_integration = apigateway.LambdaIntegration(get_subscriptions_function)
+        subscriptions_resource.add_method("GET", get_subscriptions_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
 
         movie_resource = api.root.add_resource("movie")
         get_movie_url_integration = apigateway.LambdaIntegration(get_movie_url_function)
