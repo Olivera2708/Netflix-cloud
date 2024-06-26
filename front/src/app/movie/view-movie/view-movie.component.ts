@@ -83,52 +83,6 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
     if (video != null && this.role === 'Admin') {
       video.setAttribute('controlsList', 'nodownload');
     }
-
-    this.checkAlreadyRated().then(result => {
-      this.alreadyRated = result;
-    });
-  }
-
-  calculateRatings(){
-    if (this.ratings.length != 0) {
-      let num = 0;
-      let mostLikes: any = {};
-      for (const rating of this.ratings) {
-        num += 1;
-        this.avgRating += Number(rating.rating);
-        if (rating.suggest === 'yes') {
-          this.suggestProc += 1;
-        }
-        if (!mostLikes[rating.likes]) {
-          mostLikes[rating.likes] = 0;
-        }
-        mostLikes[rating.likes] += 1;
-      }
-      this.avgRating /= num;
-      this.suggestProc = this.suggestProc/num * 100;
-
-      let maxLikes = 0;
-      for (const key in mostLikes) {
-        if (mostLikes.hasOwnProperty(key)) {
-          const count = mostLikes[key];
-          if (count > maxLikes) {
-            maxLikes = count;
-            this.mostLiked = key;
-          }
-        }
-      }
-    }
-  }
-
-  checkAlreadyRated(): Promise<boolean> {
-    return this.authenticationService.getCurrentUserEmail().then(email => {
-      for (const rating of this.ratings) {
-        if (rating.id === email) {
-          return true;
-        }
-      }
-      return false;
-    });
   }
 
   ngAfterViewInit(): void {
@@ -168,11 +122,18 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
         this.genres = data.genres.join(", ")
         this.actors = data.actors.join(", ")
         this.directors = data.directors.join(", ")
-        this.ratings = data.ratings
-
-        this.calculateRatings()
       }
     })
+    this.authenticationService.getCurrentUserEmail().then(email => {
+      this.movieService.getRating(email, this.id).subscribe({
+        next: (ratings) => {
+          this.alreadyRated = ratings.alreadyRated;
+          this.avgRating = ratings.avgRating.toFixed(2);
+          this.suggestProc = ratings.suggestProc.toFixed(0);
+          this.mostLiked = ratings.mostLiked;
+        }
+      });
+    });
   }
 
   getName(resolution : string) : string {
@@ -197,7 +158,7 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
       }
       this.movieService.editUser(body).subscribe({
         next: (data) => {
-          console.log(data);
+          // console.log(data);
         }
       });
 
@@ -212,9 +173,9 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
         let data = {
           "id": email,
           "movie_id": this.id,
-          "rating": ''+this.ratingForm.value.rating,
-          "suggest": ''+this.ratingForm.value.suggest,
-          "likes": ''+this.ratingForm.value.likes,
+          "rating": this.ratingForm.value.rating,
+          "suggest": this.ratingForm.value.suggest,
+          "likes": this.ratingForm.value.likes,
           "genres": this.genres
         }
 

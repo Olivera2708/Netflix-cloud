@@ -41,7 +41,14 @@ def add_rating(event, context):
             return {
                 'statusCode': 400,
                 'headers': cors_headers,
-                'body': json.dumps({'error': 'Missing required fields', "body": event_body})
+                'body': json.dumps({'error': 'Missing required fields'})
+            }
+        
+        if numbered_rating < 1 or numbered_rating > 5 or suggest not in ["yes", "no"] or likes == "":
+            return {
+                'statusCode': 500,
+                'headers': cors_headers,
+                'body': json.dumps({'error': 'Values are not correct'})
             }
 
         # Update movie table
