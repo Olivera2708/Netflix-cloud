@@ -52,11 +52,11 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
   year: string = ""
   selectedResolution = 'original';
   videoURL = "";
-  role : string = '';
-  genreList : any
-  actorList : any
-  directorList : any
-  ratings:any[] = []
+  role: string = '';
+  genreList: any
+  actorList: any
+  directorList: any
+  ratings: any[] = []
   alreadyRated = true
   avgRating = 0;
   suggestProc = 0;
@@ -78,11 +78,6 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
       this.id = params.get('id') || '';
       this.setInformation();
     });
-
-    let video = document.getElementById('video');
-    if (video != null && this.role === 'Admin') {
-      video.setAttribute('controlsList', 'nodownload');
-    }
   }
 
   ngAfterViewInit(): void {
@@ -104,14 +99,13 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
     this.getVideo(`${this.id}/${this.getName(resolution)}.mp4`)
   }
 
-  setInformation(){
+  setInformation() {
     this.movieService.getMetadata(this.id).subscribe({
       next: (data) => {
-        if (data.title.includes("/")){
+        if (data.title.includes("/")) {
           this.title = data.title.split("/")[1]
           this.subtitle = data.title.split("/")[0]
-        }
-        else{
+        } else {
           this.title = data.title
         }
         this.description = data.description
@@ -128,20 +122,24 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
       this.movieService.getRating(email, this.id).subscribe({
         next: (ratings) => {
           this.alreadyRated = ratings.alreadyRated;
-          this.avgRating = ratings.avgRating.toFixed(2);
-          this.suggestProc = ratings.suggestProc.toFixed(0);
+          this.avgRating = ratings.avgRating;
+          this.suggestProc = ratings.suggestProc;
           this.mostLiked = ratings.mostLiked;
         }
       });
     });
   }
 
-  getName(resolution : string) : string {
-    switch (resolution){
-      case "360p": return "640_360"
-      case "480p": return "854_480"
-      case "720p": return "1280_720"
-      default: return "original"
+  getName(resolution: string): string {
+    switch (resolution) {
+      case "360p":
+        return "640_360"
+      case "480p":
+        return "854_480"
+      case "720p":
+        return "1280_720"
+      default:
+        return "original"
     }
   }
 
@@ -183,7 +181,7 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
           "rating": this.ratingForm.value.rating,
           "suggest": this.ratingForm.value.suggest,
           "likes": this.ratingForm.value.likes,
-          "genres": this.genres
+          "genres": this.genreList
         }
 
         this.movieService.addRating(data).subscribe({
@@ -191,12 +189,36 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
             if (val["message"] == "success") {
               this._snackBar.open("Rating submitted!", "Close")
               this.alreadyRated = true;
-            }
-            else
+            } else
               this._snackBar.open("There was an error!", "Close")
           }
         })
       });
     }
+  }
+
+  downloadMovie() {
+    const link = document.createElement('a');
+    link.style.display = 'none';
+    link.href = this.videoURL;
+    link.addEventListener('click', () => {
+      this.addToDownloadedGenres()
+    });
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  addToDownloadedGenres(){
+    this.authenticationService.getCurrentUserEmail().then(email => {
+      let data = {
+        "id": email,
+        "genres": this.genreList
+      }
+      this.movieService.addDownloadedGenre(data).subscribe({
+        next: (response) => {
+        }
+      })
+    });
   }
 }

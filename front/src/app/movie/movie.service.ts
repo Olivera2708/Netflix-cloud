@@ -61,4 +61,9 @@ export class MovieService {
     return this.httpClient.get<any>(environment.apiGateway + "rating?user_id=" + user_email + "&movie_id=" + movie_id,
       {'headers': {'Content-Type': 'application/json'}})
   }
+
+  addDownloadedGenre(data: any): Observable<any> {
+    return this.httpClient.post<any>(environment.apiGateway + "feed/downloaded", data,
+      {'headers': {'Content-Type': 'application/json'}})
+  }
 }
