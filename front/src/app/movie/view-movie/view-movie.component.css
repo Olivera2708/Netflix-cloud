@@ -1,5 +1,4 @@
 .main {
-  height: calc(100vh - 7rem);
   padding-top: 7rem;
   display: flex;
   justify-content: center;
@@ -10,7 +9,6 @@
   padding: 0 2rem 0 2rem;
   display: flex;
   width: 95%;
-  height: 100vh;
 }
 
 .left {
@@ -102,6 +100,7 @@ h3 {
 }
 
 .subscribe{
+  margin-left: 0.5rem;
   color: darkgrey;
 
 }
@@ -131,4 +130,80 @@ h3 {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-right: 0.5rem;
   margin-bottom: 0.7rem;
+}
+
+
+
+.movie-rating-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-left:10rem;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.movie-rating-container h3 {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.rating-section,
+.suggest-section,
+.likes-section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.rating-section mat-form-field,
+.suggest-section .radio-group,
+.likes-section mat-form-field {
+  margin-right: 20px;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.rating-elements {
+  display: flex;
+  align-items: center;
+}
+
+.button-regular {
+  width: 8rem;
+  font-size: 1rem;
+  background-color: #42b1b6;
+  color: #ffffff;
+  border: none;
+  border-radius: 2rem;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  margin-left: 5rem;
+}
+
+.button-regular:hover {
+  background-color: #2f7f83;
+}
+
+.button-regular:disabled {
+  background-color: #153f41;
+  color: #9a9a9a;
+}
+
+.suggest-section p {
+  color: lightgrey;
+  margin : 0 0 0 2rem;
+  padding: 0;
+}
+
+mat-radio-group {
+  margin-left: 1rem;
+}
+
+.main-main {
+  overflow: hidden;
 }
