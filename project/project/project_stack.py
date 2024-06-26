@@ -184,6 +184,14 @@ class Team3ProjectStack(Stack):
             ),
             projection_type=dynamodb.ProjectionType.ALL
         )
+        genres_table.add_global_secondary_index(
+            index_name="MovieIndex",
+            partition_key=dynamodb.Attribute(
+                name="movie_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            projection_type=dynamodb.ProjectionType.ALL
+        )
 
         #index by actors
         actors_table.add_global_secondary_index(
@@ -194,12 +202,28 @@ class Team3ProjectStack(Stack):
             ),
             projection_type=dynamodb.ProjectionType.ALL
         )
+        actors_table.add_global_secondary_index(
+            index_name="MovieIndex",
+            partition_key=dynamodb.Attribute(
+                name="movie_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            projection_type=dynamodb.ProjectionType.ALL
+        )
 
         #index by directors
         directors_table.add_global_secondary_index(
             index_name="DirectorIndex",
             partition_key=dynamodb.Attribute(
                 name="director",
+                type=dynamodb.AttributeType.STRING
+            ),
+            projection_type=dynamodb.ProjectionType.ALL
+        )
+        directors_table.add_global_secondary_index(
+            index_name="MovieIndex",
+            partition_key=dynamodb.Attribute(
+                name="movie_id",
                 type=dynamodb.AttributeType.STRING
             ),
             projection_type=dynamodb.ProjectionType.ALL
@@ -306,7 +330,10 @@ class Team3ProjectStack(Stack):
             [util_layer],
             environment={
                 "BUCKET": movies_bucket.bucket_name,
-                "TABLE": movies_table.table_name
+                "MOVIES_TABLE": movies_table.table_name,
+                "ACTORS_TABLE": actors_table.table_name,
+                "DIRECTORS_TABLE": directors_table.table_name,
+                "GENRES_TABLE": genres_table.table_name
             }
         )
 
