@@ -8,6 +8,11 @@ import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
 import {ActivatedRoute} from "@angular/router";
 import {AuthenticationService} from "../../authentication/authentication.service";
 import {MatIcon} from "@angular/material/icon";
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
+import {MatError, MatFormField, MatLabel} from "@angular/material/form-field";
+import {MatInput} from "@angular/material/input";
+import {MatRadioButton, MatRadioGroup} from "@angular/material/radio";
+import {MatOption, MatSelect} from "@angular/material/select";
 
 
 @Component({
@@ -20,7 +25,17 @@ import {MatIcon} from "@angular/material/icon";
     MatMenuTrigger,
     NgIf,
     MatIcon,
-    NgForOf
+    NgForOf,
+    FormsModule,
+    MatFormField,
+    MatInput,
+    MatLabel,
+    MatRadioGroup,
+    MatSelect,
+    MatRadioButton,
+    MatOption,
+    ReactiveFormsModule,
+    MatError
   ],
   templateUrl: './view-movie.component.html',
   styleUrl: './view-movie.component.css'
@@ -41,9 +56,22 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
   genreList : any
   actorList : any
   directorList : any
+  ratings:any[] = []
+  alreadyRated = true
+  avgRating = 0;
+  suggestProc = 0;
+  mostLiked : string = "";
 
-  constructor(private authService: AuthenticationService, private route: ActivatedRoute, private movieService: MovieService, private _snackBar: MatSnackBar, private authenticationService: AuthenticationService){
-    this.role = authenticationService.getRole()
+  likeOptions = ['Actors', "Effects", "Story", "Nothing"]
+  ratingForm: FormGroup;
+
+  constructor(private fb: FormBuilder, private authService: AuthenticationService, private route: ActivatedRoute, private movieService: MovieService, private _snackBar: MatSnackBar, private authenticationService: AuthenticationService){
+    this.role = authenticationService.getRole();
+    this.ratingForm = this.fb.group({
+      rating: [null, [Validators.required, Validators.min(1), Validators.max(5)]],
+      suggest: [null, Validators.required],
+      likes: [null, Validators.required]
+    });
   }
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
@@ -55,6 +83,52 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
     if (video != null && this.role === 'Admin') {
       video.setAttribute('controlsList', 'nodownload');
     }
+
+    this.checkAlreadyRated().then(result => {
+      this.alreadyRated = result;
+    });
+  }
+
+  calculateRatings(){
+    if (this.ratings.length != 0) {
+      let num = 0;
+      let mostLikes: any = {};
+      for (const rating of this.ratings) {
+        num += 1;
+        this.avgRating += Number(rating.rating);
+        if (rating.suggest === 'yes') {
+          this.suggestProc += 1;
+        }
+        if (!mostLikes[rating.likes]) {
+          mostLikes[rating.likes] = 0;
+        }
+        mostLikes[rating.likes] += 1;
+      }
+      this.avgRating /= num;
+      this.suggestProc = this.suggestProc/num * 100;
+
+      let maxLikes = 0;
+      for (const key in mostLikes) {
+        if (mostLikes.hasOwnProperty(key)) {
+          const count = mostLikes[key];
+          if (count > maxLikes) {
+            maxLikes = count;
+            this.mostLiked = key;
+          }
+        }
+      }
+    }
+  }
+
+  checkAlreadyRated(): Promise<boolean> {
+    return this.authenticationService.getCurrentUserEmail().then(email => {
+      for (const rating of this.ratings) {
+        if (rating.id === email) {
+          return true;
+        }
+      }
+      return false;
+    });
   }
 
   ngAfterViewInit(): void {
@@ -94,6 +168,9 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
         this.genres = data.genres.join(", ")
         this.actors = data.actors.join(", ")
         this.directors = data.directors.join(", ")
+        this.ratings = data.ratings
+
+        this.calculateRatings()
       }
     })
   }
@@ -127,6 +204,31 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
     }).catch(error => {
       console.error('Error fetching user email:', error);
     });
+  }
 
+  submitRating() {
+    if (this.ratingForm.valid) {
+      this.authenticationService.getCurrentUserEmail().then(email => {
+        let data = {
+          "id": email,
+          "movie_id": this.id,
+          "rating": ''+this.ratingForm.value.rating,
+          "suggest": ''+this.ratingForm.value.suggest,
+          "likes": ''+this.ratingForm.value.likes,
+          "genres": this.genres
+        }
+
+        this.movieService.addRating(data).subscribe({
+          next: (val) => {
+            if (val["message"] == "success") {
+              this._snackBar.open("Rating submitted!", "Close")
+              this.alreadyRated = true;
+            }
+            else
+              this._snackBar.open("There was an error!", "Close")
+          }
+        })
+      });
+    }
   }
 }
