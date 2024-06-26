@@ -36,7 +36,8 @@ def edit_metadata(event, context):
 
         response = genres_table.query(
             IndexName='MovieIndex',
-            KeyConditionExpression=Key('movie_id').eq(item_id)
+            KeyConditionExpression=Key('movie_id').eq(item_id),
+            ProjectionExpression='id'
         )
         for item in response['Items']:
             genres_table.delete_item(
@@ -51,7 +52,8 @@ def edit_metadata(event, context):
 
         response = actors_table.query(
             IndexName='MovieIndex',
-            KeyConditionExpression=Key('movie_id').eq(item_id)
+            KeyConditionExpression=Key('movie_id').eq(item_id),
+            ProjectionExpression='id'
         )
         for item in response['Items']:
             actors_table.delete_item(
@@ -66,7 +68,8 @@ def edit_metadata(event, context):
 
         response = directors_table.query(
             IndexName='MovieIndex',
-            KeyConditionExpression=Key('movie_id').eq(item_id)
+            KeyConditionExpression=Key('movie_id').eq(item_id),
+            ProjectionExpression='id'
         )
         for item in response['Items']:
             directors_table.delete_item(
