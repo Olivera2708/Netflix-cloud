@@ -46,6 +46,10 @@ export class GetSubscriptionsComponent {
     this.role = authenticationService.getRole()
   }
 
+  ngOnInit(): void {
+    this.loadSubscriptions();
+  }
+
   addActor() {
     if (this.newActor.trim()) {
       this.actors.push(this.newActor.trim());
@@ -132,5 +136,32 @@ export class GetSubscriptionsComponent {
     this.snackBar.open(message, action, {
       duration: duration,
     });
+  }
+
+  private loadSubscriptions() {
+    this.authenticationService.getCurrentUserEmail().then(email => {
+      this.movieService.getSubscriptions(email).subscribe({
+        next: (response) => {
+          const subscriptions = this.convertStringToJson(response);
+
+          this.genres = subscriptions['genres'];
+          this.directors = subscriptions['directors']
+          this.actors = subscriptions['actors']
+        }
+      })
+    });
+  }
+
+  convertStringToJson(str: string) {
+    // Replace single quotes with double quotes
+    const jsonCompatibleString = str.replace(/'/g, '"');
+
+    // Parse the modified string as JSON
+    try {
+      return JSON.parse(jsonCompatibleString);
+      // this.jsonString = JSON.stringify(this.jsonObject, null, 2); // Prettify JSON string
+    } catch (error) {
+      console.error('Invalid JSON string', error);
+    }
   }
 }

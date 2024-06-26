@@ -386,7 +386,7 @@ class Team3Stack(Stack):
             "GET",
             [util_layer],
             environment={
-                "TABLE": feed_table.table_name
+                "TABLE_FEED": feed_table.table_name
             }
         )
 
