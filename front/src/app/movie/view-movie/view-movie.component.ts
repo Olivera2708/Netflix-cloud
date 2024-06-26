@@ -207,7 +207,7 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
     this.authenticationService.getCurrentUserEmail().then(email => {
       let data = {
         "id": email,
-        "genres": this.genres
+        "genres": this.genreList
       }
       this.movieService.addDownloadedGenre(data).subscribe({
         next: (response) => {
