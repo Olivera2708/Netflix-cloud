@@ -249,3 +249,7 @@ p {
   height: 3rem;
   width: 100%;
 }
+
+.subscriptions-container{
+  width: 30rem;
+}

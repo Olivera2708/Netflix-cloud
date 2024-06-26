@@ -55,7 +55,7 @@ def edit_user(event, context):
             value_to_update = payload['value']
             if update_command == "add" and value_to_update not in current_item[for_update][update_field]:
                 current_item[for_update][update_field].append(value_to_update)
-            elif update_command == "remove":
+            elif update_command == "remove" and value_to_update in current_item[for_update][update_field]:
                 current_item[for_update][update_field].remove(value_to_update)
             response = table_feed.put_item(Item=current_item)
             return {
