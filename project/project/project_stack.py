@@ -277,6 +277,18 @@ class Team3Stack(Stack):
             }
         )
 
+        add_rating_function = create_lambda_function(
+            "add_rating",
+            "add_rating.add_rating",
+            "add_rating",
+            "POST",
+            [util_layer],
+            environment={
+                "TABLE_MOVIES": movies_table.table_name,
+                "TABLE_FEED": feed_table.table_name
+            }
+        )
+
         update_user_function = create_lambda_function(
             "edit_user",
             "edit_user.edit_user",
@@ -521,4 +533,8 @@ class Team3Stack(Stack):
         movie_metadata_resource.add_method("GET", movie_metadata_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
         edit_metadata_integration = apigateway.LambdaIntegration(edit_metadata_function)
         movie_metadata_resource.add_method("PUT", edit_metadata_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
+
+        rating_resource = api.root.add_resource("rating")
+        add_rating_integration = apigateway.LambdaIntegration(add_rating_function)
+        rating_resource.add_method("POST", add_rating_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
 
