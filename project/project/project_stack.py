@@ -113,7 +113,8 @@ class Team3Stack(Stack):
                 type=dynamodb.AttributeType.STRING
             ),
             read_capacity=1,
-            write_capacity=1
+            write_capacity=1,
+            stream=dynamodb.StreamViewType.NEW_AND_OLD_IMAGES
         )
 
         feed_table = dynamodb.Table(
@@ -124,7 +125,8 @@ class Team3Stack(Stack):
                 type=dynamodb.AttributeType.STRING
             ),
             read_capacity=1,
-            write_capacity=1
+            write_capacity=1,
+            stream=dynamodb.StreamViewType.NEW_AND_OLD_IMAGES
         )
 
         #index by title
@@ -424,6 +426,41 @@ class Team3Stack(Stack):
             }
         )
 
+        calculate_rating_function = create_lambda_function(
+            "calculate_rating",
+            "calculate_rating.calculate_rating",
+            "calculate_rating",
+            "POST",
+            [util_layer]
+        )
+
+        calculate_subscription_function = create_lambda_function(
+            "calculate_subscription",
+            "calculate_subscription.calculate_subscription",
+            "calculate_subscription",
+            "POST",
+            [util_layer]
+        )
+
+        calculate_downloads_function = create_lambda_function(
+            "calculate_downloads",
+            "calculate_downloads.calculate_downloads",
+            "calculate_downloads",
+            "POST",
+            [util_layer]
+        )
+
+        add_scores_function = create_lambda_function(
+            "add_scores",
+            "add_scores.add_scores",
+            "add_scores",
+            "POST",
+            [util_layer],
+            environment={
+                "TABLE_FEED": feed_table.table_name
+            }
+        )
+
         #sqs
         dead_letter_queue = _sqs.Queue(self, "Team3UploadDeadLetterQueue", queue_name="upload-dead-queue-team3")
 
@@ -488,6 +525,46 @@ class Team3Stack(Stack):
             backoff_rate=2
         )
 
+        calculate_rating_task = _sfn_tasks.LambdaInvoke(
+            self, "CalculateRating",
+            lambda_function=calculate_rating_function,
+            output_path="$.Payload"
+        ).add_retry(
+            interval=Duration.seconds(20),
+            max_attempts=5,
+            backoff_rate=2
+        )
+
+        calculate_subscription_task = _sfn_tasks.LambdaInvoke(
+            self, "CalculateSubscription",
+            lambda_function=calculate_subscription_function,
+            output_path="$.Payload"
+        ).add_retry(
+            interval=Duration.seconds(20),
+            max_attempts=5,
+            backoff_rate=2
+        )
+
+        calculate_downloads_task = _sfn_tasks.LambdaInvoke(
+            self, "CalculateDownloads",
+            lambda_function=calculate_downloads_function,
+            output_path="$.Payload"
+        ).add_retry(
+            interval=Duration.seconds(20),
+            max_attempts=5,
+            backoff_rate=2
+        )
+
+        add_scores_task = _sfn_tasks.LambdaInvoke(
+            self, "AddScores",
+            lambda_function=add_scores_function,
+            output_path="$.Payload"
+        ).add_retry(
+            interval=Duration.seconds(20),
+            max_attempts=5,
+            backoff_rate=2
+        )
+
         #Parallel
         parallel_state = _sfn.Parallel(
             self, "Parallel State"
@@ -498,14 +575,28 @@ class Team3Stack(Stack):
         parallel_state.branch(transcode_480p_task)
         parallel_state.branch(transcode_320p_task)
 
+        parallel_state2 = _sfn.Parallel(self, "Parallel State 2")
+
+        parallel_state2.branch(calculate_rating_task)
+        parallel_state2.branch(calculate_subscription_task)
+        parallel_state2.branch(calculate_downloads_task)
+
         # Step Function Definition -> chaining tasks
         definition = parallel_state.next(send_to_queue_task)
+        definition2 = parallel_state2.next(add_scores_task)
         
         # Step Function
         state_machine = _sfn.StateMachine(
             self, "TranscodingAndUploading",
             definition=definition,
             comment="Transcoding and uploading new movies",
+            timeout=Duration.minutes(5)
+        )
+
+        state_machine2 = _sfn.StateMachine(
+            self, "AddingNewFeed",
+            definition=definition2,
+            comment="Adding new movie to feed",
             timeout=Duration.minutes(5)
         )
 
@@ -521,6 +612,28 @@ class Team3Stack(Stack):
             }
         )
         
+        add_feed_function = create_lambda_function(
+            "add_feed",
+            "add_feed.add_feed",
+            "add_feed",
+            "POST",
+            [util_layer],
+            environment={
+                "STATE_MACHINE_ARN": state_machine2.state_machine_arn,
+                "USER_TABLE": feed_table.table_name
+            }
+        )
+
+
+        dynamo_event_source = lambda_event_sources.DynamoEventSource(
+            movies_table,
+            starting_position=_lambda.StartingPosition.LATEST,
+            batch_size=1
+        )
+
+        add_feed_function.add_event_source(dynamo_event_source)
+        
+
         #endpoints
         upload_resource = api.root.add_resource("upload")
         upload_integration = apigateway.LambdaIntegration(upload_function)

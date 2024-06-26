@@ -36,7 +36,10 @@ def upload_user(event, context):
         feed = {}
         for item in data:
             feed[item['id']] = {
-                'score': 0
+                'score': 0,
+                'subscription_score': 0,
+                'rating_score': 0,
+                'download_score': 0,
             }
 
         item = {
