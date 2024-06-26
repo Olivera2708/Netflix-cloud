@@ -390,6 +390,31 @@ class Team3Stack(Stack):
             }
         )
 
+        notify_subscribed_function = create_lambda_function(
+            "notify_subscribers",
+            "notify_subscribers.notify_subscribers",
+            "notify_subscribers",
+            "POST",
+            [util_layer],
+            environment={
+                "TABLE_FEED": feed_table.table_name,
+                "TABLE_MOVIES": movies_table.table_name
+            }
+        )
+        movies_table.grant_read_data(notify_subscribed_function)
+
+        _lambda.EventSourceMapping(
+            self, "DynamoDBEventSource",
+            target=notify_subscribed_function,
+            event_source_arn=movies_table.table_stream_arn,
+            starting_position=_lambda.StartingPosition.TRIM_HORIZON
+        )
+
+        notify_subscribed_function.add_to_role_policy(iam.PolicyStatement(
+            actions=["sns:CreateTopic", "sns:Publish", "sns:Subscribe"],
+            resources=["*"],
+        ))
+
         transcode_720p_function = create_lambda_function(
             "transcode_720p_function",
             "transcoding_uploading.transcoding_uploading",
