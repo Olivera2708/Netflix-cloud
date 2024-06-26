@@ -1,6 +1,7 @@
 import json
 import boto3
 import os
+from decimal import Decimal
 from botocore.exceptions import ClientError
 
 table_feed = os.environ['TABLE_FEED']
@@ -9,48 +10,26 @@ table_feed = dynamodb.Table(table_feed)
 
 def add_scores(event, context):
     try:
-        # struktura zahteva
-        # {
-        #     user_id: "gligoric383@gmail.com"
-        #     for_update: "subscriptions",
-        #     payload: {
-        #         command: "add"/"remove",
-        #         for_update: "genres",
-        #         value: "Drama"
-        #     }
-        # }
-      
-      
-        # event = json.loads(event['body'])
-        # if not event:
-        #     return {
-        #         'statusCode': 400,
-        #         'headers': {
-        #             'Access-Control-Allow-Origin': '*',
-        #             'Access-Control-Allow-Headers': 'Content-Type',
-        #             'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
-        #         },
-        #         'body': json.dumps({'error': 'Invalid input: body is required'})
-        #     }
+        rating_score = Decimal(str(event[0]['rating_score']))
+        subscription_score = Decimal(str(event[1]['subscription_score']))
+        download_score = Decimal(str(event[2]['download_score']))
+        user_id = event[0]['user_id']
+        movie_id = event[0]['movie_id']
 
+        total_score = rating_score + subscription_score + download_score
 
-        # struktura user tabele
-        # item = {
-        #     'id': user_id,
-        #     'subscriptions': {
-        #         'genres': [],
-        #         'actors': [],
-        #         'directors': []
-        #     },
-        #     'feed': feed,
-        #     'ratings': []
-        # }
-        # if for_update == "subscriptions":
         response = table_feed.get_item(
-            Key={'id': 'mbojanic53+2@gmail.com'}
+            Key={'id': user_id}
         )
         current_item = response['Item']
-        current_item['feed']['Avenger_Endgame_d64aff03-b1d6-4b95-aa3f-99e019ddc9e3'] = 2
+        
+        if movie_id not in current_item['feed']:
+            current_item['feed'][movie_id] = {}
+
+        current_item['feed'][movie_id]['score'] = total_score
+        current_item['feed'][movie_id]['download_score'] = download_score
+        current_item['feed'][movie_id]['rating_score'] = rating_score
+        current_item['feed'][movie_id]['subscription_score'] = subscription_score
         response = table_feed.put_item(Item=current_item)
         return {
             'statusCode': 200,
@@ -69,5 +48,5 @@ def add_scores(event, context):
                 'Access-Control-Allow-Headers': 'Content-Type',
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
             },
-            'body': json.dumps(f"An error occurred: {str(response)} \n---------\n")
+            'body': json.dumps(f"An error occurred: {str(e)} \n---------\n")
         }

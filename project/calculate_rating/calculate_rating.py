@@ -8,6 +8,8 @@ def calculate_rating(event, context):
             if rating_genre in genres:
                 rating_score += rating['rating']
     result = {
-        'rating_score': rating_score
+        'rating_score': rating_score,
+        'user_id': event['user_id'],
+        'movie_id': event['id']
     }
     return result
