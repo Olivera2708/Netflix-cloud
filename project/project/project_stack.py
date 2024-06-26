@@ -462,6 +462,42 @@ class Team3ProjectStack(Stack):
             }
         )
 
+        get_subscriptions_function = create_lambda_function(
+            "get_subscriptions",
+            "get_subscriptions.get_subscriptions",
+            "get_subscriptions",
+            "GET",
+            [util_layer],
+            environment={
+                "TABLE_FEED": feed_table.table_name
+            }
+        )
+
+        notify_subscribed_function = create_lambda_function(
+            "notify_subscribers",
+            "notify_subscribers.notify_subscribers",
+            "notify_subscribers",
+            "POST",
+            [util_layer],
+            environment={
+                "TABLE_FEED": feed_table.table_name,
+                "TABLE_MOVIES": movies_table.table_name
+            }
+        )
+        movies_table.grant_read_data(notify_subscribed_function)
+
+        _lambda.EventSourceMapping(
+            self, "DynamoDBEventSource",
+            target=notify_subscribed_function,
+            event_source_arn=movies_table.table_stream_arn,
+            starting_position=_lambda.StartingPosition.TRIM_HORIZON
+        )
+
+        notify_subscribed_function.add_to_role_policy(iam.PolicyStatement(
+            actions=["sns:CreateTopic", "sns:Publish", "sns:Subscribe"],
+            resources=["*"],
+        ))
+
         transcode_720p_function = create_lambda_function(
             "transcode_720p_function",
             "transcoding_uploading.transcoding_uploading",
@@ -744,6 +780,10 @@ class Team3ProjectStack(Stack):
         downloaded_resource = feed_resource.add_resource('downloaded')
         add_downloaded_genres_integration = apigateway.LambdaIntegration(add_downloaded_genres_function)
         downloaded_resource.add_method("POST", add_downloaded_genres_integration)
+
+        subscriptions_resource = api.root.add_resource("subscriptions")
+        get_subscriptions_integration = apigateway.LambdaIntegration(get_subscriptions_function)
+        subscriptions_resource.add_method("GET", get_subscriptions_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
 
         movie_resource = api.root.add_resource("movie")
         get_movie_url_integration = apigateway.LambdaIntegration(get_movie_url_function)

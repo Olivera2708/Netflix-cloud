@@ -66,4 +66,9 @@ export class MovieService {
     return this.httpClient.post<any>(environment.apiGateway + "feed/downloaded", data,
       {'headers': {'Content-Type': 'application/json'}})
   }
+
+  getSubscriptions(userId: string): Observable<any> {
+    return this.httpClient.get<any>(environment.apiGateway + "subscriptions?id=" + userId,
+      {'headers': {'Content-Type': 'application/json'}})
+  }
 }

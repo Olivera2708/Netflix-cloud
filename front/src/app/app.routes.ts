@@ -6,6 +6,7 @@ import { LoginComponent } from './authentication/login/login.component';
 import { RegistrationComponent } from './authentication/registration/registration.component';
 import { authGuard } from './authentication/guard/auth.guard';
 import {EditMovieComponent} from "./movie/edit-movie/edit-movie.component";
+import {GetSubscriptionsComponent} from "./movie/get-subscriptions/get-subscriptions.component";
 
 export const routes: Routes = [
   { path: "movie/:id", component: ViewMovieComponent, canActivate: [authGuard]},
@@ -13,5 +14,6 @@ export const routes: Routes = [
   { path: "search", component: SearchMoviesComponent, canActivate: [authGuard]},
   { path: "edit/:id", component: EditMovieComponent},
   { path: "", component: LoginComponent, canActivate: [authGuard]},
-  { path: "registration", component: RegistrationComponent, canActivate: [authGuard]}
+  { path: "registration", component: RegistrationComponent, canActivate: [authGuard]},
+  { path: "subscriptions", component: GetSubscriptionsComponent, canActivate: [authGuard]}
 ];

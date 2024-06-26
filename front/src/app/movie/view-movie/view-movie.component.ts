@@ -60,12 +60,11 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
   alreadyRated = true
   avgRating = 0;
   suggestProc = 0;
-  mostLiked: string = "";
-
+  mostLiked : string = "";
   likeOptions = ['Actors', "Effects", "Story", "Nothing"]
   ratingForm: FormGroup;
 
-  constructor(private fb: FormBuilder, private authService: AuthenticationService, private route: ActivatedRoute, private movieService: MovieService, private _snackBar: MatSnackBar, private authenticationService: AuthenticationService) {
+  constructor(private snackBar: MatSnackBar, private fb: FormBuilder, private authService: AuthenticationService, private route: ActivatedRoute, private movieService: MovieService, private _snackBar: MatSnackBar, private authenticationService: AuthenticationService){
     this.role = authenticationService.getRole();
     this.ratingForm = this.fb.group({
       rating: [null, [Validators.required, Validators.min(1), Validators.max(5)]],
@@ -157,12 +156,19 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
       }
       this.movieService.editUser(body).subscribe({
         next: (data) => {
-          // console.log(data);
+
+          this.showAlert('You subscribed to '+forUpdate+': '+value, 'Close');
+
         }
       });
 
     }).catch(error => {
       console.error('Error fetching user email:', error);
+    });
+  }
+  showAlert(message: string, action: string = '', duration: number = 3000): void {
+    this.snackBar.open(message, action, {
+      duration: duration,
     });
   }
 
