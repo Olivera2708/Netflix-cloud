@@ -22,7 +22,7 @@ export class MovieService {
   }
 
   getMovieURL(key: string): Observable<any> {
-    return this.httpClient.get<any>(environment.apiGateway + "movie" + "?bucket=movies-team3&key=" + key,
+    return this.httpClient.get<any>(environment.apiGateway + "movie" + "?key=" + key,
       {'headers': {'Content-Type': 'application/json'}})
   }
 
@@ -54,6 +54,11 @@ export class MovieService {
 
   addRating(data: any): Observable<any> {
     return this.httpClient.post<any>(environment.apiGateway + "rating", data,
+      {'headers': {'Content-Type': 'application/json'}})
+  }
+
+  getRating(user_email: string, movie_id: string): Observable<any> {
+    return this.httpClient.get<any>(environment.apiGateway + "rating?user_id=" + user_email + "&movie_id=" + movie_id,
       {'headers': {'Content-Type': 'application/json'}})
   }
 }
