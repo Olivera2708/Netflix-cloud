@@ -37,9 +37,9 @@ export class LoginComponent {
       Username: this.loginUsername,
       Pool: this.userPool
     };
-    
+
     const cognitoUser = new CognitoUser(userData);
-    
+
     cognitoUser.authenticateUser(authenticationDetails, {
       onSuccess: (result) => {
         this.authenticationService.login(result);
@@ -50,8 +50,8 @@ export class LoginComponent {
         alert(err.message || JSON.stringify(err));
       }
     });
-  } 
-  
+  }
+
   redirectToRegistration() {
     this.router.navigate(['/registration'])
   }
