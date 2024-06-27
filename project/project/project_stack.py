@@ -513,13 +513,23 @@ class Team3ProjectStack(Stack):
                 "GENRES_TABLE": genres_table.table_name
             }
         )
-        movies_table.grant_read_data(notify_subscribed_function)
 
-        _lambda.EventSourceMapping(
-            self, "DynamoDBEventSource",
-            target=notify_subscribed_function,
+        movies_table.grant_stream_read(notify_subscribed_function)
+
+        # _lambda.EventSourceMapping(
+        #     self, "DynamoDBEventSource",
+        #     target=notify_subscribed_function,
+        #     event_source_arn=movies_table.table_stream_arn,
+        #     starting_position=_lambda.StartingPosition.TRIM_HORIZON
+        # )
+        event_subscription = _lambda.CfnEventSourceMapping(
+            scope=self,
+            id="companyInsertsOnlyEventSourceMapping",
+            function_name=notify_subscribed_function.function_name,
             event_source_arn=movies_table.table_stream_arn,
-            starting_position=_lambda.StartingPosition.TRIM_HORIZON
+            maximum_batching_window_in_seconds=1,
+            starting_position="LATEST",
+            batch_size=1,
         )
 
         notify_subscribed_function.add_to_role_policy(iam.PolicyStatement(

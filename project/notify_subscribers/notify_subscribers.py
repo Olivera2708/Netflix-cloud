@@ -19,7 +19,7 @@ actors_table = dynamodb.Table(actors_table_name)
 directors_table = dynamodb.Table(directors_table_name)
 
 
-def handler(event, context):
+def notify_subscribers(event, context):
     for record in event['Records']:
         if record['eventName'] == 'INSERT':
             new_image = record['dynamodb']['NewImage']
