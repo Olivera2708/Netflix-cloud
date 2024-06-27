@@ -23,8 +23,10 @@ def upload(event, context):
                 'body': json.dumps({'error': 'Invalid input: body is required'})
             }
 
-        unique_id = str(uuid.uuid4())
-        input_data["id"] = f"{input_data['metadata']['title']}_{unique_id}/".replace(" ", "_")
+        unique_id = input_data["id"]
+        if not unique_id: 
+            unique_id = str(uuid.uuid4())
+            input_data["id"] = f"{input_data['metadata']['title']}_{unique_id}/".replace(" ", "_")
 
         #validation
         for field in ['file_content', 'metadata']:
