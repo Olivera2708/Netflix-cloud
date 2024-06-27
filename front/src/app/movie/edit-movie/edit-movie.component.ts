@@ -131,6 +131,7 @@ export class EditMovieComponent implements OnInit {
     }
 
     let title_name: string;
+    this.title = this.title.replace("/", "_")
     if (this.checkbox)
       title_name = this.seriesName + "/" + this.title;
     else
@@ -154,23 +155,14 @@ export class EditMovieComponent implements OnInit {
         payload.file_name = this.file?.name ?? '';
         payload.file_content = base64;
 
-        this.movieService.deleteMovie(this.id).subscribe({
+        this.movieService.addNewMovie(payload).subscribe({
           next: (data) => {
-            if ("Movie deleted successfully" == data["message"]){
-              this.movieService.addNewMovie(payload).subscribe({
-                next: (data) => {
-                  if (data['message'] == "Success") {
-                    this._snackBar.open('Movie is uploading...', 'Close');
-                    this.router.navigate(['/search']);
-                  }
-                  else
-                    this._snackBar.open('There was an error while uploading movie', 'Close');
-                }
-              })
+            if (data['message'] == "Success") {
+              this._snackBar.open('Movie is uploading...', 'Close');
+              this.router.navigate(['/search']);
             }
-            else {
+            else
               this._snackBar.open('There was an error while uploading movie', 'Close');
-            }
           }
         })
       }
