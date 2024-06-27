@@ -8,7 +8,6 @@ import {MatLine} from "@angular/material/core";
 import {MatList, MatListItem} from "@angular/material/list";
 import {NgClass, NgForOf, NgIf} from "@angular/common";
 import {MovieService} from "../movie.service";
-import {MatSnackBar} from "@angular/material/snack-bar";
 import { CardModule } from 'primeng/card';
 import {Router} from "@angular/router";
 import {NavbarAdminComponent} from "../../navbar/navbar-admin/navbar-admin.component";
@@ -37,100 +36,34 @@ import {AuthenticationService} from "../../authentication/authentication.service
   styleUrl: './search-movies.component.css'
 })
 export class SearchMoviesComponent {
-  actors: string[] = [];
-  newActor: string = '';
-  genres: string[] = [];
-  newGenre: string = '';
-  directors: string[] = [];
-  newDirector: string = '';
-  title: string = '';
-  description: string = '';
-  errors: string = '';
-  movies: any;
+  searchValue: string = ""
+  movies: any[] = [];
   shownMovies: any[] = [];
   activeTab: string = 'movies';
   role: string = '';
 
-  constructor(private router: Router, private movieService: MovieService, private _snackBar: MatSnackBar, private authenticationService: AuthenticationService) {
+  constructor(private router: Router, private movieService: MovieService, private authenticationService: AuthenticationService) {
     this.role = authenticationService.getRole()
   }
 
   ngOnInit(): void {
     this.search();
   }
-  addActor() {
-    if (this.newActor.trim()) {
-      this.actors.push(this.newActor.trim());
-      this.newActor = '';
-    }
-  }
-
-  removeActor(index: number) {
-    this.actors.splice(index, 1);
-  }
-
-  addGenre() {
-    if (this.newGenre.trim()) {
-      this.genres.push(this.newGenre.trim());
-      this.newGenre = '';
-    }
-  }
-
-  removeGenre(index: number) {
-    this.genres.splice(index, 1);
-  }
-
-  addDirector() {
-    if (this.newDirector.trim()) {
-      this.directors.push(this.newDirector.trim());
-      this.newDirector = '';
-    }
-  }
-
-  removeDirector(index: number) {
-    this.directors.splice(index, 1);
-  }
 
   search() {
-    try {
-      const payload = {
-        metadata: {
-          title: this.title,
-          description: this.description,
-          actors: this.actors,
-          directors: this.directors,
-          genres: this.genres,
+    this.movieService.searchMovie(this.searchValue).subscribe({
+      next: (data) => {
+        this.movies = [];
+        for (let key in data) {
+          if (data.hasOwnProperty(key)) {
+            let value = data[key];
+            this.movies.push(value);
+          }
         }
+        this.loadData()
       }
-      this.resetFields();
-      this.movieService.searchMovie(payload.metadata.actors,
-      payload.metadata.directors,
-      payload.metadata.genres,
-      payload.metadata.title,
-      payload.metadata.description)
-      .subscribe({
-        next: (data) => {
-          this.movies = data
-          this.loadData()
-        }
-      })
-    } catch (error) {
-      console.error('Error converting file to base64:', error);
-    }
+    })
   }
-
-  private resetFields() {
-    this.actors = [];
-    this.newActor = '';
-    this.genres = [];
-    this.newGenre = '';
-    this.directors = [];
-    this.newDirector = '';
-    this.title = '';
-    this.description = '';
-    this.errors = '';
-  }
-
 
   onCardClick(id: string) {
     this.router.navigate(['/movie', id]);

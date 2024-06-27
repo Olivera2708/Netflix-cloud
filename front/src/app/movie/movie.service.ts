@@ -26,14 +26,8 @@ export class MovieService {
       {'headers': {'Content-Type': 'application/json'}})
   }
 
-  searchMovie( actors: string[], directors: string[], genres: string[],title: string, description: string): Observable<any> {
-
-    return this.httpClient.post<any>(`${environment.apiGateway}search`,
-      {title: title,
-            description: description,
-            genres: genres,
-            actors: actors,
-            directors: directors},
+  searchMovie(data: string): Observable<any> {
+    return this.httpClient.get<any>(`${environment.apiGateway}search?value=` + data,
       {'headers' : { 'Content-Type': 'application/json' },}
     );
   }
@@ -44,11 +38,6 @@ export class MovieService {
 
   deleteMovie(id: string): Observable<any> {
     return this.httpClient.delete<any>(environment.apiGateway + "movie/" + id,
-      {'headers': {'Content-Type': 'application/json'}})
-  }
-
-  editUser(data: any): Observable<any> {
-    return this.httpClient.put<any>(environment.apiGateway + "feed", data,
       {'headers': {'Content-Type': 'application/json'}})
   }
 
@@ -65,5 +54,19 @@ export class MovieService {
   addDownloadedGenre(data: any): Observable<any> {
     return this.httpClient.post<any>(environment.apiGateway + "feed/downloaded", data,
       {'headers': {'Content-Type': 'application/json'}})
+  }
+
+  getSubscriptions(userId: string): Observable<any> {
+    return this.httpClient.get<any>(environment.apiGateway + "subscriptions?id=" + userId,
+      {'headers': {'Content-Type': 'application/json'}})
+  }
+
+  addSubscription(data: any): Observable<any> {
+    return this.httpClient.put<any>(environment.apiGateway + "subscriptions", data,
+      {'headers': {'Content-Type': 'application/json'}})
+  }
+
+  deleteSubscription(data: any): Observable<any> {
+    return this.httpClient.delete<any>(environment.apiGateway + "subscriptions", { body: data })
   }
 }

@@ -1,5 +1,5 @@
-export const RegularUserPaths: string[] = [
-  'movie/',
-  'search',
-  'subscriptions'
-]
+export const RegularUserPaths : string[] = [
+    'movie/',
+    'search',
+    'subscriptions'
+  ]
