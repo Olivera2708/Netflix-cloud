@@ -2,11 +2,10 @@ import os
 
 import boto3
 from boto3.dynamodb.conditions import Key
-import logging
-
-LOGGER = logging.getLogger()
-LOGGER.setLevel(logging.INFO)
-
+# import logging
+#
+# LOGGER = logging.getLogger()
+# LOGGER.setLevel(logging.INFO)
 table_movies_name = os.environ['TABLE_MOVIES']
 table_feed_name = os.environ['TABLE_FEED']
 genres_table_name = os.environ['GENRES_TABLE']
@@ -27,17 +26,16 @@ def notify_subscribers(event, context):
     for record in event['Records']:
         if record['eventName'] == 'INSERT':
             new_image = record['dynamodb']['NewImage']
-            LOGGER.info('Ovo je nesto: %s', str(record['dynamodb']['NewImage']))
-
-            movie_id = new_image['movie_id']['S']
+            movie_id = new_image['id']['S']
+            title = new_image['title']['S']
             actors = get_actors_by_movie_id(movie_id)
-            notify_actors_subscribers(movie_id, actors)
+            notify_actors_subscribers(title, actors)
 
             directors = get_directors_by_movie_id(movie_id)
-            notify_directors_subscribers(movie_id, directors)
+            notify_directors_subscribers(title, directors)
 
             genres = get_genres_by_movie_id(movie_id)
-            notify_genres_subscribers(movie_id, genres)
+            notify_genres_subscribers(title, genres)
 
 
 def get_actors_by_movie_id(movie_id):
@@ -70,26 +68,26 @@ def get_genres_by_movie_id(movie_id):
     return [genre['genre'] for genre in genres]
 
 
-def notify_actors_subscribers(movie_id, actors):
+def notify_actors_subscribers(title, actors):
     for actor_name in actors:
         topic_arn = create_sns_topic("actor_" + actor_name.replace(" ", "_"))
-        message = f"A new movie with ID {movie_id} featuring {actor_name} has been added."
+        message = f"A new movie named {title} featuring {actor_name} has been added."
         subject = f"New Movie Added with {actor_name}"
         publish_to_sns(topic_arn, subject, message)
 
 
-def notify_directors_subscribers(movie_id, directors):
+def notify_directors_subscribers(title, directors):
     for director_name in directors:
         topic_arn = create_sns_topic("director_" + director_name.replace(" ", "_"))
-        message = f"A new movie with ID {movie_id} directed by {director_name} has been added."
+        message = f"A new movie named {title} directed by {director_name} has been added."
         subject = f"New Movie Directed by {director_name}"
         publish_to_sns(topic_arn, subject, message)
 
 
-def notify_genres_subscribers(movie_id, genres):
+def notify_genres_subscribers(title, genres):
     for genre_name in genres:
         topic_arn = create_sns_topic("genre_" + genre_name.replace(" ", "_"))
-        message = f"A new movie with ID {movie_id} in the {genre_name} genre has been added."
+        message = f"A new movie named {title} in the {genre_name} genre has been added."
         subject = f"New {genre_name} Movie Added"
         publish_to_sns(topic_arn, subject, message)
 
