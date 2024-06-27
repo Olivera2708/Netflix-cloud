@@ -155,25 +155,16 @@ export class EditMovieComponent implements OnInit {
         payload.file_name = this.file?.name ?? '';
         payload.file_content = base64;
 
-        // this.movieService.deleteMovie(this.id).subscribe({
-        //   next: (data) => {
-        //     if ("Movie deleted successfully" == data["message"]){
-        //       this.movieService.addNewMovie(payload).subscribe({
-        //         next: (data) => {
-        //           if (data['message'] == "Success") {
-        //             this._snackBar.open('Movie is uploading...', 'Close');
-        //             this.router.navigate(['/search']);
-        //           }
-        //           else
-        //             this._snackBar.open('There was an error while uploading movie', 'Close');
-        //         }
-        //       })
-        //     }
-        //     else {
-        //       this._snackBar.open('There was an error while uploading movie', 'Close');
-        //     }
-        //   }
-        // })
+        this.movieService.addNewMovie(payload).subscribe({
+          next: (data) => {
+            if (data['message'] == "Success") {
+              this._snackBar.open('Movie is uploading...', 'Close');
+              this.router.navigate(['/search']);
+            }
+            else
+              this._snackBar.open('There was an error while uploading movie', 'Close');
+          }
+        })
       }
       catch (error) {
         this._snackBar.open('There is an error while converting file', 'Close');
