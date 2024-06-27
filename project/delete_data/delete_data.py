@@ -35,6 +35,8 @@ def delete_data(event, context):
                     'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,DELETE'
                 }
             }
+
+        remove_from_all_users(object_key)
         
         movies_table.delete_item(
             Key={'id': object_key}
@@ -71,7 +73,7 @@ def delete_data(event, context):
             Key={'movie_id': object_key}
         )
 
-        remove_from_all_users(object_key)
+        # remove_from_all_users(object_key)
 
         s3_objects = s3_client.list_objects_v2(Bucket=bucket, Prefix=object_key)
         if 'Contents' in s3_objects:
@@ -108,31 +110,31 @@ def delete_data(event, context):
             }
         }
 
-# def remove_from_all_users(movie_id):
-#     response = feed_table.scan()
-#     for item in response['Items']:
-#         feed = item['feed']
-#         updated_feed = [movie for movie in feed if movie.get('id') != movie_id] #azuriraj feed
-
-#         feed_table.update_item(
-#             Key={'id': item['id']},
-#             UpdateExpression='SET feed = :val',
-#             ExpressionAttributeValues={':val': updated_feed}
-#         )
-
 def remove_from_all_users(movie_id):
-    items_to_update = []
-    paginator = feed_table.scan(PaginationConfig={'PageSize': 100})
-    for page in paginator:
-        for item in page['Items']:
-            item_to_update = {k: v for k, v in item.items() if k != 'feed'}
+    response = feed_table.scan()
+    for item in response['Items']:
+        feed = item['feed']
+        updated_feed = {key: value for key, value in feed.items() if key != movie_id}
+
+        feed_table.update_item(
+            Key={'id': item['id']},
+            UpdateExpression='SET feed = :val',
+            ExpressionAttributeValues={':val': updated_feed}
+        )
+
+# def remove_from_all_users(movie_id):
+#     items_to_update = []
+#     paginator = feed_table.scan(PaginationConfig={'PageSize': 100})
+#     for page in paginator:
+#         for item in page['Items']:
+#             item_to_update = {k: v for k, v in item.items() if k != 'feed'}
             
-            if 'feed' in item:
-                updated_feed = [movie for movie in item['feed'] if movie.get('id') != movie_id]
-                if updated_feed != item['feed']:
-                    item_to_update['feed'] = updated_feed
-                    items_to_update.append(item_to_update)
+#             if 'feed' in item:
+#                 updated_feed = [movie for movie in item['feed'] if movie.get('id') != movie_id]
+#                 if updated_feed != item['feed']:
+#                     item_to_update['feed'] = updated_feed
+#                     items_to_update.append(item_to_update)
         
-        with feed_table.batch_writer() as batch:
-            for item in items_to_update:
-                batch.put_item(Item=item)
+#         with feed_table.batch_writer() as batch:
+#             for item in items_to_update:
+#                 batch.put_item(Item=item)
