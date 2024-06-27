@@ -32,7 +32,33 @@ def edit_metadata(event, context):
                 }
             }
 
+        for field in ['metadata']:
+            value = data[field]
+            if value is None or value == '':
+                return {
+                    'statusCode': 500,
+                    'headers': {
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Headers': 'Content-Type',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    },
+                    'body': json.dumps({'error': 'Data is missing'})
+                }
+
         metadata = data.get("metadata", {})
+
+        for field in ['title', 'description', 'actors', 'directors', 'year', 'genres']:
+            value = metadata[field]
+            if value is None or isinstance(value, (str, list)) and not value:
+                return {
+                    'statusCode': 500,
+                    'headers': {
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Headers': 'Content-Type',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    },
+                    'body': json.dumps({'error': 'Data is missing'})
+                }
 
         response = genres_table.query(
             IndexName='MovieIndex',
