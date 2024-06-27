@@ -65,14 +65,9 @@ def delete_data(event, context):
                 Key={'id': item['id']}
             )
 
-        response = search_table.query(
-            IndexName='MovieIndex',
-            KeyConditionExpression=Key('movie_id').eq(object_key)
+        search_table.delete_item(
+            Key={'movie_id': object_key}
         )
-        for item in response['Items']:
-            search_table.delete_item(
-                Key={'id': item['id']}
-            )
 
         s3_objects = s3_client.list_objects_v2(Bucket=bucket, Prefix=object_key)
         if 'Contents' in s3_objects:

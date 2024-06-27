@@ -29,8 +29,8 @@ def search_movies(event, context):
             )
             for item in response.get('Items', []):
                 result[item['id']] = item
-        elif "|" in search_value:
-            search_response = genres_table.query(
+        elif "_" in search_value:
+            search_response = search_table.query(
                 IndexName='SearchIndex',
                 KeyConditionExpression=Key('search').eq(search_value),
                 ProjectionExpression='movie_id'
