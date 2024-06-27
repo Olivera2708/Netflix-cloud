@@ -46,7 +46,7 @@ def custom_serializer(obj):
 
 def add_feed(event, context):
     for record in event['Records']:
-        if record['eventName'] == 'INSERT' or record['eventName'] == 'MODIFY':
+        if record['eventName'] == 'INSERT':
             response = user_table.scan()
             new_image = record['dynamodb']['NewImage']
             movie_id = new_image['id']['S']

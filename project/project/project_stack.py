@@ -898,9 +898,10 @@ class Team3ProjectStack(Stack):
 
         update_feed_function.add_event_source(user_dynamo_event_source)
 
-        add_feed_function.add_event_source(actors_dynamo_event_source)
-        add_feed_function.add_event_source(genres_dynamo_event_source)
-        add_feed_function.add_event_source(directors_dynamo_event_source)
+        # add_feed_function.add_event_source(actors_dynamo_event_source)
+        # add_feed_function.add_event_source(genres_dynamo_event_source)
+        # add_feed_function.add_event_source(directors_dynamo_event_source)
+        add_feed_function.add_event_source(movie_dynamo_event_source)
 
         #endpoints
         upload_resource = api.root.add_resource("upload")
