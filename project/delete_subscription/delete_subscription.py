@@ -2,7 +2,10 @@ import json
 import boto3
 import os
 from botocore.exceptions import NoCredentialsError
+import logging
 
+LOGGER = logging.getLogger()
+LOGGER.setLevel(logging.INFO)
 table_feed_name = os.environ['TABLE_FEED']
 dynamodb = boto3.resource('dynamodb')
 table_feed = dynamodb.Table(table_feed_name)
@@ -58,6 +61,33 @@ def delete_subscription(event, context):
         subscriptions = item.get(update_field, [])
         
         if value_to_update in subscriptions:
+            try:
+                topic_name_prefix = {
+                    'actors': 'actor_',
+                    'directors': 'director_',
+                    'genres': 'genre_'
+                }.get(update_field, '')
+
+                if not topic_name_prefix:
+                    return {
+                        'statusCode': 400,
+                        'headers': cors_headers,
+                        'body': json.dumps({'error': 'Invalid update field'})
+                    }
+
+                topic_name = topic_name_prefix + value_to_update.replace(" ", "_")
+                topic_arn = create_sns_topic(topic_name)
+                unsubscribe_from_topic(topic_arn, user_id)
+
+                if is_topic_empty(topic_arn):
+                    sns.delete_topic(TopicArn=topic_arn)
+            except Exception:
+                return {
+                    'statusCode': 400,
+                    'headers': cors_headers,
+                    'body': json.dumps({'error': 'Pending subscriptions cannot be unsubscribed'})
+                }
+
             subscriptions.remove(value_to_update)
             table_feed.update_item(
                 Key={'id': user_id},
@@ -65,25 +95,7 @@ def delete_subscription(event, context):
                 ExpressionAttributeValues={':updated_list': subscriptions}
             )
 
-            topic_name_prefix = {
-                'actors': 'actor_',
-                'directors': 'director_',
-                'genres': 'genre_'
-            }.get(update_field, '')
 
-            if not topic_name_prefix:
-                return {
-                    'statusCode': 400,
-                    'headers': cors_headers,
-                    'body': json.dumps({'error': 'Invalid update field'})
-                }
-
-            topic_name = topic_name_prefix + value_to_update.replace(" ", "_")
-            topic_arn = create_sns_topic(topic_name)
-            unsubscribe_from_topic(topic_arn, user_id)
-
-            if is_topic_empty(topic_arn):
-                sns.delete_topic(TopicArn=topic_arn)
 
         return {
             'statusCode': 200,

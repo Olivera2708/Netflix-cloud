@@ -60,7 +60,7 @@ export class GetSubscriptionsComponent {
 
   removeActor(index: number) {
     this.unsubscribeFrom('actors', this.actors[index])
-    this.actors.splice(index, 1);
+    // this.actors.splice(index, 1);
   }
 
   addGenre() {
@@ -73,7 +73,7 @@ export class GetSubscriptionsComponent {
 
   removeGenre(index: number) {
     this.unsubscribeFrom('genres', this.genres[index])
-    this.genres.splice(index, 1);
+    // this.genres.splice(index, 1);
   }
 
   addDirector() {
@@ -86,7 +86,7 @@ export class GetSubscriptionsComponent {
 
   removeDirector(index: number) {
     this.unsubscribeFrom('directors', this.directors[index])
-    this.directors.splice(index, 1);
+    // this.directors.splice(index, 1);
   }
 
   subscribeTo(forUpdate: string, value: any) {
@@ -120,6 +120,10 @@ export class GetSubscriptionsComponent {
       this.movieService.deleteSubscription(body).subscribe({
         next: (data) => {
           this.showAlert('You unsubscribed from '+forUpdate+': '+value, 'Close');
+          this.loadSubscriptions();
+        },
+        error: (error) => {
+          this.showAlert(error.error.error, 'Close');
         }
       });
 
