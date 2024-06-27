@@ -3,11 +3,19 @@ import json
 import boto3
 import os
 
-table_feed = os.environ['TABLE_FEED']
+user_table_name = os.environ['USER_TABLE']
+movies_table_name = os.environ['MOVIES_TABLE']
+genres_table_name = os.environ['GENRES_TABLE']
+actors_table_name = os.environ['ACTORS_TABLE']
+directors_table_name = os.environ['DIRECTORS_TABLE']
 
-stepfunctions_client = boto3.client('stepfunctions')
 dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table(table_feed)
+
+user_table = dynamodb.Table(user_table_name)
+movies_table = dynamodb.Table(movies_table_name)
+genres_table = dynamodb.Table(genres_table_name)
+actors_table = dynamodb.Table(actors_table_name)
+directors_table = dynamodb.Table(directors_table_name)
 
 def custom_serializer(obj):
     if isinstance(obj, Decimal):
@@ -112,7 +120,7 @@ def update_feed(event, context):
                 
                 new_image['feed'][film]['score'] = new_image['feed'][film]['subscription_score'] + new_image['feed'][film]['rating_score'] + new_image['feed'][film]['download_score']
 
-                #table.put_item(Item=new_image)
+                #user_table.put_item(Item=new_image)
 
     return {
             'statusCode': 200,
