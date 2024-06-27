@@ -3,10 +3,9 @@ import json
 import urllib.request
 import os
 
-def lambda_handler(event, context):
+def admin_authorizer(event, context):
     token = event['authorizationToken']
     user_pool_id = os.environ['USER_POOL_ID']
-    region = os.environ['REGION']
     
     keys_url = f"https://cognito-idp.eu-central-1.amazonaws.com/{user_pool_id}/.well-known/jwks.json"
     with urllib.request.urlopen(keys_url) as f:
@@ -55,9 +54,8 @@ def lambda_handler(event, context):
     user_groups = payload.get('cognito:groups', [])
     
     method_arn = event['methodArn']
-    required_roles = event['requestContext']['authorizer']['requiredRoles']
     
-    if any(role in user_groups for role in required_roles):
+    if 'Admin' in user_groups:
         effect = 'Allow'
     else:
         effect = 'Deny'
