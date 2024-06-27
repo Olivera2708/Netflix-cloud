@@ -349,6 +349,28 @@ class Team3ProjectStack(Stack):
             }
         )
 
+        add_subscription_function = create_lambda_function(
+            "add_subscription",
+            "add_subscription.add_subscription",
+            "add_subscription",
+            "PUT",
+            [util_layer],
+            environment={
+                "TABLE_FEED": feed_table.table_name
+            }
+        )
+
+        delete_subscription_function = create_lambda_function(
+            "delete_subscription",
+            "delete_subscription.delete_subscription",
+            "delete_subscription",
+            "DELETE",
+            [util_layer],
+            environment={
+                "TABLE_FEED": feed_table.table_name
+            }
+        )
+
         get_rating_function = create_lambda_function(
             "get_rating",
             "get_rating.get_rating",
@@ -782,8 +804,10 @@ class Team3ProjectStack(Stack):
         downloaded_resource.add_method("POST", add_downloaded_genres_integration)
 
         subscriptions_resource = api.root.add_resource("subscriptions")
-        get_subscriptions_integration = apigateway.LambdaIntegration(get_subscriptions_function)
-        subscriptions_resource.add_method("GET", get_subscriptions_integration)
+        add_subscriptions_integration = apigateway.LambdaIntegration(add_subscription_function)
+        subscriptions_resource.add_method("PUT", add_subscriptions_integration)
+        delete_subscriptions_integration = apigateway.LambdaIntegration(delete_subscription_function)
+        subscriptions_resource.add_method("DELETE", delete_subscriptions_integration)
 
         movie_resource = api.root.add_resource("movie")
         get_movie_url_integration = apigateway.LambdaIntegration(get_movie_url_function)
