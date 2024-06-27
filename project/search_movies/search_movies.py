@@ -7,19 +7,21 @@ movies_table_name = os.environ['MOVIES_TABLE']
 genres_table_name = os.environ['GENRES_TABLE']
 actors_table_name = os.environ['ACTORS_TABLE']
 directors_table_name = os.environ['DIRECTORS_TABLE']
+search_table_name = os.environ['SEARCH_TABLE']
 
 dynamodb = boto3.resource('dynamodb')
 movies_table = dynamodb.Table(movies_table_name)
 genres_table = dynamodb.Table(genres_table_name)
 actors_table = dynamodb.Table(actors_table_name)
 directors_table = dynamodb.Table(directors_table_name)
-
+search_table = dynamodb.Table(search_table_name)
 
 def search_movies(event, context):
     try:
         params = event.get('queryStringParameters', {})
         search_value = params.get('value')
         result = {}
+        all_movie_ids = set()
 
         if search_value.strip() == "":
             response = movies_table.scan(
@@ -27,8 +29,21 @@ def search_movies(event, context):
             )
             for item in response.get('Items', []):
                 result[item['id']] = item
+        elif "_" in search_value:
+            search_response = search_table.query(
+                IndexName='SearchIndex',
+                KeyConditionExpression=Key('search').eq(search_value),
+                ProjectionExpression='movie_id'
+            )
+            for item in search_response.get('Items', []):
+                val = item['movie_id']
+                id_response = movies_table.query(
+                    KeyConditionExpression=Key('id').eq(val),
+                    ProjectionExpression='id, title, description'
+                )
+                for item in id_response.get('Items', []):
+                    result[item['id']] = item
         else:
-            all_movie_ids = set()
             genres_response = genres_table.query(
                 IndexName='GenreIndex',
                 KeyConditionExpression=Key('genre').eq(search_value),
