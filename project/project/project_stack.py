@@ -509,7 +509,8 @@ class Team3ProjectStack(Stack):
                 "ACTORS_TABLE": actors_table.table_name,
                 "DIRECTORS_TABLE": directors_table.table_name,
                 "GENRES_TABLE": genres_table.table_name,
-                "SEARCH_TABLE": search_table.table_name
+                "SEARCH_TABLE": search_table.table_name,
+                "FEED_TABLE": feed_table.table_name
             }
         )
 
