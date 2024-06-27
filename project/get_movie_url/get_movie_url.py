@@ -33,3 +33,4 @@ def get_movie_url(event, context):
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             },
         }
+ 
