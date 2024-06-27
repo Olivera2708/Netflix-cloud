@@ -341,19 +341,22 @@ class Team3ProjectStack(Stack):
         admin_authorizer = apigateway.RequestAuthorizer(
             self, 'AdminAuthorizer',
             handler=admin_authorizer_function,
-            identity_sources=[apigateway.IdentitySource.header('Authorization')]
+            identity_sources=[apigateway.IdentitySource.header('Authorization')],
+            results_cache_ttl=Duration.seconds(0)
         )
 
         user_authorizer = apigateway.RequestAuthorizer(
             self, 'UserAuthorizer',
             handler=user_authorizer_function,
-            identity_sources=[apigateway.IdentitySource.header('Authorization')]
+            identity_sources=[apigateway.IdentitySource.header('Authorization')],
+            results_cache_ttl=Duration.seconds(0)
         )
 
         both_authorizer = apigateway.RequestAuthorizer(
             self, 'BothAuthorizer',
             handler=both_authorizer_function,
-            identity_sources=[apigateway.IdentitySource.header('Authorization')]
+            identity_sources=[apigateway.IdentitySource.header('Authorization')],
+            results_cache_ttl=Duration.seconds(0)
         )
 
         # Define the Lambda Layer
