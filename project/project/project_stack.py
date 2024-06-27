@@ -360,6 +360,11 @@ class Team3ProjectStack(Stack):
             }
         )
 
+        add_subscription_function.add_to_role_policy(iam.PolicyStatement(
+            actions=["sns:CreateTopic", "sns:Publish", "sns:Subscribe", "sns:Unsubscribe"],
+            resources=["*"],
+        ))
+
         delete_subscription_function = create_lambda_function(
             "delete_subscription",
             "delete_subscription.delete_subscription",
@@ -370,6 +375,16 @@ class Team3ProjectStack(Stack):
                 "TABLE_FEED": feed_table.table_name
             }
         )
+
+        delete_subscription_function.add_to_role_policy(iam.PolicyStatement(
+            actions=["sns:CreateTopic",
+                     "sns:DeleteTopic",
+                     "sns:Publish",
+                     "sns:Subscribe",
+                     "sns:Unsubscribe",
+                     "sns:ListSubscriptionsByTopic"],
+            resources=["*"],
+        ))
 
         get_rating_function = create_lambda_function(
             "get_rating",

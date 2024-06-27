@@ -81,7 +81,10 @@ def delete_subscription(event, context):
             topic_name = topic_name_prefix + value_to_update
             topic_arn = create_sns_topic(topic_name)
             unsubscribe_from_topic(topic_arn, user_id)
-        
+
+            if is_topic_empty(topic_arn):
+                sns.delete_topic(TopicArn=topic_arn)
+
         return {
             'statusCode': 200,
             'headers': cors_headers,
@@ -113,3 +116,8 @@ def unsubscribe_from_topic(topic_arn, email):
         if subscription['Endpoint'] == email and subscription['Protocol'] == 'email':
             sns.unsubscribe(SubscriptionArn=subscription['SubscriptionArn'])
             break
+
+
+def is_topic_empty(topic_arn):
+    subscriptions = sns.list_subscriptions_by_topic(TopicArn=topic_arn)['Subscriptions']
+    return len(subscriptions) == 0
