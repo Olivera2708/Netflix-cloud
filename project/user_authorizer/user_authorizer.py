@@ -75,15 +75,7 @@ def user_authorizer(event, context):
     
     policy = generate_policy(principal_id, effect, method_arn)
     
-    return {
-            'statusCode': 200,
-            'body': json.dumps(policy),
-            'headers': {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-            }
-        }
+    return policy
 
 def generate_policy(principal_id, effect, method_arn):
     return {
