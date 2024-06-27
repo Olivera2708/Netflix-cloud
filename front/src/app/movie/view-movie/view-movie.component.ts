@@ -56,7 +56,6 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
   genreList: any
   actorList: any
   directorList: any
-  ratings: any[] = []
   alreadyRated = true
   avgRating = 0;
   suggestProc = 0;
