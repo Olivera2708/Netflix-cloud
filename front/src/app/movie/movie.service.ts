@@ -26,14 +26,8 @@ export class MovieService {
       {'headers': {'Content-Type': 'application/json'}})
   }
 
-  searchMovie( actors: string[], directors: string[], genres: string[],title: string, description: string): Observable<any> {
-
-    return this.httpClient.post<any>(`${environment.apiGateway}search`,
-      {title: title,
-            description: description,
-            genres: genres,
-            actors: actors,
-            directors: directors},
+  searchMovie(data: string): Observable<any> {
+    return this.httpClient.get<any>(`${environment.apiGateway}search?value=` + data,
       {'headers' : { 'Content-Type': 'application/json' },}
     );
   }
