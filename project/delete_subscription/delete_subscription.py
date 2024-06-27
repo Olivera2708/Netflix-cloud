@@ -3,11 +3,8 @@ import boto3
 import os
 from botocore.exceptions import NoCredentialsError
 
-table_movies_name = os.environ['TABLE_MOVIES']
 table_feed_name = os.environ['TABLE_FEED']
-
 dynamodb = boto3.resource('dynamodb')
-table_movies = dynamodb.Table(table_movies_name)
 table_feed = dynamodb.Table(table_feed_name)
 
 cors_headers = {
@@ -18,78 +15,60 @@ cors_headers = {
 
 def delete_subscription(event, context):
     try:
-        event_body = json.loads(event.get('body', '{}'))
+        event_body = json.loads(event['body'])
+        
         if not event_body:
             return {
                 'statusCode': 400,
-                'headers': {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': 'Content-Type',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,DELETE'
-                },
+                'headers': cors_headers,
                 'body': json.dumps({'error': 'Invalid input: body is required'})
             }
         
-        user_id = event_body.get('id')
-        movie_id = event_body.get("movie_id")
-        numbered_rating = event_body.get("rating")
-        suggest = event_body.get("suggest")
-        likes = event_body.get("likes")
-        genres = event_body.get("genres")
-
-        if not (user_id and movie_id and numbered_rating is not None and suggest is not None and likes is not None and genres):
+        user_id = event_body.get('user_id')
+        payload = event_body.get('payload')
+        
+        if not user_id or not payload:
             return {
                 'statusCode': 400,
                 'headers': cors_headers,
-                'body': json.dumps({'error': 'Missing required fields'})
+                'body': json.dumps({'error': 'Invalid input: user_id and payload are required'})
             }
         
-        if numbered_rating < 1 or numbered_rating > 5 or suggest not in ["yes", "no"] or likes == "":
+        update_field = payload.get('for_update')
+        value_to_update = payload.get('value')
+        
+        if not update_field or not value_to_update:
             return {
-                'statusCode': 500,
+                'statusCode': 400,
                 'headers': cors_headers,
-                'body': json.dumps({'error': 'Values are not correct'})
+                'body': json.dumps({'error': 'Invalid input: for_update and value are required in payload'})
             }
 
-        # Update movie table
-        response = table_movies.update_item(
-            Key={'id': movie_id},
-            UpdateExpression="SET #r = list_append(if_not_exists(#r, :empty_list), :rating)",
-            ExpressionAttributeNames={'#r': 'ratings'},
-            ExpressionAttributeValues={
-                ':rating': [{
-                    "id": user_id, 
-                    "rating": numbered_rating,
-                    "suggest": suggest,
-                    "likes": likes
-                }],
-                ':empty_list': []
-            },
-            ReturnValues="UPDATED_NEW"
-        )
+        response = table_feed.get_item(Key={'id': user_id})
+        if 'Item' not in response:
+            return {
+                'statusCode': 404,
+                'headers': cors_headers,
+                'body': json.dumps({'error': 'Item not found'})
+            }
 
-        # Update user table
-        response = table_feed.update_item(
-            Key={'id': user_id},
-            UpdateExpression="SET #r = list_append(if_not_exists(#r, :empty_list), :rating)",
-            ExpressionAttributeNames={'#r': 'ratings'},
-            ExpressionAttributeValues={
-                ':rating': [{
-                    "movie": movie_id,
-                    "rating": numbered_rating,
-                    "genres": genres
-                }],
-                ':empty_list': []
-            },
-            ReturnValues="UPDATED_NEW"
-        )
-
+        item = response['Item']["subscriptions"]
+        subscriptions = item.get(update_field, [])
+        
+        if value_to_update in subscriptions:
+            subscriptions.remove(value_to_update)
+            table_feed.update_item(
+                Key={'id': user_id},
+                UpdateExpression=f"SET subscriptions.{update_field} = :updated_list",
+                ExpressionAttributeValues={':updated_list': subscriptions}
+            )
+        
         return {
             'statusCode': 200,
             'headers': cors_headers,
-            'body': json.dumps({"message": "success"})
+            'body': json.dumps({'message': 'Subscription deleted successfully'})
         }
-
+        
     except NoCredentialsError:
         return {
             'statusCode': 403,

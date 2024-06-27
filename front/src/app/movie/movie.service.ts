@@ -65,4 +65,13 @@ export class MovieService {
     return this.httpClient.get<any>(environment.apiGateway + "subscriptions?id=" + userId,
       {'headers': {'Content-Type': 'application/json'}})
   }
+
+  addSubscription(data: any): Observable<any> {
+    return this.httpClient.put<any>(environment.apiGateway + "subscriptions", data,
+      {'headers': {'Content-Type': 'application/json'}})
+  }
+
+  deleteSubscription(data: any): Observable<any> {
+    return this.httpClient.delete<any>(environment.apiGateway + "subscriptions", { body: data })
+  }
 }
