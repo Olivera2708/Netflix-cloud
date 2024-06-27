@@ -3,8 +3,9 @@ import json
 import urllib.request
 import os
 
-def admin_authorizer(event, context):
-    token = event['authorizationToken']
+def user_authorizer(event, context):
+    print(event)
+    token = event['headers']['authorization'].split()[1]
     user_pool_id = os.environ['USER_POOL_ID']
     
     keys_url = f"https://cognito-idp.eu-central-1.amazonaws.com/{user_pool_id}/.well-known/jwks.json"
@@ -60,6 +61,7 @@ def admin_authorizer(event, context):
     else:
         effect = 'Deny'
     
+    print(effect)
     policy = generate_policy(principal_id, effect, method_arn)
     
     return policy
