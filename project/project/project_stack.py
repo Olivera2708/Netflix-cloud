@@ -492,7 +492,10 @@ class Team3ProjectStack(Stack):
             [util_layer],
             environment={
                 "TABLE_FEED": feed_table.table_name,
-                "TABLE_MOVIES": movies_table.table_name
+                "TABLE_MOVIES": movies_table.table_name,
+                "ACTORS_TABLE": actors_table.table_name,
+                "DIRECTORS_TABLE": directors_table.table_name,
+                "GENRES_TABLE": genres_table.table_name
             }
         )
         movies_table.grant_read_data(notify_subscribed_function)

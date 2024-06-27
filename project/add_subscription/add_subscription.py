@@ -6,12 +6,14 @@ from botocore.exceptions import NoCredentialsError, ClientError
 table_feed_name = os.environ['TABLE_FEED']
 dynamodb = boto3.resource('dynamodb')
 table_feed = dynamodb.Table(table_feed_name)
+sns = boto3.client('sns')
 
 cors_headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
 }
+
 
 def add_subscription(event, context):
     try:
@@ -58,6 +60,23 @@ def add_subscription(event, context):
                 'body': json.dumps({"message": "Value already exists"})
             }
 
+        topic_name_prefix = {
+            'actors': 'actor_',
+            'directors': 'director_',
+            'genres': 'genre_'
+        }.get(update_field, '')
+
+        if not topic_name_prefix:
+            return {
+                'statusCode': 400,
+                'headers': cors_headers,
+                'body': json.dumps({'error': 'Invalid update field'})
+            }
+
+        topic_name = topic_name_prefix + value_to_update
+        topic_arn = create_sns_topic(topic_name)
+        subscribe_to_topic(topic_arn, user_id)
+
         response = table_feed.update_item(
             Key={'id': user_id},
             UpdateExpression=f"SET subscriptions.#field = list_append(subscriptions.#field, :value)",
@@ -84,3 +103,16 @@ def add_subscription(event, context):
             'headers': cors_headers,
             'body': json.dumps(f"An error occurred: {str(e)}")
         }
+
+
+def create_sns_topic(topic_name):
+    response = sns.create_topic(Name=topic_name)
+    return response['TopicArn']
+
+
+def subscribe_to_topic(topic_arn, email):
+    sns.subscribe(
+        TopicArn=topic_arn,
+        Protocol='email',
+        Endpoint=email
+    )

@@ -6,12 +6,14 @@ from botocore.exceptions import NoCredentialsError
 table_feed_name = os.environ['TABLE_FEED']
 dynamodb = boto3.resource('dynamodb')
 table_feed = dynamodb.Table(table_feed_name)
+sns = boto3.client('sns')
 
 cors_headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
 }
+
 
 def delete_subscription(event, context):
     try:
@@ -62,6 +64,23 @@ def delete_subscription(event, context):
                 UpdateExpression=f"SET subscriptions.{update_field} = :updated_list",
                 ExpressionAttributeValues={':updated_list': subscriptions}
             )
+
+            topic_name_prefix = {
+                'actors': 'actor_',
+                'directors': 'director_',
+                'genres': 'genre_'
+            }.get(update_field, '')
+
+            if not topic_name_prefix:
+                return {
+                    'statusCode': 400,
+                    'headers': cors_headers,
+                    'body': json.dumps({'error': 'Invalid update field'})
+                }
+
+            topic_name = topic_name_prefix + value_to_update
+            topic_arn = create_sns_topic(topic_name)
+            unsubscribe_from_topic(topic_arn, user_id)
         
         return {
             'statusCode': 200,
@@ -81,3 +100,16 @@ def delete_subscription(event, context):
             'headers': cors_headers,
             'body': json.dumps(f"An error occurred: {str(e)}")
         }
+
+
+def create_sns_topic(topic_name):
+    response = sns.create_topic(Name=topic_name)
+    return response['TopicArn']
+
+
+def unsubscribe_from_topic(topic_arn, email):
+    subscriptions = sns.list_subscriptions_by_topic(TopicArn=topic_arn)['Subscriptions']
+    for subscription in subscriptions:
+        if subscription['Endpoint'] == email and subscription['Protocol'] == 'email':
+            sns.unsubscribe(SubscriptionArn=subscription['SubscriptionArn'])
+            break
