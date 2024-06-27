@@ -155,6 +155,26 @@ class Team3ProjectStack(Stack):
             stream=dynamodb.StreamViewType.NEW_AND_OLD_IMAGES
         )
 
+        search_table = dynamodb.Table(
+            self, "search-table-team-3",
+            table_name="search-table-team-3",
+            partition_key=dynamodb.Attribute(
+                name="id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            stream=dynamodb.StreamViewType.NEW_AND_OLD_IMAGES
+        )
+
+        #index by search expression
+        search_table.add_global_secondary_index(
+            index_name="SearchIndex",
+            partition_key=dynamodb.Attribute(
+                name="search",
+                type=dynamodb.AttributeType.STRING
+            ),
+            projection_type=dynamodb.ProjectionType.ALL
+        )
+
         #index by title
         movies_table.add_global_secondary_index(
             index_name="TitleIndex",
