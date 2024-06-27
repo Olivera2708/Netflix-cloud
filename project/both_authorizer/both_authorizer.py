@@ -4,11 +4,12 @@ import urllib.request
 import os
 import jwt.algorithms
 
-def user_authorizer(event, context):
+def both_authorizer(event, context):
     try:
         token = event['headers']['authorization'].split()[1]
     except:
         token = event['headers']['Authorization'].split()[1]
+
     user_pool_id = os.environ['USER_POOL_ID']
     
     keys_url = f"https://cognito-idp.eu-central-1.amazonaws.com/{user_pool_id}/.well-known/jwks.json"
@@ -18,7 +19,7 @@ def user_authorizer(event, context):
     
     headers = jwt.get_unverified_header(token)
     kid = headers['kid']
-
+    
     key_index = -1
     for i in range(len(keys)):
         if kid == keys[i]['kid']:
@@ -64,16 +65,10 @@ def user_authorizer(event, context):
         }
     
     principal_id = payload['sub']
-    user_groups = payload.get('cognito:groups', [])
-
+    
     method_arn = event['methodArn']
     
-    if 'RegularUser' in user_groups:
-        effect = 'Allow'
-    else:
-        effect = 'Deny'
-    
-    policy = generate_policy(principal_id, effect, method_arn)
+    policy = generate_policy(principal_id, 'Allow', method_arn)
     
     return policy
 

@@ -325,9 +325,18 @@ class Team3ProjectStack(Stack):
             }
         )
 
-        # authorizer = apigateway.CognitoUserPoolsAuthorizer(self, "authorizer",
-        #     cognito_user_pools=[user_pool]
-        # )
+        both_authorizer_function = create_lambda_function(
+            'both_authorizer',
+            'both_authorizer.both_authorizer',
+            'both_authorizer',
+            'GET',
+            [util_layer],
+            environment={
+                'USER_POOL_ID': user_pool.user_pool_id,
+                'REGION': 'eu-central-1',
+                'CLIENT_ID': user_pool_client.user_pool_client_id
+            }
+        )
 
         admin_authorizer = apigateway.RequestAuthorizer(
             self, 'AdminAuthorizer',
@@ -338,6 +347,12 @@ class Team3ProjectStack(Stack):
         user_authorizer = apigateway.RequestAuthorizer(
             self, 'UserAuthorizer',
             handler=user_authorizer_function,
+            identity_sources=[apigateway.IdentitySource.header('Authorization')]
+        )
+
+        both_authorizer = apigateway.RequestAuthorizer(
+            self, 'BothAuthorizer',
+            handler=both_authorizer_function,
             identity_sources=[apigateway.IdentitySource.header('Authorization')]
         )
 
@@ -554,12 +569,6 @@ class Team3ProjectStack(Stack):
 
         movies_table.grant_stream_read(notify_subscribed_function)
 
-        # _lambda.EventSourceMapping(
-        #     self, "DynamoDBEventSource",
-        #     target=notify_subscribed_function,
-        #     event_source_arn=movies_table.table_stream_arn,
-        #     starting_position=_lambda.StartingPosition.TRIM_HORIZON
-        # )
         event_subscription = _lambda.CfnEventSourceMapping(
             scope=self,
             id="companyInsertsOnlyEventSourceMapping",
@@ -866,146 +875,83 @@ class Team3ProjectStack(Stack):
         add_feed_function.add_event_source(directors_dynamo_event_source)
 
         #endpoints
-
-        # for resource_path, data in mapper.items():
-        #     resource_parts = resource_path.strip('/').split('/')
-        #     resource = api.root
-        #     for part in resource_parts:
-        #         resource = resource.add_resource(part)
-
-        #     integration_function = resources_functions['/'.join(resource_parts)]
-        #     method = resource.add_method(
-        #         'POST' if resource_path not in ['subscriptions', 'metadata'] else ('PUT' if resource_path == 'metadata' else 'DELETE'),
-        #         apigateway.LambdaIntegration(integration_function),
-        #         authorization_type=apigateway.AuthorizationType.CUSTOM,
-        #         authorizer=authorizer,
-        #         request_parameters={
-        #             'method.request.header.Authorization': True
-        #         }
-        #     )
-
-        #     cfn_method = method.node.find_child("Resource")
-        #     cfn_method.add_property_override(
-        #         "RequestContext", {
-        #             "authorizer": {
-        #                 "requiredRoles": data[0]
-        #             }
-        #         }
-        #     )
-
-        # def add_roles(method, roles):
-        #     method.node.find_child('Resource').add_property_override(
-        #         'Integration.RequestParameters.context.requiredRoles', str(roles)
-        #     )
-
-        #mapper
-        # mapper = {
-        #     '/upload': [[], upload_function, 'POST'],
-        #     '/feed': [['Admin', 'RegularUser'], upload_user_function, 'POST'],
-        #     '/feed/downloaded': [['Admin', 'RegularUser'], add_downloaded_genres_function, 'POST'],
-        #     '/subscriptions': [['Admin', 'RegularUser'], add_subscription_function, 'PUT'],
-        #     '/subscriptions': [['Admin', 'RegularUser'], delete_subscription_function, 'DELETE'],
-        #     '/subscriptions': [['Admin', 'RegularUser'], get_subscriptions_function, 'GET'],
-        #     '/movie': [['Admin', 'RegularUser'], get_movie_url_function, 'GET'],
-        #     '/movie/{id}': [['Admin'], delete_data_function, 'DELETE'],
-        #     '/search': [['Admin', 'RegularUser'], search_movies_function, 'GET'],
-        #     '/metadata': [['Admin', 'RegularUser'], get_metadata_function, 'GET'],
-        #     '/metadata': [['Admin'], edit_metadata_function, 'PUT'],
-        #     '/rating': [['Admin', 'RegularUser'], add_rating_function, 'POST'],
-        #     '/rating': [['Admin', 'RegularUser'], get_rating_function, 'GET']
-        # }
-
-
         upload_resource = api.root.add_resource("upload")
         upload_integration = apigateway.LambdaIntegration(upload_function)
         method = upload_resource.add_method("POST", upload_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=admin_authorizer,
         request_parameters={
             'method.request.header.Authorization': True
         })
-        #add_roles(method, 'Admin')
 
         feed_resource = api.root.add_resource("feed")
         upload_user_integration = apigateway.LambdaIntegration(upload_user_function)
-        method = feed_resource.add_method("POST", upload_user_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=admin_authorizer,
+        method = feed_resource.add_method("POST", upload_user_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=both_authorizer,
         request_parameters={
             'method.request.header.Authorization': True
         })
-        #add_roles(method, 'Admin,RegularUser')
         downloaded_resource = feed_resource.add_resource('downloaded')
         add_downloaded_genres_integration = apigateway.LambdaIntegration(add_downloaded_genres_function)
-        method = downloaded_resource.add_method("POST", add_downloaded_genres_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=admin_authorizer,
+        method = downloaded_resource.add_method("POST", add_downloaded_genres_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=user_authorizer,
         request_parameters={
             'method.request.header.Authorization': True
         })
-        #add_roles(method, 'Admin,RegularUser')
 
         subscriptions_resource = api.root.add_resource("subscriptions")
         add_subscriptions_integration = apigateway.LambdaIntegration(add_subscription_function)
-        method = subscriptions_resource.add_method("PUT", add_subscriptions_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=admin_authorizer,
+        method = subscriptions_resource.add_method("PUT", add_subscriptions_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=user_authorizer,
         request_parameters={
             'method.request.header.Authorization': True
         })
-        #add_roles(method, 'Admin,RegularUser')
         delete_subscriptions_integration = apigateway.LambdaIntegration(delete_subscription_function)
-        method = subscriptions_resource.add_method("DELETE", delete_subscriptions_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=admin_authorizer,
+        method = subscriptions_resource.add_method("DELETE", delete_subscriptions_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=user_authorizer,
         request_parameters={
             'method.request.header.Authorization': True
         })
-        #add_roles(method, 'Admin,RegularUser')
         get_subscriptions_integration = apigateway.LambdaIntegration(get_subscriptions_function)
-        method = subscriptions_resource.add_method("GET", get_subscriptions_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=admin_authorizer,
+        method = subscriptions_resource.add_method("GET", get_subscriptions_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=user_authorizer,
         request_parameters={
             'method.request.header.Authorization': True
         })
-        #add_roles(method, 'Admin,RegularUser')
 
         movie_resource = api.root.add_resource("movie")
         get_movie_url_integration = apigateway.LambdaIntegration(get_movie_url_function)
-        method = movie_resource.add_method("GET", get_movie_url_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=admin_authorizer,
+        method = movie_resource.add_method("GET", get_movie_url_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=both_authorizer,
         request_parameters={
             'method.request.header.Authorization': True
         })
-        #add_roles(method, 'Admin,RegularUser')
         delete_resource = movie_resource.add_resource('{id}')
         delete_data_integration = apigateway.LambdaIntegration(delete_data_function)
         method = delete_resource.add_method("DELETE", delete_data_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=admin_authorizer,
         request_parameters={
             'method.request.header.Authorization': True
         })
-        #add_roles(method, 'Admin')
 
         search_resource = api.root.add_resource("search")
         search_movies_integration = apigateway.LambdaIntegration(search_movies_function)
-        method = search_resource.add_method("GET", search_movies_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=admin_authorizer,
+        method = search_resource.add_method("GET", search_movies_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=both_authorizer,
         request_parameters={
             'method.request.header.Authorization': True
         })
-        #add_roles(method, 'Admin,RegularUser')
         
         movie_metadata_resource = api.root.add_resource("metadata")
         movie_metadata_integration = apigateway.LambdaIntegration(get_metadata_function)
-        method = movie_metadata_resource.add_method("GET", movie_metadata_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=admin_authorizer,
+        method = movie_metadata_resource.add_method("GET", movie_metadata_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=both_authorizer,
         request_parameters={
             'method.request.header.Authorization': True
         })
-        #add_roles(method, 'Admin,RegularUser')
         edit_metadata_integration = apigateway.LambdaIntegration(edit_metadata_function)
         method = movie_metadata_resource.add_method("PUT", edit_metadata_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=admin_authorizer,
         request_parameters={
             'method.request.header.Authorization': True
         })
-        #add_roles(method, 'Admin')
 
         rating_resource = api.root.add_resource("rating")
         add_rating_integration = apigateway.LambdaIntegration(add_rating_function)
-        method = rating_resource.add_method("POST", add_rating_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=admin_authorizer,
+        method = rating_resource.add_method("POST", add_rating_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=user_authorizer,
         request_parameters={
             'method.request.header.Authorization': True
         })
-        #add_roles(method, 'Admin,RegularUser')
         get_rating_integration = apigateway.LambdaIntegration(get_rating_function)
-        method = rating_resource.add_method("GET", get_rating_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=user_authorizer,
+        method = rating_resource.add_method("GET", get_rating_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=both_authorizer,
         request_parameters={
             'method.request.header.Authorization': True
         })
-        #add_roles(method, 'Admin,RegularUser')

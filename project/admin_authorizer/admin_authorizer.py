@@ -2,10 +2,14 @@ import jwt
 import json
 import urllib.request
 import os
+import jwt.algorithms
 
 def admin_authorizer(event, context):
-    print(event)
-    token = event['headers']['authorization'].split()[1]
+    try:
+        token = event['headers']['authorization'].split()[1]
+    except:
+        token = event['headers']['Authorization'].split()[1]
+
     user_pool_id = os.environ['USER_POOL_ID']
     
     keys_url = f"https://cognito-idp.eu-central-1.amazonaws.com/{user_pool_id}/.well-known/jwks.json"
@@ -25,7 +29,12 @@ def admin_authorizer(event, context):
         print('Public key not found in jwks.json')
         return {
             'statusCode': 401,
-            'body': json.dumps('Unauthorized')
+            'body': json.dumps('Unauthorized'),
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            }
         }
     
     public_key = jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(keys[key_index]))
@@ -36,24 +45,28 @@ def admin_authorizer(event, context):
         print('Token is expired')
         return {
             'statusCode': 401,
-            'body': json.dumps('Unauthorized')
-        }
-    except jwt.JWTClaimsError:
-        print('Token claims are invalid')
-        return {
-            'statusCode': 401,
-            'body': json.dumps('Unauthorized')
+            'body': json.dumps('Unauthorized'),
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            }
         }
     except Exception as e:
         print(f'Unable to parse token: {str(e)}')
         return {
             'statusCode': 401,
-            'body': json.dumps('Unauthorized')
+            'body': json.dumps('Unauthorized'),
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            }
         }
     
     principal_id = payload['sub']
     user_groups = payload.get('cognito:groups', [])
-    
+
     method_arn = event['methodArn']
     
     if 'Admin' in user_groups:
@@ -61,7 +74,6 @@ def admin_authorizer(event, context):
     else:
         effect = 'Deny'
     
-    print(effect)
     policy = generate_policy(principal_id, effect, method_arn)
     
     return policy
