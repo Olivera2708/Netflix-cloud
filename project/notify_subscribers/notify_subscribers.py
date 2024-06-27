@@ -79,7 +79,7 @@ def notify_actors_subscribers(title, actors):
 def notify_directors_subscribers(title, directors):
     for director_name in directors:
         topic_arn = create_sns_topic("director_" + director_name.replace(" ", "_"))
-        message = f"A new movie with ID {title} directed by {director_name} has been added."
+        message = f"A new movie named {title} directed by {director_name} has been added."
         subject = f"New Movie Directed by {director_name}"
         publish_to_sns(topic_arn, subject, message)
 
@@ -87,7 +87,7 @@ def notify_directors_subscribers(title, directors):
 def notify_genres_subscribers(title, genres):
     for genre_name in genres:
         topic_arn = create_sns_topic("genre_" + genre_name.replace(" ", "_"))
-        message = f"A new movie with ID {title} in the {genre_name} genre has been added."
+        message = f"A new movie named {title} in the {genre_name} genre has been added."
         subject = f"New {genre_name} Movie Added"
         publish_to_sns(topic_arn, subject, message)
 
