@@ -9,12 +9,14 @@ movies_table_name = os.environ['MOVIES_TABLE']
 genres_table_name = os.environ['GENRES_TABLE']
 actors_table_name = os.environ['ACTORS_TABLE']
 directors_table_name = os.environ['DIRECTORS_TABLE']
+search_table_name = os.environ['SEARCH_TABLE']
 
 dynamodb = boto3.resource('dynamodb')
 movies_table = dynamodb.Table(movies_table_name)
 genres_table = dynamodb.Table(genres_table_name)
 actors_table = dynamodb.Table(actors_table_name)
 directors_table = dynamodb.Table(directors_table_name)
+search_table = dynamodb.Table(search_table_name)
 s3 = boto3.client('s3')
 
 def upload_metadata(event, context):
@@ -82,6 +84,8 @@ def process_message(event):
                 'id': str(uuid.uuid4())
             })
 
+        add_to_search_table(data, table_key)
+
         movies_table.put_item(Item=item)
         s3.delete_object(Bucket=s3_bucket, Key=s3_key)
         return {
@@ -90,3 +94,21 @@ def process_message(event):
         }
     except Exception as e:
         raise e
+
+
+def add_to_search_table(data, movie_id):
+    title = data.get("title")
+    description = data.get("description")
+    actors = data.get("actors")
+    directors = data.get("directors")
+    genres = data.get("genres")
+    string_actors = [f"{act}," for act in actors][:-1]
+    string_directors = [f"{dire}," for dire in directors][:-1]
+    string_genres = [f"{gen}," for gen in genres][:-1]
+    search = f"{title}|{description}|{actors}|{directors}|{genres}"
+
+    search_table.put_item(Item={
+        'movie_id': movie_id,
+        'search': search,
+        'id': str(uuid.uuid4())
+    })

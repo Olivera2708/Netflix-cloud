@@ -10,12 +10,14 @@ movies_table_name = os.environ['MOVIES_TABLE']
 genres_table_name = os.environ['GENRES_TABLE']
 actors_table_name = os.environ['ACTORS_TABLE']
 directors_table_name = os.environ['DIRECTORS_TABLE']
+search_table_name = os.environ['SEARCH_TABLE']
 
 dynamodb = boto3.resource('dynamodb')
 movies_table = dynamodb.Table(movies_table_name)
 genres_table = dynamodb.Table(genres_table_name)
 actors_table = dynamodb.Table(actors_table_name)
 directors_table = dynamodb.Table(directors_table_name)
+search_table = dynamodb.Table(search_table_name)
 
 def delete_data(event, context):
     try:
@@ -60,6 +62,15 @@ def delete_data(event, context):
         )
         for item in response['Items']:
             directors_table.delete_item(
+                Key={'id': item['id']}
+            )
+
+        response = search_table.query(
+            IndexName='MovieIndex',
+            KeyConditionExpression=Key('movie_id').eq(object_key)
+        )
+        for item in response['Items']:
+            search_table.delete_item(
                 Key={'id': item['id']}
             )
 

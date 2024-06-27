@@ -174,6 +174,14 @@ class Team3ProjectStack(Stack):
             ),
             projection_type=dynamodb.ProjectionType.ALL
         )
+        search_table.add_global_secondary_index(
+            index_name="MovieIndex",
+            partition_key=dynamodb.Attribute(
+                name="movie_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            projection_type=dynamodb.ProjectionType.ALL
+        )
 
         #index by title
         movies_table.add_global_secondary_index(
