@@ -25,32 +25,13 @@ def custom_serializer(obj):
         return int(obj)
     raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
 
-# def convert_dynamodb_to_json(data):
-#     if isinstance(data, dict):
-#         if 'M' in data:
-#             return {key: convert_dynamodb_to_json(value) for key, value in data['M'].items()}
-#         elif 'L' in data:
-#             return [convert_dynamodb_to_json(item) for item in data['L']]
-#         elif 'NULL' in data:
-#             return None
-#         elif 'BOOL' in data:
-#             return data['BOOL']
-#         elif 'S' in data:
-#             return data['S']
-#         elif 'N' in data:
-#             return int(data['N']) if data['N'].isdigit() else float(data['N'])
-#         else:
-#             return data
-#     else:
-#         return data
 
 def add_feed(event, context):
     for record in event['Records']:
-        if record['eventName'] == 'INSERT' or record['eventName'] == 'MODIFY':
+        if record['eventName'] == 'INSERT':
             response = user_table.scan()
             new_image = record['dynamodb']['NewImage']
             movie_id = new_image['id']['S']
-            # new_image = {key: convert_dynamodb_to_json(value) for key, value in new_image.items()}
             genres_response = genres_table.query(
                 IndexName='MovieIndex',
                 KeyConditionExpression='movie_id = :id',
