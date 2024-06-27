@@ -66,7 +66,7 @@ def get_genres_by_movie_id(movie_id):
 
 def notify_actors_subscribers(movie_id, actors):
     for actor_name in actors:
-        topic_arn = create_sns_topic("actor_" + actor_name)
+        topic_arn = create_sns_topic("actor_" + actor_name.replace(" ", "_"))
         message = f"A new movie with ID {movie_id} featuring {actor_name} has been added."
         subject = f"New Movie Added with {actor_name}"
         publish_to_sns(topic_arn, subject, message)
@@ -74,7 +74,7 @@ def notify_actors_subscribers(movie_id, actors):
 
 def notify_directors_subscribers(movie_id, directors):
     for director_name in directors:
-        topic_arn = create_sns_topic("director_" + director_name)
+        topic_arn = create_sns_topic("director_" + director_name.replace(" ", "_"))
         message = f"A new movie with ID {movie_id} directed by {director_name} has been added."
         subject = f"New Movie Directed by {director_name}"
         publish_to_sns(topic_arn, subject, message)
@@ -82,7 +82,7 @@ def notify_directors_subscribers(movie_id, directors):
 
 def notify_genres_subscribers(movie_id, genres):
     for genre_name in genres:
-        topic_arn = create_sns_topic("genre_" + genre_name)
+        topic_arn = create_sns_topic("genre_" + genre_name.replace(" ", "_"))
         message = f"A new movie with ID {movie_id} in the {genre_name} genre has been added."
         subject = f"New {genre_name} Movie Added"
         publish_to_sns(topic_arn, subject, message)

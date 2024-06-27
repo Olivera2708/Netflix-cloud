@@ -78,7 +78,7 @@ def delete_subscription(event, context):
                     'body': json.dumps({'error': 'Invalid update field'})
                 }
 
-            topic_name = topic_name_prefix + value_to_update
+            topic_name = topic_name_prefix + value_to_update.replace(" ", "_")
             topic_arn = create_sns_topic(topic_name)
             unsubscribe_from_topic(topic_arn, user_id)
 
