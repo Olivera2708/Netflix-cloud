@@ -66,11 +66,11 @@ def update_feed(event, context):
                     new_image['feed'][film]['download_score'] = new_image['feed'][film]['download_score']/2 + len(new_genre & film_genres) * 3
                 elif len(new_ratings) > len(old_ratings):
                     #ocenio je
-                    new_rating = set([item for item in new_ratings if item not in old_ratings][0])
-                    rating_genres = set(new_rating['genres'])
+                    # new_rating = set([item for item in new_ratings if item not in old_ratings][0])
+                    rating_genres = set(new_ratings[0]['genres'])
                     #dobavi zanrove filma, DECIMAL 
                     film_genres = set(['Action'])
-                    new_image['feed'][film]['rating_score'] += len(rating_genres & film_genres) * new_rating['rating']
+                    new_image['feed'][film]['rating_score'] += len(rating_genres & film_genres) * new_ratings[0]['rating']
                 elif len(new_subscriptions['actors']) > len(old_subscriptions['actors']):
                     #pretplatio se
                     # new_actor = set(new_subscriptions['actors']) - set(old_subscriptions['actors'])
@@ -112,7 +112,7 @@ def update_feed(event, context):
                 
                 new_image['feed'][film]['score'] = new_image['feed'][film]['subscription_score'] + new_image['feed'][film]['rating_score'] + new_image['feed'][film]['download_score']
 
-                table.put_item(Item=new_image)
+                #table.put_item(Item=new_image)
 
     return {
             'statusCode': 200,

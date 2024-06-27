@@ -747,8 +747,32 @@ class Team3ProjectStack(Stack):
             }
         )
 
-        dynamo_event_source = lambda_event_sources.DynamoEventSource(
+        movie_dynamo_event_source = lambda_event_sources.DynamoEventSource(
             movies_table,
+            starting_position=_lambda.StartingPosition.LATEST,
+            batch_size=1
+        )
+        
+        user_dynamo_event_source = lambda_event_sources.DynamoEventSource(
+            feed_table,
+            starting_position=_lambda.StartingPosition.LATEST,
+            batch_size=1
+        )
+        
+        genres_dynamo_event_source = lambda_event_sources.DynamoEventSource(
+            genres_table,
+            starting_position=_lambda.StartingPosition.LATEST,
+            batch_size=1
+        )
+
+        actors_dynamo_event_source = lambda_event_sources.DynamoEventSource(
+            actors_table,
+            starting_position=_lambda.StartingPosition.LATEST,
+            batch_size=1
+        )
+
+        directors_dynamo_event_source = lambda_event_sources.DynamoEventSource(
+            directors_table,
             starting_position=_lambda.StartingPosition.LATEST,
             batch_size=1
         )
@@ -768,15 +792,12 @@ class Team3ProjectStack(Stack):
             }
         )
 
-        user_dynamo_event_source = lambda_event_sources.DynamoEventSource(
-            feed_table,
-            starting_position=_lambda.StartingPosition.LATEST,
-            batch_size=1
-        )
 
         update_feed_function.add_event_source(user_dynamo_event_source)
 
-        add_feed_function.add_event_source(dynamo_event_source)
+        add_feed_function.add_event_source(actors_dynamo_event_source)
+        add_feed_function.add_event_source(genres_dynamo_event_source)
+        add_feed_function.add_event_source(directors_dynamo_event_source)
 
         #endpoints
         upload_resource = api.root.add_resource("upload")
