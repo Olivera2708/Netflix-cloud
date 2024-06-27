@@ -41,6 +41,7 @@ def update_subscription_score(new_items, old_items, film_items):
 def update_feed(event, context):
     for record in event['Records']:
         if record['eventName'] == 'MODIFY':
+            print(record)
             new_image = record['dynamodb']['NewImage']
             old_image = record['dynamodb']['OldImage']
             new_image = {key: convert_dynamodb_to_json(value) for key, value in new_image.items()}
