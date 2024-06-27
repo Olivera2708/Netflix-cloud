@@ -135,7 +135,6 @@ export class EditMovieComponent implements OnInit {
       title_name = this.seriesName + "/" + this.title;
     else
       title_name = this.title;
-    title_name = title_name.replace("/", "_")
 
     const payload : Payload = {
       id: this.id,

@@ -1,11 +1,20 @@
 import json
 import boto3
+import uuid
 import os
 from botocore.exceptions import ClientError
+from boto3.dynamodb.conditions import Key
 
-table_name = os.environ['TABLE']
+movies_table_name = os.environ['MOVIES_TABLE']
+genres_table_name = os.environ['GENRES_TABLE']
+actors_table_name = os.environ['ACTORS_TABLE']
+directors_table_name = os.environ['DIRECTORS_TABLE']
+
 dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table(table_name)
+movies_table = dynamodb.Table(movies_table_name)
+genres_table = dynamodb.Table(genres_table_name)
+actors_table = dynamodb.Table(actors_table_name)
+directors_table = dynamodb.Table(directors_table_name)
 
 def edit_metadata(event, context):
     try:
@@ -23,13 +32,64 @@ def edit_metadata(event, context):
                 }
             }
 
-        data = data["metadata"]
+        metadata = data.get("metadata", {})
+
+        response = genres_table.query(
+            IndexName='MovieIndex',
+            KeyConditionExpression=Key('movie_id').eq(item_id),
+            ProjectionExpression='id'
+        )
+        for item in response['Items']:
+            genres_table.delete_item(
+                Key={'id': item['id']}
+            )
+        for genre in metadata.get('genres', []):
+            genres_table.put_item(Item={
+                'movie_id': item_id,
+                'genre': genre,
+                'id': str(uuid.uuid4())
+            })
+
+        response = actors_table.query(
+            IndexName='MovieIndex',
+            KeyConditionExpression=Key('movie_id').eq(item_id),
+            ProjectionExpression='id'
+        )
+        for item in response['Items']:
+            actors_table.delete_item(
+                Key={'id': item['id']}
+            )
+        for actor in metadata.get('actors', []):
+            actors_table.put_item(Item={
+                'movie_id': item_id,
+                'actor': actor,
+                'id': str(uuid.uuid4())
+            }) 
+
+        response = directors_table.query(
+            IndexName='MovieIndex',
+            KeyConditionExpression=Key('movie_id').eq(item_id),
+            ProjectionExpression='id'
+        )
+        for item in response['Items']:
+            directors_table.delete_item(
+                Key={'id': item['id']}
+            )
+        for director in metadata.get('directors', []):
+            directors_table.put_item(Item={
+                'movie_id': item_id,
+                'director': director,
+                'id': str(uuid.uuid4())
+            })
+
         update_expression = "SET "
         expression_attribute_values = {}
         expression_attribute_names = {}
         
-        for key, value in data.items():
-            if key == "year":
+        for key, value in metadata.items():
+            if key in ["actors", "directors", "genres"]:
+                continue
+            elif key == "year":
                 update_expression += "#yr = :year, "
                 expression_attribute_names["#yr"] = "year"
                 expression_attribute_values[":year"] = value
@@ -39,7 +99,7 @@ def edit_metadata(event, context):
         
         update_expression = update_expression.rstrip(", ")
 
-        table.update_item(
+        movies_table.update_item(
             Key={'id': item_id},
             UpdateExpression=update_expression,
             ExpressionAttributeValues=expression_attribute_values,

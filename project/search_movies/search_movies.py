@@ -1,81 +1,81 @@
 import json
 import boto3
 import os
-from boto3.dynamodb.conditions import Attr
+from boto3.dynamodb.conditions import Key
 
-# Initialize DynamoDB resource
+movies_table_name = os.environ['MOVIES_TABLE']
+genres_table_name = os.environ['GENRES_TABLE']
+actors_table_name = os.environ['ACTORS_TABLE']
+directors_table_name = os.environ['DIRECTORS_TABLE']
+
 dynamodb = boto3.resource('dynamodb')
-table_name = os.environ['TABLE']
-table = dynamodb.Table(table_name)
+movies_table = dynamodb.Table(movies_table_name)
+genres_table = dynamodb.Table(genres_table_name)
+actors_table = dynamodb.Table(actors_table_name)
+directors_table = dynamodb.Table(directors_table_name)
 
 
 def search_movies(event, context):
     try:
-        input_data = json.loads(event["body"])
-        if not input_data:
-            return {
-                'statusCode': 400,
-                'headers': {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': 'Content-Type',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-                },
-                'body': json.dumps({'error': 'Invalid input: body is required'})
-            }
+        params = event.get('queryStringParameters', {})
+        search_value = params.get('value')
+        result = {}
 
-        # # Extract query parameters from event
-        title = input_data['title']
-        description = input_data['description']
-        actors = input_data['actors']
-        directors = input_data['directors']
-        genres = input_data['genres']
-        # return {
-        #     'statusCode': 200,
-        #     'headers': {
-        #         'Access-Control-Allow-Origin': '*',
-        #         'Access-Control-Allow-Headers': 'Content-Type',
-        #         'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-        #     },
-        #     'body': json.dumps(actors)
-        # }
-        # return {
-        #     'statusCode': 400,
-        #     'headers': {
-        #         'Access-Control-Allow-Origin': '*',
-        #         'Access-Control-Allow-Headers': 'Content-Type',
-        #         'Access-Control-Allow-Methods': 'GET,POST,OPTIONS'
-        #     },
-        #     'genres': genres,
-        #     'directors': directors
-        # }
+        if search_value.strip() == "":
+            response = movies_table.scan(
+                ProjectionExpression='id, title, description'
+            )
+            for item in response.get('Items', []):
+                result[item['id']] = item
+        else:
+            all_movie_ids = set()
+            genres_response = genres_table.query(
+                IndexName='GenreIndex',
+                KeyConditionExpression=Key('genre').eq(search_value),
+                ProjectionExpression='movie_id'
+            )
+            for item in genres_response.get('Items', []):
+                all_movie_ids.add(item['movie_id'])
 
-        filter_expression = Attr('title').contains(title)
+            actors_response = actors_table.query(
+                IndexName='ActorIndex',
+                KeyConditionExpression=Key('actor').eq(search_value),
+                ProjectionExpression='movie_id'
+            )
+            for item in actors_response.get('Items', []):
+                all_movie_ids.add(item['movie_id'])
 
-        filter_expression = filter_expression & Attr('description').contains(
-            description) if filter_expression else Attr('description').contains(description)
+            directors_response = directors_table.query(
+                IndexName='DirectorIndex',
+                KeyConditionExpression=Key('director').eq(search_value),
+                ProjectionExpression='movie_id'
+            )
+            for item in directors_response.get('Items', []):
+                all_movie_ids.add(item['movie_id'])
 
-        for actor in actors:
-            filter_expression = filter_expression & Attr('actors').contains(actor) if filter_expression else Attr(
-                'actors').contains(actor)
+            title_response = movies_table.query(
+                IndexName='TitleIndex',
+                KeyConditionExpression=Key('title').eq(search_value),
+                ProjectionExpression='id, title, description'
+            )
+            for item in title_response.get('Items', []):
+                result[item['id']] = item
 
-        for director in directors:
-            filter_expression = filter_expression & Attr('directors').contains(
-                director) if filter_expression else Attr('directors').contains(director)
+            description_response = movies_table.query(
+                IndexName='DescriptionIndex',
+                KeyConditionExpression=Key('description').eq(search_value),
+                ProjectionExpression='id, title, description'
+            )
+            for item in description_response.get('Items', []):
+                result[item['id']] = item
 
-        for genre in genres:
-            filter_expression = filter_expression & Attr('genres').contains(genre) if filter_expression else Attr(
-                'genres').contains(genre)
-
-        response = table.scan(
-            FilterExpression=filter_expression
-        )
-
-        items = response['Items']
-        for item in items:
-            if 'file_size' in item:
-                del item['file_size']
-            if 'ratings' in item:
-                del item['ratings']
+            for val in all_movie_ids:
+                id_response = movies_table.query(
+                    KeyConditionExpression=Key('id').eq(val),
+                    ProjectionExpression='id, title, description'
+                )
+                for item in id_response.get('Items', []):
+                    result[item['id']] = item
 
         return {
             'statusCode': 200,
@@ -84,7 +84,7 @@ def search_movies(event, context):
                 'Access-Control-Allow-Headers': 'Content-Type',
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             },
-            'body': json.dumps(items)
+            'body': json.dumps(result)
         }
 
     except Exception as e:

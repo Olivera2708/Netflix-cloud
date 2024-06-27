@@ -55,7 +55,7 @@
           </div>
         </div>
         <!--      <p class="value">{{ directors }}</p>-->
-        <div class="rating-view">
+        <div class="rating-view" *ngIf="avgRating != 0">
           <p class="subtitle">Rating</p>
           <p class="value">Average rating for this movie is {{ avgRating }}/5</p>
           <p class="value">{{ suggestProc }}% of the users will suggest this movie</p>
