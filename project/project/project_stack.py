@@ -349,6 +349,28 @@ class Team3ProjectStack(Stack):
             }
         )
 
+        add_subscription_function = create_lambda_function(
+            "add_subscription",
+            "add_subscription.add_subscription",
+            "add_subscription",
+            "PUT",
+            [util_layer],
+            environment={
+                "TABLE_FEED": feed_table.table_name
+            }
+        )
+
+        delete_subscription_function = create_lambda_function(
+            "delete_subscription",
+            "delete_subscription.delete_subscription",
+            "delete_subscription",
+            "DELETE",
+            [util_layer],
+            environment={
+                "TABLE_FEED": feed_table.table_name
+            }
+        )
+
         get_rating_function = create_lambda_function(
             "get_rating",
             "get_rating.get_rating",
@@ -368,17 +390,6 @@ class Team3ProjectStack(Stack):
             [util_layer],
             environment={
                 "TABLE_MOVIES": movies_table.table_name,
-                "TABLE_FEED": feed_table.table_name
-            }
-        )
-
-        update_user_function = create_lambda_function(
-            "edit_user",
-            "edit_user.edit_user",
-            "edit_user",
-            "PUT",
-            [util_layer],
-            environment={
                 "TABLE_FEED": feed_table.table_name
             }
         )
@@ -775,13 +786,15 @@ class Team3ProjectStack(Stack):
         feed_resource = api.root.add_resource("feed")
         upload_user_integration = apigateway.LambdaIntegration(upload_user_function)
         feed_resource.add_method("POST", upload_user_integration)
-        edit_user_integration = apigateway.LambdaIntegration(update_user_function)
-        feed_resource.add_method("PUT", edit_user_integration)
         downloaded_resource = feed_resource.add_resource('downloaded')
         add_downloaded_genres_integration = apigateway.LambdaIntegration(add_downloaded_genres_function)
         downloaded_resource.add_method("POST", add_downloaded_genres_integration)
 
         subscriptions_resource = api.root.add_resource("subscriptions")
+        add_subscriptions_integration = apigateway.LambdaIntegration(add_subscription_function)
+        subscriptions_resource.add_method("PUT", add_subscriptions_integration)
+        delete_subscriptions_integration = apigateway.LambdaIntegration(delete_subscription_function)
+        subscriptions_resource.add_method("DELETE", delete_subscriptions_integration)
         get_subscriptions_integration = apigateway.LambdaIntegration(get_subscriptions_function)
         subscriptions_resource.add_method("GET", get_subscriptions_integration)
 

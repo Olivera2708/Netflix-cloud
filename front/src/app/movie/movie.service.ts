@@ -41,11 +41,6 @@ export class MovieService {
       {'headers': {'Content-Type': 'application/json'}})
   }
 
-  editUser(data: any): Observable<any> {
-    return this.httpClient.put<any>(environment.apiGateway + "feed", data,
-      {'headers': {'Content-Type': 'application/json'}})
-  }
-
   addRating(data: any): Observable<any> {
     return this.httpClient.post<any>(environment.apiGateway + "rating", data,
       {'headers': {'Content-Type': 'application/json'}})
@@ -64,5 +59,14 @@ export class MovieService {
   getSubscriptions(userId: string): Observable<any> {
     return this.httpClient.get<any>(environment.apiGateway + "subscriptions?id=" + userId,
       {'headers': {'Content-Type': 'application/json'}})
+  }
+
+  addSubscription(data: any): Observable<any> {
+    return this.httpClient.put<any>(environment.apiGateway + "subscriptions", data,
+      {'headers': {'Content-Type': 'application/json'}})
+  }
+
+  deleteSubscription(data: any): Observable<any> {
+    return this.httpClient.delete<any>(environment.apiGateway + "subscriptions", { body: data })
   }
 }
