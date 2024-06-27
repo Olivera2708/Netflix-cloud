@@ -378,6 +378,11 @@ class Team3ProjectStack(Stack):
             }
         )
 
+        add_subscription_function.add_to_role_policy(iam.PolicyStatement(
+            actions=["sns:CreateTopic", "sns:Publish", "sns:Subscribe", "sns:Unsubscribe"],
+            resources=["*"],
+        ))
+
         delete_subscription_function = create_lambda_function(
             "delete_subscription",
             "delete_subscription.delete_subscription",
@@ -388,6 +393,16 @@ class Team3ProjectStack(Stack):
                 "TABLE_FEED": feed_table.table_name
             }
         )
+
+        delete_subscription_function.add_to_role_policy(iam.PolicyStatement(
+            actions=["sns:CreateTopic",
+                     "sns:DeleteTopic",
+                     "sns:Publish",
+                     "sns:Subscribe",
+                     "sns:Unsubscribe",
+                     "sns:ListSubscriptionsByTopic"],
+            resources=["*"],
+        ))
 
         get_rating_function = create_lambda_function(
             "get_rating",
@@ -510,16 +525,29 @@ class Team3ProjectStack(Stack):
             [util_layer],
             environment={
                 "TABLE_FEED": feed_table.table_name,
-                "TABLE_MOVIES": movies_table.table_name
+                "TABLE_MOVIES": movies_table.table_name,
+                "ACTORS_TABLE": actors_table.table_name,
+                "DIRECTORS_TABLE": directors_table.table_name,
+                "GENRES_TABLE": genres_table.table_name
             }
         )
-        movies_table.grant_read_data(notify_subscribed_function)
 
-        _lambda.EventSourceMapping(
-            self, "DynamoDBEventSource",
-            target=notify_subscribed_function,
+        movies_table.grant_stream_read(notify_subscribed_function)
+
+        # _lambda.EventSourceMapping(
+        #     self, "DynamoDBEventSource",
+        #     target=notify_subscribed_function,
+        #     event_source_arn=movies_table.table_stream_arn,
+        #     starting_position=_lambda.StartingPosition.TRIM_HORIZON
+        # )
+        event_subscription = _lambda.CfnEventSourceMapping(
+            scope=self,
+            id="companyInsertsOnlyEventSourceMapping",
+            function_name=notify_subscribed_function.function_name,
             event_source_arn=movies_table.table_stream_arn,
-            starting_position=_lambda.StartingPosition.TRIM_HORIZON
+            maximum_batching_window_in_seconds=1,
+            starting_position="LATEST",
+            batch_size=1,
         )
 
         notify_subscribed_function.add_to_role_policy(iam.PolicyStatement(
@@ -765,8 +793,32 @@ class Team3ProjectStack(Stack):
             }
         )
 
-        dynamo_event_source = lambda_event_sources.DynamoEventSource(
+        movie_dynamo_event_source = lambda_event_sources.DynamoEventSource(
             movies_table,
+            starting_position=_lambda.StartingPosition.LATEST,
+            batch_size=1
+        )
+        
+        user_dynamo_event_source = lambda_event_sources.DynamoEventSource(
+            feed_table,
+            starting_position=_lambda.StartingPosition.LATEST,
+            batch_size=1
+        )
+        
+        genres_dynamo_event_source = lambda_event_sources.DynamoEventSource(
+            genres_table,
+            starting_position=_lambda.StartingPosition.LATEST,
+            batch_size=1
+        )
+
+        actors_dynamo_event_source = lambda_event_sources.DynamoEventSource(
+            actors_table,
+            starting_position=_lambda.StartingPosition.LATEST,
+            batch_size=1
+        )
+
+        directors_dynamo_event_source = lambda_event_sources.DynamoEventSource(
+            directors_table,
             starting_position=_lambda.StartingPosition.LATEST,
             batch_size=1
         )
@@ -786,15 +838,12 @@ class Team3ProjectStack(Stack):
             }
         )
 
-        user_dynamo_event_source = lambda_event_sources.DynamoEventSource(
-            feed_table,
-            starting_position=_lambda.StartingPosition.LATEST,
-            batch_size=1
-        )
 
         update_feed_function.add_event_source(user_dynamo_event_source)
 
-        add_feed_function.add_event_source(dynamo_event_source)
+        add_feed_function.add_event_source(actors_dynamo_event_source)
+        add_feed_function.add_event_source(genres_dynamo_event_source)
+        add_feed_function.add_event_source(directors_dynamo_event_source)
 
         #endpoints
 
