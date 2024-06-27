@@ -783,7 +783,7 @@ class Team3ProjectStack(Stack):
 
         subscriptions_resource = api.root.add_resource("subscriptions")
         get_subscriptions_integration = apigateway.LambdaIntegration(get_subscriptions_function)
-        subscriptions_resource.add_method("GET", get_subscriptions_integration, authorization_type=apigateway.AuthorizationType.COGNITO, authorizer=authorizer)
+        subscriptions_resource.add_method("GET", get_subscriptions_integration)
 
         movie_resource = api.root.add_resource("movie")
         get_movie_url_integration = apigateway.LambdaIntegration(get_movie_url_function)
