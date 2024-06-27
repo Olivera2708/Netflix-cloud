@@ -29,7 +29,7 @@ def notify_subscribers(event, context):
             new_image = record['dynamodb']['NewImage']
             LOGGER.info('Ovo je nesto: %s', str(record['dynamodb']['NewImage']))
 
-            movie_id = new_image['movie_id']['S']
+            movie_id = new_image['id']['S']
             actors = get_actors_by_movie_id(movie_id)
             notify_actors_subscribers(movie_id, actors)
 
