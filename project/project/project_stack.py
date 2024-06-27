@@ -887,10 +887,7 @@ class Team3ProjectStack(Stack):
 
         feed_resource = api.root.add_resource("feed")
         upload_user_integration = apigateway.LambdaIntegration(upload_user_function)
-        method = feed_resource.add_method("POST", upload_user_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=both_authorizer,
-        request_parameters={
-            'method.request.header.Authorization': True
-        })
+        method = feed_resource.add_method("POST", upload_user_integration)
         downloaded_resource = feed_resource.add_resource('downloaded')
         add_downloaded_genres_integration = apigateway.LambdaIntegration(add_downloaded_genres_function)
         method = downloaded_resource.add_method("POST", add_downloaded_genres_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=user_authorizer,
