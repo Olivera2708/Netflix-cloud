@@ -2,6 +2,10 @@ import os
 
 import boto3
 from boto3.dynamodb.conditions import Key
+import logging
+
+LOGGER = logging.getLogger()
+LOGGER.setLevel(logging.INFO)
 
 table_movies_name = os.environ['TABLE_MOVIES']
 table_feed_name = os.environ['TABLE_FEED']
@@ -23,6 +27,8 @@ def notify_subscribers(event, context):
     for record in event['Records']:
         if record['eventName'] == 'INSERT':
             new_image = record['dynamodb']['NewImage']
+            LOGGER.info('Ovo je nesto: %s', str(record['dynamodb']['NewImage']))
+
             movie_id = new_image['movie_id']['S']
             actors = get_actors_by_movie_id(movie_id)
             notify_actors_subscribers(movie_id, actors)
