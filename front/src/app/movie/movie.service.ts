@@ -41,11 +41,6 @@ export class MovieService {
       {'headers': {'Content-Type': 'application/json'}})
   }
 
-  editUser(data: any): Observable<any> {
-    return this.httpClient.put<any>(environment.apiGateway + "feed", data,
-      {'headers': {'Content-Type': 'application/json'}})
-  }
-
   addRating(data: any): Observable<any> {
     return this.httpClient.post<any>(environment.apiGateway + "rating", data,
       {'headers': {'Content-Type': 'application/json'}})

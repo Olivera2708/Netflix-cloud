@@ -146,18 +146,14 @@ export class ViewMovieComponent implements OnInit, AfterViewInit {
     this.authenticationService.getCurrentUserEmail().then(email => {
       const body = {
         user_id: email,
-        for_update: "subscriptions",
         payload: {
-          command: "add",
           for_update: forUpdate,
           value: value
         }
       }
-      this.movieService.editUser(body).subscribe({
+      this.movieService.addSubscription(body).subscribe({
         next: (data) => {
-
           this.showAlert('You subscribed to '+forUpdate+': '+value, 'Close');
-
         }
       });
 

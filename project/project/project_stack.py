@@ -394,17 +394,6 @@ class Team3ProjectStack(Stack):
             }
         )
 
-        update_user_function = create_lambda_function(
-            "edit_user",
-            "edit_user.edit_user",
-            "edit_user",
-            "PUT",
-            [util_layer],
-            environment={
-                "TABLE_FEED": feed_table.table_name
-            }
-        )
-
         get_movie_url_function = create_lambda_function(
             "get_movie_url",
             "get_movie_url.get_movie_url",
@@ -797,8 +786,6 @@ class Team3ProjectStack(Stack):
         feed_resource = api.root.add_resource("feed")
         upload_user_integration = apigateway.LambdaIntegration(upload_user_function)
         feed_resource.add_method("POST", upload_user_integration)
-        edit_user_integration = apigateway.LambdaIntegration(update_user_function)
-        feed_resource.add_method("PUT", edit_user_integration)
         downloaded_resource = feed_resource.add_resource('downloaded')
         add_downloaded_genres_integration = apigateway.LambdaIntegration(add_downloaded_genres_function)
         downloaded_resource.add_method("POST", add_downloaded_genres_integration)
@@ -808,6 +795,8 @@ class Team3ProjectStack(Stack):
         subscriptions_resource.add_method("PUT", add_subscriptions_integration)
         delete_subscriptions_integration = apigateway.LambdaIntegration(delete_subscription_function)
         subscriptions_resource.add_method("DELETE", delete_subscriptions_integration)
+        get_subscriptions_integration = apigateway.LambdaIntegration(get_subscriptions_function)
+        subscriptions_resource.add_method("GET", get_subscriptions_integration)
 
         movie_resource = api.root.add_resource("movie")
         get_movie_url_integration = apigateway.LambdaIntegration(get_movie_url_function)
