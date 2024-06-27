@@ -21,60 +21,54 @@ def search_movies(event, context):
         search_value = params.get('value')
         all_movie_ids = set()
         
-        # genres_response = genres_table.query(
-        #     IndexName='MovieIndex',
-        #     KeyConditionExpression='genre = :id',
-        #     ExpressionAttributeValues={':id': movie_id},
-        #     ProjectionExpression='genre'
-        # )
         genres_response = genres_table.query(
             IndexName='GenreIndex',
             KeyConditionExpression=Key('genre').eq(search_value),
             ProjectionExpression='movie_id'
         )
-        # for item in genres_response.get('Items', []):
-        #     all_movie_ids.add(item['movie_id'])
+        for item in genres_response.get('Items', []):
+            all_movie_ids.add(item['movie_id'])
 
-        # actors_response = actors_table.query(
-        #     IndexName='MovieIndex',
-        #     KeyConditionExpression=Key('actor').eq(search_value),
-        #     ProjectionExpression='movie_id'
-        # )
-        # for item in actors_response.get('Items', []):
-        #     all_movie_ids.add(item['movie_id'])
+        actors_response = actors_table.query(
+            IndexName='ActorIndex',
+            KeyConditionExpression=Key('actor').eq(search_value),
+            ProjectionExpression='movie_id'
+        )
+        for item in actors_response.get('Items', []):
+            all_movie_ids.add(item['movie_id'])
 
-        # directors_response = directors_table.query(
-        #     IndexName='MovieIndex',
-        #     KeyConditionExpression=Key('director').eq(search_value),
-        #     ProjectionExpression='movie_id'
-        # )
-        # for item in directors_response.get('Items', []):
-        #     all_movie_ids.add(item['movie_id'])
+        directors_response = directors_table.query(
+            IndexName='DirectorIndex',
+            KeyConditionExpression=Key('director').eq(search_value),
+            ProjectionExpression='movie_id'
+        )
+        for item in directors_response.get('Items', []):
+            all_movie_ids.add(item['movie_id'])
 
-        # title_response = movie_table.query(
-        #     IndexName='TitleIndex',
-        #     KeyConditionExpression=Key('title').eq(search_value),
-        #     ProjectionExpression='id'
-        # )
-        # for item in title_response.get('Items', []):
-        #     all_movie_ids.add(item['id'])
+        result = {}
+        title_response = movies_table.query(
+            IndexName='TitleIndex',
+            KeyConditionExpression=Key('title').eq(search_value),
+            ProjectionExpression='id, title, description'
+        )
+        for item in title_response.get('Items', []):
+            result[item['id']] = item
 
-        # description_response = movie_table.query(
-        #     IndexName='DescriptionIndex',
-        #     KeyConditionExpression=Key('description').eq(search_value),
-        #     ProjectionExpression='id'
-        # )
-        # for item in description_response.get('Items', []):
-        #     all_movie_ids.add(item['id'])
+        description_response = movies_table.query(
+            IndexName='DescriptionIndex',
+            KeyConditionExpression=Key('description').eq(search_value),
+            ProjectionExpression='id, title, description'
+        )
+        for item in description_response.get('Items', []):
+            result[item['id']] = item
 
-        # keys = [{'id': movie_id} for movie_id in all_movie_ids]
-        # movie_details = batch_get_items(keys, {
-        #     movies_table_name: ['id', 'year', 'title', 'description'],
-        #     genres_table_name: ['genre'],
-        #     actors_table_name: ['actor'],
-        #     directors_table_name: ['director']
-        # })
-
+        for val in all_movie_ids:
+            id_response = movies_table.query(
+                KeyConditionExpression=Key('id').eq(val),
+                ProjectionExpression='id, title, description'
+            )
+            for item in id_response.get('Items', []):
+                result[item['id']] = item
 
         return {
             'statusCode': 200,
@@ -83,7 +77,7 @@ def search_movies(event, context):
                 'Access-Control-Allow-Headers': 'Content-Type',
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             },
-            'body': json.dumps(all_movie_ids)
+            'body': json.dumps(result)
         }
 
     except Exception as e:
@@ -96,25 +90,3 @@ def search_movies(event, context):
             },
             'body': json.dumps(f"An error occurred: {str(e)}")
         }
-
-# def batch_get_items(keys, table_names):
-#     responses = {table: [] for table in table_names}
-#     while keys:
-#         batch_keys = keys[:100]
-#         keys = keys[100:]
-
-#         request_items = {table: {'Keys': batch_keys} for table in table_names}
-#         response = dynamodb.batch_get_item(RequestItems=request_items)
-
-#         for table in table_names:
-#             responses[table].extend(response['Responses'].get(table, []))
-        
-#         unprocessed_keys = response.get('UnprocessedKeys', {})
-
-#         while unprocessed_keys:
-#             response = dynamodb.batch_get_item(RequestItems=unprocessed_keys)
-#             for table in table_names:
-#                 responses[table].extend(response['Responses'].get(table, []))
-#             unprocessed_keys = response.get('UnprocessedKeys', {})
-
-#     return responses
