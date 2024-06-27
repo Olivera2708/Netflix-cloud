@@ -850,21 +850,21 @@ class Team3ProjectStack(Stack):
             }
         )
 
-        edit_feed_function = create_lambda_function(
-            "edit_feed",
-            "edit_feed.edit_feed",
-            "edit_feed",
-            "POST",
-            [util_layer],
-            environment={
-                "STATE_MACHINE_ARN": state_machine2.state_machine_arn,
-                "USER_TABLE": feed_table.table_name,
-                "MOVIES_TABLE": movies_table.table_name,
-                "GENRES_TABLE": genres_table.table_name,
-                "ACTORS_TABLE": actors_table.table_name,
-                "DIRECTORS_TABLE": directors_table.table_name,
-            }
-        )
+        # edit_feed_function = create_lambda_function(
+        #     "edit_feed",
+        #     "edit_feed.edit_feed",
+        #     "edit_feed",
+        #     "POST",
+        #     [util_layer],
+        #     environment={
+        #         "STATE_MACHINE_ARN": state_machine2.state_machine_arn,
+        #         "USER_TABLE": feed_table.table_name,
+        #         "MOVIES_TABLE": movies_table.table_name,
+        #         "GENRES_TABLE": genres_table.table_name,
+        #         "ACTORS_TABLE": actors_table.table_name,
+        #         "DIRECTORS_TABLE": directors_table.table_name,
+        #     }
+        # )
 
         movie_dynamo_event_source = lambda_event_sources.DynamoEventSource(
             movies_table,
@@ -914,11 +914,11 @@ class Team3ProjectStack(Stack):
 
         update_feed_function.add_event_source(user_dynamo_event_source)
 
-        edit_feed_function.add_event_source(actors_dynamo_event_source)
-        edit_feed_function.add_event_source(genres_dynamo_event_source)
-        edit_feed_function.add_event_source(directors_dynamo_event_source)
+        # edit_feed_function.add_event_source(actors_dynamo_event_source)
+        # edit_feed_function.add_event_source(genres_dynamo_event_source)
+        # edit_feed_function.add_event_source(directors_dynamo_event_source)
         
-        add_feed_function.add_event_source(movie_dynamo_event_source)
+        add_feed_function.add_event_source(genres_dynamo_event_source)
 
         #endpoints
         upload_resource = api.root.add_resource("upload")

@@ -30,7 +30,8 @@ def add_feed(event, context):
         if record['eventName'] == 'INSERT':
             response = user_table.scan()
             new_image = record['dynamodb']['NewImage']
-            movie_id = new_image['id']['S']
+
+            movie_id = new_image['movie_id']['S']
             genres_response = genres_table.query(
                 IndexName='MovieIndex',
                 KeyConditionExpression='movie_id = :id',

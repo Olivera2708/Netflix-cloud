@@ -43,7 +43,7 @@ def custom_serializer(obj):
 #     else:
 #         return data
 
-def add_feed(event, context):
+def edit_feed(event, context):
     for record in event['Records']:
         if record['eventName'] == 'INSERT':
             response = user_table.scan()
