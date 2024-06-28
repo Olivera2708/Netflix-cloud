@@ -1,0 +1,173 @@
+#main {
+  background-color: #252525;
+  background-image: linear-gradient(to top, rgba(255, 255, 255, 0), rgb(16, 16, 16)),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0), rgb(3, 3, 3)),
+    url('../../../assets/images/background_main.jpg');
+  background-size: auto;
+  background-position: center top;
+  background-repeat: no-repeat;
+  padding-top: 4rem;
+  width: 100%;
+  overflow-x: hidden;
+  min-height: 93vh;
+}
+
+h3 {
+  color: #1a9094;
+  margin-bottom: 3rem;
+}
+
+#search-bar {
+  display: flex;
+  margin: 3rem auto 1rem auto;
+  width: 50vw;
+}
+
+.search-field {
+  flex: 1;
+  margin-right: 2rem;
+}
+
+.button-regular {
+  margin-left: 2rem;
+  width: 8rem;
+  height: 3rem;
+  font-size: 1rem;
+  background-color: #42b1b6;
+  color: #ffffff;
+  border: none;
+  border-radius: 2rem;
+  cursor: pointer;
+}
+
+.button-regular:hover {
+  background-color: #2f7f83;
+}
+
+.card {
+  width: 100%;
+  background-color: #1c1c1c;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin: 10px;
+  max-width: 100%; /* Ensure cards do not overflow */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card h2 {
+  font-size: 2.5rem;
+  color: darkgrey;
+}
+
+.card p {
+  color: grey;
+  margin-top: 1rem;
+  font-size: 1.1rem;
+}
+
+.card span {
+  color: #41b0b5;
+}
+
+.card:hover {
+
+  cursor: pointer;
+  transform: translateY(-10px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 600px) {
+  .container {
+    flex-direction: column;
+  }
+}
+
+.genres-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+.genre {
+  height: min-content;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  background-color: #333333;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-right: 0.5rem;
+  margin-bottom: 0.7rem;
+}
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin: 4rem 10rem 4rem 10rem;
+}
+
+
+.container > * {
+  flex: 0 0 calc(33.33% - 20px);
+  margin: 0 1rem 2rem 0;
+  box-sizing: border-box;
+}
+
+.container::after {
+  content: "";
+  flex: auto;
+}
+
+@media (max-width: 768px) {
+  .container > * {
+    flex-basis: calc(50% - 20px);
+  }
+}
+
+.inline {
+  display: flex;
+  justify-content: space-between;
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.tab {
+  background-color: transparent;
+  color: whitesmoke;
+  border: none;
+  font-size: 1.2rem;
+  border-bottom: 0.2rem solid #ccc;
+  padding: 10px 20px;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.tab:hover {
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.tab.active {
+  display: block;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.series-name {
+  margin-top: 3rem;
+  margin-left: 2rem;
+  color: lightgrey;
+}
+
+.series-title {
+  height: 3rem;
+  width: 100%;
+}

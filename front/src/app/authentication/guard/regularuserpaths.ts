@@ -1,5 +1,6 @@
 export const RegularUserPaths : string[] = [
     'movie/',
     'search',
-    'subscriptions'
+    'subscriptions',
+    'feed'
   ]

@@ -5,8 +5,7 @@ import os
 from boto3.dynamodb.conditions import Key
 
 table_feed = os.environ['TABLE_FEED']
-movie_table = os.environ['MOVIE_TABLE']
-N = os.environ['N']
+movie_table = os.environ['MOVIES_TABLE']
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(table_feed)
@@ -31,9 +30,10 @@ def convert_dynamodb_to_json(data):
     else:
         return data
 
-def upload_feed(event, context):
+def get_feed(event, context):
     params = event.get('queryStringParameters', {})
     user_id = params.get('id')
+    N = 3
 
     if not user_id:
         return {
@@ -51,13 +51,11 @@ def upload_feed(event, context):
     )
 
     films = response['Item']['feed']
-
     sorted_films = sorted(films.keys(), key=lambda k: films[k]['score'], reverse=True)
+    result = {}
 
-    result = []
-
-    for i in range(sorted_films):
-        if i > N: break
+    for i in range(len(sorted_films)):
+        if i >= N: break
         id_response = movie_table.query(
             KeyConditionExpression=Key('id').eq(sorted_films[i]),
             ProjectionExpression='id, title, description'
