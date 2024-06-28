@@ -850,6 +850,19 @@ class Team3ProjectStack(Stack):
             }
         )
 
+        get_feed_function = create_lambda_function(
+            "get_feed",
+            "get_feed.get_feed",
+            "get_feed",
+            "POST",
+            [util_layer],
+            environment={
+                "N": 3,
+                "TABLE_FEED": feed_table.table_name,
+                "MOVIES_TABLE": movies_table.table_name
+            }
+        )
+
         movie_dynamo_event_source = lambda_event_sources.DynamoEventSource(
             movies_table,
             starting_position=_lambda.StartingPosition.LATEST,

@@ -2,6 +2,7 @@ from decimal import Decimal
 import json
 import boto3
 import os
+from boto3.dynamodb.conditions import Key
 
 table_feed = os.environ['TABLE_FEED']
 movie_table = os.environ['MOVIE_TABLE']
@@ -45,10 +46,17 @@ def upload_feed(event, context):
 
     for i in range(sorted_films):
         if i > N: break
-        film = movie_table.get_item(
-            Key={'id': sorted_films[i]}
+        # film = movie_table.get_item(
+        #     Key={'id': sorted_films[i]}
+        # )
+        # result.append(film)
+
+        id_response = movie_table.query(
+            KeyConditionExpression=Key('id').eq(sorted_films[i]),
+            ProjectionExpression='id, title, description'
         )
-        result.append(film)
+        for item in id_response.get('Items', []):
+            result[item['id']] = item
 
     return {
         'statusCode': 200,
