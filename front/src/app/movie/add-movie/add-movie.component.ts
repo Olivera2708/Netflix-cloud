@@ -98,11 +98,11 @@ export class AddMovieComponent {
       try {
         const base64 = await this.convertFileToBase64(this.file);
         let title_name: string;
+        this.title = this.title.replace("/", "_")
         if (this.checkbox)
           title_name = this.seriesName + "/" + this.title;
         else
           title_name = this.title;
-        title_name = title_name.replace("/", "_")
         const payload = {
           file_name: this.file?.name,
           file_content: base64,

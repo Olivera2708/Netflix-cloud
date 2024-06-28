@@ -10,6 +10,7 @@ from aws_cdk import (
     aws_sqs as _sqs,
     aws_cognito as cognito
 )
+import os
 from constructs import Construct
 from aws_cdk.aws_lambda_python_alpha import PythonLayerVersion
 import aws_cdk.aws_lambda_event_sources as lambda_event_sources
@@ -996,3 +997,4 @@ class Team3ProjectStack(Stack):
         request_parameters={
             'method.request.header.Authorization': True
         })
+        
