@@ -9,12 +9,14 @@ movies_table_name = os.environ['MOVIES_TABLE']
 genres_table_name = os.environ['GENRES_TABLE']
 actors_table_name = os.environ['ACTORS_TABLE']
 directors_table_name = os.environ['DIRECTORS_TABLE']
+search_table_name = os.environ['SEARCH_TABLE']
 
 dynamodb = boto3.resource('dynamodb')
 movies_table = dynamodb.Table(movies_table_name)
 genres_table = dynamodb.Table(genres_table_name)
 actors_table = dynamodb.Table(actors_table_name)
 directors_table = dynamodb.Table(directors_table_name)
+search_table = dynamodb.Table(search_table_name)
 
 def edit_metadata(event, context):
     try:
@@ -82,7 +84,7 @@ def edit_metadata(event, context):
                 'id': str(uuid.uuid4())
             })
 
-        add_to_search_table(data, table_key)
+        add_to_search_table(metadata, item_id)
 
         update_expression = "SET "
         expression_attribute_values = {}
