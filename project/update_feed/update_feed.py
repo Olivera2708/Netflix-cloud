@@ -17,11 +17,6 @@ genres_table = dynamodb.Table(genres_table_name)
 actors_table = dynamodb.Table(actors_table_name)
 directors_table = dynamodb.Table(directors_table_name)
 
-def custom_serializer(obj):
-    if isinstance(obj, Decimal):
-        return int(obj)
-    raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
-
 def convert_dynamodb_to_json(data):
     if isinstance(data, dict):
         if 'M' in data:
@@ -41,29 +36,6 @@ def convert_dynamodb_to_json(data):
     else:
         return data
 
-def convert_json_to_dynamodb(data):
-    if isinstance(data, dict):
-        dynamodb_dict = {}
-        for key, value in data.items():
-            dynamodb_dict[key] = convert_json_to_dynamodb(value)
-        return {'M': dynamodb_dict}
-    elif isinstance(data, list):
-        return {'L': [convert_json_to_dynamodb(item) for item in data]}
-    elif data is None:
-        return {'NULL': True}
-    elif isinstance(data, bool):
-        return {'BOOL': data}
-    elif isinstance(data, str):
-        return {'S': data}
-    elif isinstance(data, (int, float)):
-        return {'N': str(data)}
-    else:
-        raise TypeError(f"Unsupported data type: {type(data)}")
-
-def update_subscription_score(new_items, old_items, film_items):
-    new_item = set(new_items) - set(old_items)
-    return 10 if new_item in film_items else 0
-
 def get_movie_genres(movie_id):
     genres_response = genres_table.query(   
         IndexName='MovieIndex',
@@ -72,7 +44,21 @@ def get_movie_genres(movie_id):
     )
     return set([genre_item['genre'] for genre_item in genres_response.get('Items', [])])
     
+def get_movie_actors(movie_id):
+    actors_response = actors_table.query(
+        IndexName='MovieIndex',
+        KeyConditionExpression='movie_id = :id',
+        ExpressionAttributeValues={':id': movie_id}
+    )
+    return set([actor_item['actor'] for actor_item in actors_response.get('Items', [])])
 
+def get_movie_directors(movie_id):
+    directors_response = directors_table.query(
+        IndexName='MovieIndex',
+        KeyConditionExpression='movie_id = :id',
+        ExpressionAttributeValues={':id': movie_id}
+    )
+    return [director_item['director'] for director_item in directors_response.get('Items', [])]
 
 def update_feed(event, context):
     for record in event['Records']:
@@ -103,7 +89,7 @@ def update_feed(event, context):
                     film_genres = get_movie_genres(movie)
                     current_item['feed'][movie]['download_score'] = Decimal(new_image['feed'][movie]['download_score']/2 + len(diff_downloaded_genre & film_genres) * 3)
                     current_item['feed'][movie]['score'] = current_item['feed'][movie]['download_score'] + current_item['feed'][movie]['rating_score'] + current_item['feed'][movie]['subscription_score']
-                user_table.put_item(Item=current_item)                
+                user_table.put_item(Item=current_item)
             elif len(new_ratings) > len(old_ratings):
                 #ocenio je
                 rating_genres = set(new_ratings[-1]['genres'])
@@ -112,48 +98,51 @@ def update_feed(event, context):
                     current_item['feed'][movie]['rating_score'] = current_item['feed'][movie]['rating_score'] + Decimal(len(rating_genres & film_genres) * new_ratings[-1]['rating'])
                     current_item['feed'][movie]['score'] = current_item['feed'][movie]['download_score'] + current_item['feed'][movie]['rating_score'] + current_item['feed'][movie]['subscription_score']
                 user_table.put_item(Item=current_item)
-            # elif len(new_subscriptions['actors']) > len(old_subscriptions['actors']):
-            #     #pretplatio se
-            #     # new_actor = set(new_subscriptions['actors']) - set(old_subscriptions['actors'])
-            #     #dobavi glumce filma, DECIMAL 
-            #     film_actors = set(['Actor Actor'])
-            #     # new_image['feed'][movie]['subscription_score'] += (10 if new_actor in film_actors else 0)
-            #     new_image['feed'][movie]['subscription_score'] += update_subscription_score(new_subscriptions['actors'], old_subscriptions['actors'], film_actors)
-            # elif  len(new_subscriptions['directors']) > len(old_subscriptions['directors']):
-            #     # new_director = set(new_subscriptions['directors']) - set(old_subscriptions['directors'])
-            #     #dobavi rezisere filma, DECIMAL 
-            #     film_directors = set(['Actor Actor'])
-            #     # new_image['feed'][movie]['subscription_score'] += (10 if new_director in film_directors else 0)
-            #     new_image['feed'][movie]['subscription_score'] += update_subscription_score(new_subscriptions['directors'], old_subscriptions['directors'], film_directors)
-            # elif  len(new_subscriptions['genres']) > len(old_subscriptions['genres']):
-            #     # new_genre = set(new_subscriptions['genres']) - set(old_subscriptions['genres'])
-            #     #dobavi zanrove filma, DECIMAL 
-            #     film_genres = set(['Action'])
-            #     # new_image['feed'][movie]['subscription_score'] += (10 if new_genre in film_genres else 0)
-            #     new_image['feed'][movie]['subscription_score'] += update_subscription_score(new_subscriptions['genres'], old_subscriptions['genres'], film_genres)
-            # elif len(new_subscriptions) < len(old_subscriptions):
-            #     #obrisao pretplatu
-            #     # deleted_actor = set(old_subscriptions['actors']) - set(new_subscriptions['actors'])
-            #     #dobavi glumce filma, DECIMAL 
-            #     film_actors = set(['Actor Actor'])
-            #     # new_image['feed'][movie]['subscription_score'] -= (10 if deleted_actor in film_actors else 0)
-            #     new_image['feed'][movie]['subscription_score'] -=update_subscription_score(old_subscriptions['actors'], new_subscriptions['actors'], film_actors)
-            # elif  len(new_subscriptions['directors']) < len(old_subscriptions['directors']):
-            #     # deleted_director = set(old_subscriptions['directors']) - set(new_subscriptions['directors'])
-            #     #dobavi rezisere filma, DECIMAL 
-            #     film_directors = set(['Actor Actor'])
-            #     # new_image['feed'][movie]['subscription_score'] -= (10 if deleted_director in film_directors else 0)
-            #     new_image['feed'][movie]['subscription_score'] -= update_subscription_score(old_subscriptions['directors'], new_subscriptions['directors'], film_directors)
-            # elif  len(new_subscriptions['genres']) < len(old_subscriptions['genres']):
-            #     # deleted_genre = set(old_subscriptions['genres']) - set(new_subscriptions['genres'])
-            #     #dobavi zanrove filma, DECIMAL 
-            #     film_genres = set(['Action'])
-            #     # new_image['feed'][movie]['subscription_score'] -= (10 if deleted_genre in film_genres else 0)
-            #     new_image['feed'][movie]['subscription_score'] -= update_subscription_score(old_subscriptions['genres'], new_subscriptions['genres'], film_genres)
-                
-                # new_image['feed'][movie]['score'] = new_image['feed'][movie]['subscription_score'] + new_image['feed'][movie]['rating_score'] + new_image['feed'][movie]['download_score']
-
-
+            elif len(new_subscriptions['actors']) > len(old_subscriptions['actors']):
+                #pretplatio se
+                new_actor = list(set(new_subscriptions['actors']) - set(old_subscriptions['actors']))
+                for movie in new_image['feed']:
+                    film_actors = get_movie_actors(movie)
+                    current_item['feed'][movie]['subscription_score'] = current_item['feed'][movie]['subscription_score'] + (10 if new_actor[0] in film_actors else 0)
+                    current_item['feed'][movie]['score'] = current_item['feed'][movie]['download_score'] + current_item['feed'][movie]['rating_score'] + current_item['feed'][movie]['subscription_score']
+                user_table.put_item(Item=current_item)
+            elif  len(new_subscriptions['directors']) > len(old_subscriptions['directors']):
+                new_director = list(set(new_subscriptions['directors']) - set(old_subscriptions['directors']))
+                for movie in new_image['feed']:
+                    film_directors = get_movie_directors(movie)
+                    current_item['feed'][movie]['subscription_score'] = current_item['feed'][movie]['subscription_score'] + (10 if new_director[0] in film_directors else 0)
+                    current_item['feed'][movie]['score'] = current_item['feed'][movie]['download_score'] + current_item['feed'][movie]['rating_score'] + current_item['feed'][movie]['subscription_score']
+                user_table.put_item(Item=current_item)
+            elif  len(new_subscriptions['genres']) > len(old_subscriptions['genres']):
+                new_genre = list(set(new_subscriptions['genres']) - set(old_subscriptions['genres']))
+                for movie in new_image['feed']:
+                    film_genres = get_movie_genres(movie)
+                    current_item['feed'][movie]['subscription_score'] = current_item['feed'][movie]['subscription_score'] + (10 if new_genre[0] in film_genres else 0)
+                    current_item['feed'][movie]['score'] = current_item['feed'][movie]['download_score'] + current_item['feed'][movie]['rating_score'] + current_item['feed'][movie]['subscription_score']
+                user_table.put_item(Item=current_item)
+            elif len(new_subscriptions['actors']) < len(old_subscriptions['actors']):
+                #obrisao pretplatu
+                deleted_actor = list(set(old_subscriptions['actors']) - set(new_subscriptions['actors']))
+                print(deleted_actor)
+                for movie in new_image['feed']: 
+                    film_actors = get_movie_actors(movie)
+                    current_item['feed'][movie]['subscription_score'] = current_item['feed'][movie]['subscription_score'] - (10 if deleted_actor[0] in film_actors else 0)
+                    current_item['feed'][movie]['score'] = current_item['feed'][movie]['download_score'] + current_item['feed'][movie]['rating_score'] + current_item['feed'][movie]['subscription_score']
+                user_table.put_item(Item=current_item)
+            elif  len(new_subscriptions['directors']) < len(old_subscriptions['directors']):
+                deleted_director = list(set(old_subscriptions['directors']) - set(new_subscriptions['directors']))
+                for movie in new_image['feed']:
+                    film_directors = get_movie_directors(movie)
+                    current_item['feed'][movie]['subscription_score'] = current_item['feed'][movie]['subscription_score'] - (10 if deleted_director[0] in film_directors else 0)
+                    current_item['feed'][movie]['score'] = current_item['feed'][movie]['download_score'] + current_item['feed'][movie]['rating_score'] + current_item['feed'][movie]['subscription_score']
+                user_table.put_item(Item=current_item)
+            elif  len(new_subscriptions['genres']) < len(old_subscriptions['genres']):
+                deleted_genre = list(set(old_subscriptions['genres']) - set(new_subscriptions['genres']))
+                for movie in new_image['feed']:
+                    film_genres = get_movie_genres(movie)
+                    current_item['feed'][movie]['subscription_score'] = current_item['feed'][movie]['subscription_score'] - (10 if deleted_genre[0] in film_genres else 0)
+                    current_item['feed'][movie]['score'] = current_item['feed'][movie]['download_score'] + current_item['feed'][movie]['rating_score'] + current_item['feed'][movie]['subscription_score']
+                user_table.put_item(Item=current_item)
     return {
             'statusCode': 200,
             'headers': {
