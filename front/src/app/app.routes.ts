@@ -7,11 +7,13 @@ import { RegistrationComponent } from './authentication/registration/registratio
 import { authGuard } from './authentication/guard/auth.guard';
 import {EditMovieComponent} from "./movie/edit-movie/edit-movie.component";
 import {GetSubscriptionsComponent} from "./movie/get-subscriptions/get-subscriptions.component";
+import {FeedMoviesComponent} from "./movie/feed-movies/feed-movies.component";
 
 export const routes: Routes = [
   { path: "movie/:id", component: ViewMovieComponent, canActivate: [authGuard]},
   { path: "add", component: AddMovieComponent, canActivate: [authGuard]},
   { path: "search", component: SearchMoviesComponent, canActivate: [authGuard]},
+  { path: "feed", component: FeedMoviesComponent, canActivate: [authGuard]},
   { path: "edit/:id", component: EditMovieComponent},
   { path: "", component: LoginComponent, canActivate: [authGuard]},
   { path: "registration", component: RegistrationComponent, canActivate: [authGuard]},

@@ -850,6 +850,18 @@ class Team3ProjectStack(Stack):
             }
         )
 
+        get_feed_function = create_lambda_function(
+            "get_feed",
+            "get_feed.get_feed",
+            "get_feed",
+            "GET",
+            [util_layer],
+            environment={
+                "TABLE_FEED": feed_table.table_name,
+                "MOVIES_TABLE": movies_table.table_name
+            }
+        )
+
         movie_dynamo_event_source = lambda_event_sources.DynamoEventSource(
             movies_table,
             starting_position=_lambda.StartingPosition.LATEST,
@@ -898,9 +910,7 @@ class Team3ProjectStack(Stack):
 
         update_feed_function.add_event_source(user_dynamo_event_source)
 
-        add_feed_function.add_event_source(actors_dynamo_event_source)
         add_feed_function.add_event_source(genres_dynamo_event_source)
-        add_feed_function.add_event_source(directors_dynamo_event_source)
 
         #endpoints
         upload_resource = api.root.add_resource("upload")
@@ -911,8 +921,14 @@ class Team3ProjectStack(Stack):
         })
 
         feed_resource = api.root.add_resource("feed")
+        get_feed_integration = apigateway.LambdaIntegration(get_feed_function)
+        method = feed_resource.add_method("GET", get_feed_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=user_authorizer,
+        request_parameters={
+            'method.request.header.Authorization': True
+        })
         upload_user_integration = apigateway.LambdaIntegration(upload_user_function)
         method = feed_resource.add_method("POST", upload_user_integration)
+        
         downloaded_resource = feed_resource.add_resource('downloaded')
         add_downloaded_genres_integration = apigateway.LambdaIntegration(add_downloaded_genres_function)
         method = downloaded_resource.add_method("POST", add_downloaded_genres_integration, authorization_type=apigateway.AuthorizationType.CUSTOM, authorizer=user_authorizer,

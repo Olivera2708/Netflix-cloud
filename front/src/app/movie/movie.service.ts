@@ -69,4 +69,10 @@ export class MovieService {
   deleteSubscription(data: any): Observable<any> {
     return this.httpClient.delete<any>(environment.apiGateway + "subscriptions", { body: data })
   }
+
+  feedMovie(id: string): Observable<any> {
+    return this.httpClient.get<any>(environment.apiGateway + "feed?id=" + id,
+      {'headers' : { 'Content-Type': 'application/json' },}
+    );
+  }
 }
