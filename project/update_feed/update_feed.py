@@ -103,16 +103,15 @@ def update_feed(event, context):
                     film_genres = get_movie_genres(movie)
                     current_item['feed'][movie]['download_score'] = Decimal(new_image['feed'][movie]['download_score']/2 + len(diff_downloaded_genre & film_genres) * 3)
                     current_item['feed'][movie]['score'] = current_item['feed'][movie]['download_score'] + current_item['feed'][movie]['rating_score'] + current_item['feed'][movie]['subscription_score']
-
+                user_table.put_item(Item=current_item)                
+            elif len(new_ratings) > len(old_ratings):
+                #ocenio je
+                rating_genres = set(new_ratings[-1]['genres'])
+                for movie in new_image['feed']:
+                    film_genres = get_movie_genres(movie)
+                    current_item['feed'][movie]['rating_score'] = current_item['feed'][movie]['rating_score'] + Decimal(len(rating_genres & film_genres) * new_ratings[-1]['rating'])
+                    current_item['feed'][movie]['score'] = current_item['feed'][movie]['download_score'] + current_item['feed'][movie]['rating_score'] + current_item['feed'][movie]['subscription_score']
                 user_table.put_item(Item=current_item)
-                
-            # elif len(new_ratings) > len(old_ratings):
-            #     #ocenio je
-            #     # new_rating = set([item for item in new_ratings if item not in old_ratings][0])
-            #     rating_genres = set(new_ratings[0]['genres'])
-            #     #dobavi zanrove filma, DECIMAL 
-            #     film_genres = set(['Action'])
-            #     new_image['feed'][movie]['rating_score'] += len(rating_genres & film_genres) * new_ratings[0]['rating']
             # elif len(new_subscriptions['actors']) > len(old_subscriptions['actors']):
             #     #pretplatio se
             #     # new_actor = set(new_subscriptions['actors']) - set(old_subscriptions['actors'])
