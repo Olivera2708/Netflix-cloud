@@ -1,0 +1,8 @@
+aws-cdk-lib==2.143.1
+constructs>=10.0.0,<11.0.0
+
+boto3~=1.34.116
+botocore~=1.34.116
+aws-cdk.aws-lambda-python-alpha
+pyjwt[crypto]
+ipython

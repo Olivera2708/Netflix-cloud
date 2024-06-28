@@ -1,0 +1,37 @@
+<div id="main">
+  <div id="search-bar" *ngIf="role!=='Admin'">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search</mat-label>
+      <input matInput [(ngModel)]="searchValue" name="search">
+    </mat-form-field>
+    <button class="button-regular" (click)="search()">Search</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab" [ngClass]="{'active': activeTab === 'movies'}" (click)="setActiveTab('movies')">Movies</button>
+    <button class="tab" [ngClass]="{'active': activeTab === 'series'}" style="margin-left: 4rem"
+            (click)="setActiveTab('series')">Series
+    </button>
+  </div>
+
+  <div class="container-new">
+    <div class="container">
+      <div class="card" (click)="onCardClick(movie.id)" *ngFor="let movie of shownMovies">
+        <div *ngIf="movie.displaySeries">
+          <h2 class="series-name">{{ movie.series }}</h2>
+        </div>
+        <div *ngIf="!movie.displaySeries">
+          <div class="inline">
+            <h2>{{ movie.title }}</h2>
+            <button *ngIf="role==='Admin'" mat-icon-button aria-label="Edit" (click)="editMovie(movie.id)">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </div>
+          <div class="genres-container">
+            <p>{{ movie.description }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
