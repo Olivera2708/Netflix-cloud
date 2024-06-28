@@ -82,6 +82,8 @@ def edit_metadata(event, context):
                 'id': str(uuid.uuid4())
             })
 
+        add_to_search_table(data, table_key)
+
         update_expression = "SET "
         expression_attribute_values = {}
         expression_attribute_names = {}
@@ -153,3 +155,18 @@ def edit_metadata(event, context):
             }
         }
 
+def add_to_search_table(data, movie_id):
+    title = data.get("title")
+    description = data.get("description")
+    actors = data.get("actors")
+    directors = data.get("directors")
+    genres = data.get("genres")
+    string_actors = ",".join(actors)
+    string_directors = ",".join(directors)
+    string_genres = ",".join(genres)
+    search = f"{title}_{description}_{string_actors}_{string_directors}_{string_genres}"
+
+    search_table.put_item(Item={
+        'movie_id': movie_id,
+        'search': search
+    })
