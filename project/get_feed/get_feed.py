@@ -32,7 +32,19 @@ def convert_dynamodb_to_json(data):
         return data
 
 def upload_feed(event, context):
-    user_id = event['user_id']
+    params = event.get('queryStringParameters', {})
+    user_id = params.get('id')
+
+    if not user_id:
+        return {
+            'statusCode': 400,
+            'body': json.dumps('Missing id query parameter'),
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            }
+        }
 
     response = table.get_item(
             Key={'id': user_id}
@@ -46,11 +58,6 @@ def upload_feed(event, context):
 
     for i in range(sorted_films):
         if i > N: break
-        # film = movie_table.get_item(
-        #     Key={'id': sorted_films[i]}
-        # )
-        # result.append(film)
-
         id_response = movie_table.query(
             KeyConditionExpression=Key('id').eq(sorted_films[i]),
             ProjectionExpression='id, title, description'
