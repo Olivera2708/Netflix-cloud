@@ -9,12 +9,14 @@ movies_table_name = os.environ['MOVIES_TABLE']
 genres_table_name = os.environ['GENRES_TABLE']
 actors_table_name = os.environ['ACTORS_TABLE']
 directors_table_name = os.environ['DIRECTORS_TABLE']
+search_table_name = os.environ['SEARCH_TABLE']
 
 dynamodb = boto3.resource('dynamodb')
 movies_table = dynamodb.Table(movies_table_name)
 genres_table = dynamodb.Table(genres_table_name)
 actors_table = dynamodb.Table(actors_table_name)
 directors_table = dynamodb.Table(directors_table_name)
+search_table = dynamodb.Table(search_table_name)
 
 def edit_metadata(event, context):
     try:
@@ -81,6 +83,8 @@ def edit_metadata(event, context):
                 'director': director,
                 'id': str(uuid.uuid4())
             })
+
+        add_to_search_table(metadata, item_id)
 
         update_expression = "SET "
         expression_attribute_values = {}
@@ -153,3 +157,18 @@ def edit_metadata(event, context):
             }
         }
 
+def add_to_search_table(data, movie_id):
+    title = data.get("title")
+    description = data.get("description")
+    actors = data.get("actors")
+    directors = data.get("directors")
+    genres = data.get("genres")
+    string_actors = ",".join(actors)
+    string_directors = ",".join(directors)
+    string_genres = ",".join(genres)
+    search = f"{title}_{description}_{string_actors}_{string_directors}_{string_genres}"
+
+    search_table.put_item(Item={
+        'movie_id': movie_id,
+        'search': search
+    })
