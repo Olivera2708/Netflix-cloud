@@ -7,7 +7,7 @@ s3_client = boto3.client('s3')
 bucket = os.environ['BUCKET']
 
 def get_movie_url(event, context):
-    object_key = event['queryStringParameters']['key']
+    object_key = event.get('queryStringParameters', {}).get('key')
     
     try:
         response = s3_client.generate_presigned_url('get_object',

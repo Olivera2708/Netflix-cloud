@@ -32,7 +32,7 @@
         <div class="genres-container">
           <div class="genre" *ngFor="let genre of genreList">
             {{ genre }}
-            <mat-icon class="subscribe" (click)="subscribeTo('genres', genre)">add_alert</mat-icon>
+            <mat-icon *ngIf="role!=='Admin'" class="subscribe" (click)="subscribeTo('genres', genre)">add_alert</mat-icon>
           </div>
         </div>
 
@@ -43,7 +43,7 @@
         <div class="genres-container">
           <div class="genre" *ngFor="let actor of actorList">
             {{ actor }}
-            <mat-icon class="subscribe" (click)="subscribeTo('actors', actor)">add_alert</mat-icon>
+            <mat-icon *ngIf="role!=='Admin'" class="subscribe" (click)="subscribeTo('actors', actor)">add_alert</mat-icon>
           </div>
         </div>
         <!--      <p class="value">{{ actors }}</p>-->
@@ -51,7 +51,7 @@
         <div class="genres-container">
           <div class="genre" *ngFor="let director of directorList">
             {{ director }}
-            <mat-icon class="subscribe" (click)="subscribeTo('directors', director)">add_alert</mat-icon>
+            <mat-icon *ngIf="role!=='Admin'" class="subscribe" (click)="subscribeTo('directors', director)">add_alert</mat-icon>
           </div>
         </div>
         <!--      <p class="value">{{ directors }}</p>-->
