@@ -50,6 +50,7 @@ This project is a web application designed to store and manage movie content, de
 - **Amazon SQS (Simple Queue Service)**: For asynchronous communication between system components.
 - **Amazon DynamoDB**: For storing metadata and user data.
 - **Amazon S3 (Simple Storage Service)**: For storing movie content and serving static assets for the Angular frontend.
+- **AWS API Gateway**: For creating, publishing, maintaining, monitoring, and securing APIs.
 
 ## Deployment
 
