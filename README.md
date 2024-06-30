@@ -57,7 +57,7 @@ This project is a web application designed to store and manage movie content, de
 
 ## Architecture Diagram
 
-[!preview](diagram.png)
+![diagram](diagram.png)
 
 ## Getting Started
 
