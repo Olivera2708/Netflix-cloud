@@ -63,7 +63,7 @@ This project is a web application designed to store and manage movie content, de
 
 To get started with the project, follow the instructions below:
 
-1. **Clone the Repository**: `git clone https://github.com/your-repo-url`
+1. **Clone the Repository**: `git clone https://github.com/Olivera2708/Netflix-cloud`
 2. **Install Dependencies**: Navigate to the project directory and run `npm install` for the frontend and `pip install -r requirements.txt` for the backend.
 3. **Deploy the Infrastructure**: Use the provided IaC scripts to deploy the necessary AWS resources.
 4. **Run the Application**: Start the frontend application and ensure it connects to the deployed backend services.
